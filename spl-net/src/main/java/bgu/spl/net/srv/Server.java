@@ -22,9 +22,10 @@ public interface Server<T> extends Closeable {
      */
     public static <T> Server<T>  threadPerClient(
             int port,
-            Supplier<MessagingProtocol<T> > protocolFactory,
-            Supplier<MessageEncoderDecoder<T> > encoderDecoderFactory) {
-        return new ThreadPerClientServer<T>(port, protocolFactory, encoderDecoderFactory);
+            Supplier<? extends MessagingProtocol<T> > protocolFactory,
+            Supplier<? extends MessageEncoderDecoder<T> > encoderDecoderFactory,
+            Connections<T> connections) {
+        return new ThreadPerClientServer<T>(port, protocolFactory, encoderDecoderFactory, connections);
     }
 
     /**

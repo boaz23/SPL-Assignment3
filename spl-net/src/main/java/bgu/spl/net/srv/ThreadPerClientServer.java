@@ -7,9 +7,10 @@ import java.util.function.Supplier;
 
 public class ThreadPerClientServer<T> extends BaseServer<T> {
     public ThreadPerClientServer(int port,
-                                 Supplier<MessagingProtocol<T>> protocolFactory,
-                                 Supplier<MessageEncoderDecoder<T>> encdecFactory) {
-        super(port, protocolFactory, encdecFactory);
+                                 Supplier<? extends MessagingProtocol<T>> protocolFactory,
+                                 Supplier<? extends MessageEncoderDecoder<T>> encdecFactory,
+                                 Connections<T> connections) {
+        super(port, protocolFactory, encdecFactory, connections);
     }
 
     @Override
