@@ -1,11 +1,12 @@
 package bgu.spl.net.api.frames;
 
-public class Receipt extends Frame {
+public class DisconnectFrame extends Frame {
+
     public static final String RECEIPT_ID_HEADER = "receipt-id";
 
-    public Receipt(String receiptId) {
-        super("RECEIPT", "");
-        setReceiptId(receiptId);
+    public DisconnectFrame(String recepitId) {
+        super("SEND", "");
+        setReceiptId(recepitId);
     }
 
     public String getReceiptId() {
@@ -16,3 +17,4 @@ public class Receipt extends Frame {
         setHeader(RECEIPT_ID_HEADER, receiptId);
     }
 }
+

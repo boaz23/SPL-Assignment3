@@ -21,4 +21,9 @@ public class IdCount
 
         return tId;
     }
+
+    public String getNewIdAsString(){
+        int tId = getNewId();
+        return String.format("%d",tId);
+    }
 }
