@@ -48,4 +48,9 @@ public class Frame {
     public Iterable<Map.Entry<String, String>> headers() {
         return headers.entrySet();
     }
+
+    public String toString(){
+        //TODO implement
+        return null;
+    }
 }
