@@ -3,6 +3,7 @@ package bgu.spl.net.impl.stomp;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.StompMessageProcessor;
 import bgu.spl.net.api.frames.*;
+import bgu.spl.net.srv.connections.ConnectionInfo;
 import bgu.spl.net.srv.connections.Connections;
 import bgu.spl.net.srv.IdCount;
 
@@ -13,13 +14,18 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     // TODO: add mapping for subscription-id to topic name
 
     private static IdCount messageId = new IdCount();
+    private static final String version = "1.2";
 
     private int connectionId;
     private StompConnections connections;
     private Map<String, StompMessageProcessor<Frame>> comMap;
+    private Map<Integer, String> subscriptionMap;
+    private boolean shouldTerminate;
 
     public StompMessagingProtocolImpl(){
-        InitMap();
+        subscriptionMap = new HashMap<>();
+        InitMapNotConnected();
+        shouldTerminate = false;
     }
 
     @Override
@@ -36,7 +42,38 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
     @Override
     public boolean shouldTerminate() {
-        return false;
+        return shouldTerminate;
+    }
+
+    protected class ConnectMessageProcessor implements StompMessageProcessor<Frame>{
+        @Override
+        public void process(Frame message) {
+            String acceptVersion = message.getHeader(Connect.ACCEPTVERSION_HEADER);
+            String userName = message.getHeader(Connect.LOGIN_HEADER);
+            String passcode = message.getHeader(Connect.PASSCODE_HEADER);
+            String host = message.getHeader(Connect.HOST_HEADER);
+
+            if(acceptVersion == null | userName == null | passcode == null | host == null){
+                errorMessage(message,"malformed frame received", "");
+                return;
+            }
+            if(!acceptVersion.equals(version)){
+                errorMessage(message,"version of stomp is not supported", "");
+                return;
+            }
+
+            String passwordByUserName = connections.getUserPassword(userName);
+            //TODO add a method that check if the user exist, instead of trying to get the password.
+            if(passwordByUserName == null){
+                connections.addUser(userName, passcode);
+                InitMap();
+                return;
+            }
+            if(!passcode.equals(passwordByUserName)){
+                errorMessage(message,"Check your password", "");
+                return;
+            }
+        }
     }
 
     protected class SubscribeMessageProcessor implements StompMessageProcessor<Frame>{
@@ -45,15 +82,34 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             //TODO in the assignment file they wrote that the id header is not
             // mandatory but when unsubscribe it is, so set the id header as required
 
+            int id = -1;
             String dest = message.getHeader(SubscribeFrame.DESTINATION_HEADER);
             String subscriptionId = message.getHeader(SubscribeFrame.ID_HEADER);
-            if(dest == null | subscriptionId == null){
+            if(dest == null){
                 errorMessage(message, "malformed frame received",
-                        "Didnt contain dest header or id header");
+                        "Didnt contain dest header");
                 return;
             }
-            if(!connections.subscribe(dest ,String.format("%d",connectionId),
-                    subscriptionId)){
+
+            id = validateId(subscriptionId, message);
+            if(id < 0){
+                return;
+            }
+
+            String tmpTopic = subscriptionMap.getOrDefault(id, null);
+
+            if(tmpTopic == null){
+                subscriptionMap.put(id, dest);
+            }
+            else if(tmpTopic.equals(dest)){
+                //TODO may send error
+            } else{
+                errorMessage(message, "Already used id", "");
+                return;
+            }
+
+            SubscriptionAttachment subscriptionAttachment = new SubscriptionAttachment(subscriptionId);
+            if(!connections.subscribe(dest ,connectionId, subscriptionAttachment)){
                 //TODO check if a subscription to channel return false
                 errorMessage(message, "Already used id", "");
                 return;
@@ -70,14 +126,21 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         @Override
         public void process(Frame message) {
 
-            String id = message.getHeader(UnsubscribeFrame.ID_HEADER);
-            if(id == null){
-                errorMessage(message, "malformed frame received",
-                        "Didnt contain id header");
+            int id = -1;
+            String subscriptionId = message.getHeader(UnsubscribeFrame.ID_HEADER);
+            id = validateId(subscriptionId, message);
+            if(id < 0){
                 return;
             }
 
-            connections.unsubscribe(String.format("%d",connectionId), id);
+            String topic = subscriptionMap.remove(id);
+            if(topic == null){
+                //TODO throw error if unsubscribe with id not in the map
+            }
+
+
+
+            connections.unsubscribe(connectionId, topic);
 
             String receiptId = message.getHeader(Receipt.RECEIPT_ID_HEADER);
             if(receiptId != null) {
@@ -89,24 +152,27 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     protected class SendMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
-            //TODO maybe check for valid data in the body i.e
-            // {user} has added the book {book name}
-            String dest  = message.getHeader(SendFrame.DESTINATION_HEADER);
+            String topic  = message.getHeader(SendFrame.DESTINATION_HEADER);
             String body = message.getBody();
 
-            if(dest == null){
+            if(topic == null){
                 errorMessage(message, "malformed frame received",
                         "Didnt contain destination header");
                 return;
             }
 
-            //TODO how to send to each client its subscription id
-            Frame messageFrame =  new MessageFrame(body,
-                    connections.getSubscriptionById(connectionId, dest),
-                    messageId.getNewIdAsString(),
-                    dest);
-            connections.send(dest, messageFrame);
+            Iterable<ConnectionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
 
+            for (ConnectionInfo<Frame> conn : connectionInfosOfTopic) {
+                String id = ((SubscriptionAttachment)conn.getAttachment()).getSubscriptionId();
+                Frame messageFrame =  new MessageFrame(body,
+                        id,
+                        messageId.getNewIdAsString(),
+                        topic);
+                //TODO check if to get the connection id from the attachment
+                // or use the send(topic, message) in conncetions.
+                connections.send(topic, messageFrame);
+            }
         }
     }
 
@@ -114,13 +180,29 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         @Override
         public void process(Frame message) {
             String receiptId  = message.getHeader(Receipt.RECEIPT_ID_HEADER);
-            connections.disconnect(connectionId);
+            shouldTerminate = true;
 
             if(receiptId == null){
                 //TODO send error message, or not sending anything at all
             } else {
                 connections.send(connectionId, new Receipt(receiptId));
             }
+        }
+    }
+
+    protected class UserNotConnectedProcessor implements StompMessageProcessor<Frame>{
+        @Override
+        public void process(Frame message) {
+            errorMessage(message, "Not valid request, user not connected",
+                    "User is not connected");
+        }
+    }
+
+    protected class ConnectButUserConnectedProcessor implements StompMessageProcessor<Frame>{
+        @Override
+        public void process(Frame message) {
+            errorMessage(message, "Not valid request, user already connected",
+                    "User is connected");
         }
     }
 
@@ -134,12 +216,41 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             errorMessage.setHeader(Receipt.RECEIPT_ID_HEADER, receiptId);
         }
         connections.send(connectionId, errorMessage);
-        connections.disconnect(connectionId);
+        shouldTerminate = true;
+    }
+
+    private int validateId(String subscriptionId, Frame message){
+        int id = -1;
+
+        if(subscriptionId == null) {
+            errorMessage(message, "malformed frame received",
+                    "Didnt contain id header");
+            return id;
+        }
+
+        try {
+            id = Integer.parseInt(subscriptionId);
+        } catch (NumberFormatException e){
+            errorMessage(message,"malformed frame received",
+                    "Id is not a number");
+        }
+
+        return  id;
+    }
+
+    private void InitMapNotConnected() {
+        comMap = new HashMap<>();
+        comMap.put("CONNECT", new ConnectMessageProcessor());
+        comMap.put("SUBSCRIBE", new UserNotConnectedProcessor());
+        comMap.put("UNSUBSCRIBE", new UserNotConnectedProcessor());
+        comMap.put("SEND", new UserNotConnectedProcessor());
+        comMap.put("DISCONNECT", new UserNotConnectedProcessor());
     }
 
     private void InitMap() {
         //TODO check if there is a better way to represent the Stomp title
         comMap = new HashMap<>();
+        comMap.put("CONNECT", new ConnectButUserConnectedProcessor());
         comMap.put("SUBSCRIBE", new SubscribeMessageProcessor());
         comMap.put("UNSUBSCRIBE", new UnsubscribeMessageProcessor());
         comMap.put("SEND", new SendMessageProcessor());
