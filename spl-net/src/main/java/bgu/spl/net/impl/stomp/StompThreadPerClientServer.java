@@ -6,8 +6,7 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.BlockingConnectionHandler;
-import bgu.spl.net.srv.ConnectionHandler;
-import bgu.spl.net.srv.Connections;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 import bgu.spl.net.srv.ThreadPerClientServer;
 
 import java.net.Socket;
@@ -18,9 +17,9 @@ public class StompThreadPerClientServer extends ThreadPerClientServer<Frame> {
         int port,
         Supplier<StompMessagingProtocol> protocolFactory,
         Supplier<StompMessageEncoderDecoder> encdecFactory,
-        Connections<Frame> connections) {
+        ConnectionHandlersManager<Frame> connectionHandlersManager) {
 
-        super(port, protocolFactory, encdecFactory, connections);
+        super(port, protocolFactory, encdecFactory, connectionHandlersManager);
     }
 
     @Override
@@ -40,7 +39,7 @@ public class StompThreadPerClientServer extends ThreadPerClientServer<Frame> {
     }
 
     private void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-        protocol.start(connectionId, connections);
+        protocol.start(connectionId, connectionHandlersManager);
     }
 
     protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions

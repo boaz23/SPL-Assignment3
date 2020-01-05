@@ -71,6 +71,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 //TODO create error message
             }
 
+            // TODO: somehow figure out to send different message to different clients
+            //  because each client needs a different subscription id header
             Frame messageFrame =  new MessageFrame(body,
                     connections.getsubscriptionById(dest, connectionId),
                     messageId.getNewIdAsString(),

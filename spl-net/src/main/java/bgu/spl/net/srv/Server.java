@@ -2,6 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
+
 import java.io.Closeable;
 import java.util.function.Supplier;
 
@@ -21,11 +23,15 @@ public interface Server<T> extends Closeable {
      * @return A new Thread per client server
      */
     public static <T> Server<T>  threadPerClient(
-            int port,
-            Supplier<? extends MessagingProtocol<T> > protocolFactory,
-            Supplier<? extends MessageEncoderDecoder<T> > encoderDecoderFactory,
-            Connections<T> connections) {
-        return new ThreadPerClientServer<T>(port, protocolFactory, encoderDecoderFactory, connections);
+        int port,
+        Supplier<? extends MessagingProtocol<T> > protocolFactory,
+        Supplier<? extends MessageEncoderDecoder<T> > encoderDecoderFactory,
+        ConnectionHandlersManager<T> connectionHandlersManager) {
+        return new ThreadPerClientServer<T>(
+            port,
+            protocolFactory,
+            encoderDecoderFactory,
+            connectionHandlersManager);
     }
 
     /**

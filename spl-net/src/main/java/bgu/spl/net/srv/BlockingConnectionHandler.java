@@ -2,6 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.srv.connections.ConnectionHandler;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -30,6 +32,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         this.socket = socket;
         this.encdec = reader;
         this.protocol = protocol;
+
         this.connectionId = connectionId;
         this.connections = connections;
     }
@@ -42,7 +45,8 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             in = new BufferedInputStream(sock.getInputStream());
             out = new BufferedOutputStream(sock.getOutputStream());
 
-            doClientHandshake();
+            handshakeWithClient();
+            connections.add(connectionId, this);
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte)read);
                 if (nextMessage != null) {
@@ -52,11 +56,19 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        finally {
+            connections.remove(connectionId);
+        }
     }
 
     @Override
     public void close() throws IOException {
         connected = false;
+
+        // order is important.
+        // closing a socket might throw an exception so we want to remove
+        // the connection handler before doing so.
+        connections.remove(connectionId);
         socket.close();
     }
 
@@ -71,11 +83,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 ex.printStackTrace();
             }
         }
-    }
-
-    private void doClientHandshake() {
-        handshakeWithClient();
-        connections.add(connectionId, this);
     }
 
     /**
