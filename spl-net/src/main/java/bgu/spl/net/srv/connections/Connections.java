@@ -10,6 +10,11 @@ public interface Connections<T> {
 
     void disconnect(int connectionId);
 
+    boolean subscribeToChannel(String channel, String connectionId,
+                               String subscriptionId);
+
+    boolean unsubscribe(String connectionId, String subscriptionId);
+
     String getsubscriptionById(String topic, int clientId);
 
     // TODO: add method for subscribing and unsubscribing
