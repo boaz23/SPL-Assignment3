@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StompMessagingProtocolImpl implements StompMessagingProtocol {
+    // TODO: add mapping for subscription-id to topic name
+
     private static IdCount messageId = new IdCount();
 
     private int connectionId;
@@ -50,7 +52,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                         "Didnt contain dest header or id header");
                 return;
             }
-            if(!connections.subscribeToChannel(dest ,String.format("%d",connectionId),
+            if(!connections.subscribe(dest ,String.format("%d",connectionId),
                     subscriptionId)){
                 //TODO check if a subscription to channel return false
                 errorMessage(message, "Already used id", "");
@@ -100,7 +102,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
             //TODO how to send to each client its subscription id
             Frame messageFrame =  new MessageFrame(body,
-                    connections.getsubscriptionById(dest, connectionId),
+                    connections.getSubscriptionById(connectionId, dest),
                     messageId.getNewIdAsString(),
                     dest);
             connections.send(dest, messageFrame);
