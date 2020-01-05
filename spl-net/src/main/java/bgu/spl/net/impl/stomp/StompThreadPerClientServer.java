@@ -8,18 +8,18 @@ import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.BlockingConnectionHandler;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 import bgu.spl.net.srv.ThreadPerClientServer;
+import bgu.spl.net.srv.connections.ConnectionIdsManager;
 
 import java.net.Socket;
 import java.util.function.Supplier;
 
 public class StompThreadPerClientServer extends ThreadPerClientServer<Frame> {
     public StompThreadPerClientServer(
-        int port,
-        Supplier<StompMessagingProtocol> protocolFactory,
-        Supplier<StompMessageEncoderDecoder> encdecFactory,
-        ConnectionHandlersManager<Frame> connectionHandlersManager) {
-
-        super(port, protocolFactory, encdecFactory, connectionHandlersManager);
+            int port,
+            Supplier<StompMessagingProtocol> protocolFactory,
+            Supplier<StompMessageEncoderDecoder> encdecFactory,
+            ConnectionIdsManager connectionIdsManager) {
+        super(port, protocolFactory, encdecFactory, new StompConnections(connectionIdsManager));
     }
 
     @Override

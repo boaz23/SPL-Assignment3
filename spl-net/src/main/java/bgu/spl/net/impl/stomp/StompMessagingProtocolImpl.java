@@ -15,7 +15,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private static IdCount messageId = new IdCount();
 
     private int connectionId;
-    private Connections<Frame> connections;
+    private StompConnections connections;
     private Map<String, StompMessageProcessor<Frame>> comMap;
 
     public StompMessagingProtocolImpl(){
@@ -24,8 +24,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
     @Override
     public void start(int connectionId, Connections<Frame> connections) {
-        //TODO who is holding all the users in the server. is it just a map
-        // that we init each run of the server, or we need to save it in a file.
+        this.connectionId = connectionId;
+        this.connections = (StompConnections)connections;
     }
 
     @Override

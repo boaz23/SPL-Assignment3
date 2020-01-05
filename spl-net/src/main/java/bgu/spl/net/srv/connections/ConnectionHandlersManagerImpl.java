@@ -1,5 +1,7 @@
 package bgu.spl.net.srv.connections;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -35,13 +37,15 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
 
     @Override
     public boolean send(int connectionId, T msg) {
-
+        // TODO: implement
+        throw new NotImplementedException();
     }
 
-    @Override
-    public void send(String channel, T msg) {
-
-    }
+//    @Override
+//    public void send(String channel, T msg) {
+//        // TODO: implement
+//        throw new NotImplementedException();
+//    }
 
     @Override
     public void disconnect(int connectionId) {
@@ -52,5 +56,23 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
         finally {
             connectionHandlersMapRwLock.writeLock().unlock();
         }
+    }
+
+    @Override
+    public boolean subscribe(String topic, int connectionId, Object attachment) {
+        // TODO: implement
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public boolean unsubscribe(int connectionId, String topic) {
+        // TODO: implement
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Iterable<ConnectionInfo<T>> getConnectionsSubscribedTo(String topic) {
+        // TODO: implement
+        throw new NotImplementedException();
     }
 }
