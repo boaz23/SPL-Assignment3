@@ -6,6 +6,7 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.frames.Frame;
 
 import java.nio.charset.Charset;
+import java.util.IllegalFormatException;
 import java.util.Map;
 
 public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
@@ -133,12 +134,12 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
                 }
                 else {
                     if (headerName == null) {
-                        // TODO: error
+                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
                     }
 
                     String value = bufferReader.popString();
                     if (value.length() == 0) {
-                        // TODO: error
+                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
                     }
 
                     frameBuilder.putHeader(headerName, value);
@@ -162,7 +163,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
                 if (nextByte == HEADER_VALUE_SEPARATOR && headerName == null) {
                     headerName = bufferReader.popString();
                     if (headerName.length() == 0) {
-                        // TODO: error
+                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
                     }
                 }
                 else {
