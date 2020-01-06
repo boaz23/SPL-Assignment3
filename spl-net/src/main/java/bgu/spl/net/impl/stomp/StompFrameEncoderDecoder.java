@@ -34,13 +34,6 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         return frameSb.toString();
     }
 
-    private static void appendHeader(StringBuilder frameSb, Map.Entry<String, String> header) {
-        frameSb.append(header.getKey())
-            .append(':')
-            .append(header.getValue())
-            .append(EOL_ENCODE);
-    }
-
     @Override
     public Frame decodeNextByte(byte nextByte) {
         return decodeState.decodeNextByte(nextByte);
@@ -49,12 +42,6 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
     @Override
     public byte[] encode(Frame message) {
         return toString(message).getBytes(encoding);
-    }
-
-    private static void appendBody(Frame frame, StringBuilder frameSb) {
-        frameSb.append(EOL_ENCODE)
-            .append(frame.getBody())
-            .append('\0');
     }
 
     private static void appendMessageType(Frame frame, StringBuilder frameSb) {
@@ -66,6 +53,19 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         for (Map.Entry<String, String> header : frame.headers()) {
             appendHeader(frameSb, header);
         }
+    }
+
+    private static void appendHeader(StringBuilder frameSb, Map.Entry<String, String> header) {
+        frameSb.append(header.getKey())
+            .append(':')
+            .append(header.getValue())
+            .append(EOL_ENCODE);
+    }
+
+    private static void appendBody(Frame frame, StringBuilder frameSb) {
+        frameSb.append(EOL_ENCODE)
+            .append(frame.getBody())
+            .append('\0');
     }
 
     private void reset() {

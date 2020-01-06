@@ -3,25 +3,23 @@ package bgu.spl.net.impl.stomp;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.ConnectionHandlersManagerImpl;
 import bgu.spl.net.srv.connections.ConnectionIdsManager;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-// TODO: implement
 public class StompConnections extends ConnectionHandlersManagerImpl<Frame> {
-    private final Map<String, String> usersMap;
+    private final ConcurrentMap<String, String> usersMap;
 
     public StompConnections(ConnectionIdsManager connectionIdsManager) {
         super(connectionIdsManager);
-        usersMap = new HashMap<>();
+        usersMap = new ConcurrentHashMap<>();
     }
 
     public void addUser(String username, String password) {
-        throw new NotImplementedException();
+        usersMap.put(username, password);
     }
 
     public String getUserPassword(String username) {
-        throw new NotImplementedException();
+        return usersMap.get(username);
     }
 }

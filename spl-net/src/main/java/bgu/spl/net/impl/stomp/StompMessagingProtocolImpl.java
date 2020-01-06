@@ -3,7 +3,7 @@ package bgu.spl.net.impl.stomp;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.StompMessageProcessor;
 import bgu.spl.net.api.frames.*;
-import bgu.spl.net.srv.connections.ConnectionInfo;
+import bgu.spl.net.srv.connections.ConnectionSubscriptionInfo;
 import bgu.spl.net.srv.connections.Connections;
 import bgu.spl.net.srv.IdCount;
 
@@ -150,9 +150,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            Iterable<ConnectionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
+            Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
 
-            for (ConnectionInfo<Frame> conn : connectionInfosOfTopic) {
+            for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
                 String id = ((SubscriptionAttachment)conn.getAttachment()).getSubscriptionId();
                 Frame messageFrame =  new MessageFrame(body,
                         id,

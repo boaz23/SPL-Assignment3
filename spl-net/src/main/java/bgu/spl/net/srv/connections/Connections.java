@@ -11,5 +11,5 @@ public interface Connections<T> {
 
     boolean unsubscribe(int connectionId, String topic);
 
-    Iterable<ConnectionInfo<T>> getConnectionsSubscribedTo(String topic);
+    Iterable<ConnectionSubscriptionInfo<T>> getConnectionsSubscribedTo(String topic);
 }
