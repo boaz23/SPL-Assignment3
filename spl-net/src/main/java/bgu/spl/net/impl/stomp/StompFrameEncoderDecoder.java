@@ -112,7 +112,6 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         }
     }
 
-    // TODO: continue
     private class HeadersDecodeState implements DecodeState {
         private static final char HEADER_VALUE_SEPARATOR = ':';
 

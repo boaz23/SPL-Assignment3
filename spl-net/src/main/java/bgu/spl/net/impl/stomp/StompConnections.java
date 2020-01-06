@@ -8,6 +8,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO: implement
 public class StompConnections extends ConnectionHandlersManagerImpl<Frame> {
     private final Map<String, String> usersMap;
 

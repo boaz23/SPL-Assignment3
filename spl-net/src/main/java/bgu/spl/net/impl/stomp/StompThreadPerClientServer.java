@@ -6,7 +6,6 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.BlockingConnectionHandler;
-import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 import bgu.spl.net.srv.ThreadPerClientServer;
 import bgu.spl.net.srv.connections.ConnectionIdsManager;
 
