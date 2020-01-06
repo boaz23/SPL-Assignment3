@@ -8,6 +8,9 @@ public class Frame {
     private Map<String, String> headers;
     private String body;
 
+    private Frame() {
+        this(null, null);
+    }
     public Frame(String messageType, String body) {
         this(messageType, new HashMap<>(), body);
     }
@@ -47,5 +50,49 @@ public class Frame {
 
     public Iterable<Map.Entry<String, String>> headers() {
         return headers.entrySet();
+    }
+
+    public static class Builder {
+        private Frame frame;
+
+        public Builder() {
+            frame = new Frame();
+        }
+
+        public Builder setMessageType(String messageType) {
+            frame.messageType = messageType;
+            return this;
+        }
+
+        public String getMessageType() {
+            return frame.getMessageType();
+        }
+
+        public Builder putHeader(String header, String value) {
+            frame.headers.put(header, value);
+            return this;
+        }
+
+        public Builder removeHeader(String header) {
+            frame.headers.remove(header);
+            return this;
+        }
+
+        public String getHeader(String header) {
+            return frame.getHeader(header);
+        }
+
+        public Builder setBody(String body) {
+            frame.body = body;
+            return this;
+        }
+
+        public String getBody() {
+            return frame.getBody();
+        }
+
+        public Frame build() {
+            return frame;
+        }
     }
 }
