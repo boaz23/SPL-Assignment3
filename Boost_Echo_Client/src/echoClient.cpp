@@ -1,6 +1,18 @@
 #include <stdlib.h>
 #include <connectionHandler.h>
 
+// 2 Threads:
+// Main thread: reads from the standard input stream
+// Socket input stream: reads messages from the server and process them
+// NOTE: need to synchronize access to the out stream, because both will write to it
+
+// Data Structures:
+// Map of genre to owned books of that genre
+// Map of subscription-id to topic name
+
+// TODO: client logic
+// TODO: add class for the connection handler, encoder/decoder, protocol and the frames
+
 /**
 * This code assumes that the server replies the exact text the client sent it (as opposed to the practical session example)
 */
