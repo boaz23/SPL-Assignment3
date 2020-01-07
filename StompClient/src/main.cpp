@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
-#include "../include/connectionHandler.h"
+#include "../include/api/ConnectionHandler.h"
 
 // 2 Threads:
 // Main thread: reads from the standard input stream
@@ -12,7 +12,7 @@
 // Map of subscription-id to topic name
 
 // TODO: client logic
-// TODO: add class for the connection handler, encoder/decoder, protocol and the frames
+// TODO: add class for the connection handler, encoder/decoder, Protocol and the frames
 
 /**
 * This code assumes that the server replies the exact text the client sent it (as opposed to the practical session example)

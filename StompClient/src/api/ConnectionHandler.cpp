@@ -1,4 +1,4 @@
-#include "../include/connectionHandler.h"
+#include "../../include/api/ConnectionHandler.h"
  
 using boost::asio::ip::tcp;
 
@@ -62,20 +62,11 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     }
     return true;
 }
- 
-bool ConnectionHandler::getLine(std::string& line) {
-    return getFrameAscii(line, '\n');
-}
-
-bool ConnectionHandler::sendLine(std::string& line) {
-    return sendFrameAscii(line, '\n');
-}
- 
 
 bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
     char ch;
     // Stop when we encounter the null character.
-    // Notice that the null character is not appended to the frame string.
+    // Notice that the null character is not appended to the Frame string.
     try {
 	do{
 		if(!getBytes(&ch, 1))
