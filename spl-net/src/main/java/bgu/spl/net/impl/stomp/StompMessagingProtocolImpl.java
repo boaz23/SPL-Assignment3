@@ -36,6 +36,11 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     @Override
     public void process(Frame message) {
         StompMessageProcessor<Frame> process = comMap.getOrDefault(message.getMessageType(), null);
+
+        if(process == null){
+            errorMessage(message, "Unknown message","Unknown message");
+            return;
+        }
         process.process(message);
 
         if (!shouldTerminate){
@@ -193,7 +198,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     }
 
     private void errorMessage(Frame message, String messageHeader, String addedBodyMessage){
-        String body = "The message: \n " + message.toString() + "\n" +
+        String body = "The message: \n " + StompFrameEncoderDecoder.toString(message) + "\n" +
                 addedBodyMessage;
 
         Frame errorMessage = new ErrorFrame(body , messageHeader);
