@@ -2,46 +2,49 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.srv.connections.ConnectionHandler;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Supplier;
 
 public abstract class BaseServer<T> implements Server<T> {
-
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
-    private ServerSocket sock;
+    private final Supplier<? extends MessagingProtocol<T>> protocolFactory;
+    private final Supplier<? extends MessageEncoderDecoder<T>> encdecFactory;
+    private ServerSocket serverSocket;
+
+    protected final ConnectionHandlersManager<T> connectionHandlersManager;
 
     public BaseServer(
-            int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encdecFactory) {
+        int port,
+        Supplier<? extends MessagingProtocol<T>> protocolFactory,
+        Supplier<? extends MessageEncoderDecoder<T>> encdecFactory,
+        ConnectionHandlersManager<T> connectionHandlersManager) {
 
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
-		this.sock = null;
+        this.serverSocket = null;
+
+        this.connectionHandlersManager = connectionHandlersManager;
     }
 
     @Override
     public void serve() {
-
-        try (ServerSocket serverSock = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
 			System.out.println("Server started");
-
-            this.sock = serverSock; //just to be able to close
-
+            this.serverSocket = serverSocket; //just to be able to close
             while (!Thread.currentThread().isInterrupted()) {
-
-                Socket clientSock = serverSock.accept();
-
-                BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
-                        clientSock,
-                        encdecFactory.get(),
-                        protocolFactory.get());
-
+                Socket clientSock = serverSocket.accept();
+                BlockingConnectionHandler<T> handler = createConnectionHandler(
+                    clientSock,
+                    encdecFactory.get(),
+                    protocolFactory.get(),
+                    connectionHandlersManager.nextConnectionId()
+                );
                 execute(handler);
             }
         } catch (IOException ex) {
@@ -52,10 +55,44 @@ public abstract class BaseServer<T> implements Server<T> {
 
     @Override
     public void close() throws IOException {
-		if (sock != null)
-			sock.close();
+		if (serverSocket != null)
+			serverSocket.close();
+    }
+
+    private void addConnectionHanlder(int connectionId, ConnectionHandler<T> connectionHandler) {
+        connectionHandlersManager.addConnectionHandler(connectionId, connectionHandler);
+    }
+
+    private void removeConnectionHandler(int connectionId) {
+        connectionHandlersManager.disconnect(connectionId);
+    }
+
+    protected BlockingConnectionHandler<T> createConnectionHandler(
+        Socket socket,
+        MessageEncoderDecoder<T> encdec,
+        MessagingProtocol<T> protocol,
+        int connectionId
+    ) {
+        return new BlockingConnectionHandler<>(
+            socket,
+            encdecFactory.get(),
+            protocolFactory.get(),
+            connectionId,
+            new ConnectionsHandlerActions()
+        );
     }
 
     protected abstract void execute(BlockingConnectionHandler<T>  handler);
 
+    protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
+        @Override
+        public void add(int connectionId, ConnectionHandler<T> connectionHandler) {
+            BaseServer.this.addConnectionHanlder(connectionId, connectionHandler);
+        }
+
+        @Override
+        public void remove(int connectionId) {
+            BaseServer.this.removeConnectionHandler(connectionId);
+        }
+    }
 }
