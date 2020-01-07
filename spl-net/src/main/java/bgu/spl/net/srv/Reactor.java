@@ -2,6 +2,9 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.srv.connections.ConnectionHandler;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedSelectorException;
@@ -23,16 +26,20 @@ public class Reactor<T> implements Server<T> {
     private Thread selectorThread;
     private final ConcurrentLinkedQueue<Runnable> selectorTasks = new ConcurrentLinkedQueue<>();
 
+    protected final ConnectionHandlersManager<T> connectionHandlersManager;
+
     public Reactor(
             int numThreads,
             int port,
             Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> readerFactory) {
+            Supplier<MessageEncoderDecoder<T>> readerFactory,
+            ConnectionHandlersManager<T> connectionHandlersManager) {
 
         this.pool = new ActorThreadPool(numThreads);
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.readerFactory = readerFactory;
+        this.connectionHandlersManager = connectionHandlersManager;
     }
 
     @Override
@@ -95,11 +102,9 @@ public class Reactor<T> implements Server<T> {
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
-        final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<>(
-                readerFactory.get(),
-                protocolFactory.get(),
-                clientChan,
-                this);
+
+        int nextId = connectionHandlersManager.nextConnectionId();
+        final NonBlockingConnectionHandler<T> handler = createConnectionHandler(clientChan, readerFactory.get(), protocolFactory.get(), nextId);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 
@@ -130,4 +135,36 @@ public class Reactor<T> implements Server<T> {
         selector.close();
     }
 
+    protected NonBlockingConnectionHandler<T> createConnectionHandler(SocketChannel clientChan,
+                                                                      MessageEncoderDecoder<T> encdec,
+                                                                      MessagingProtocol<T> protocol,
+                                                                      int nextId) {
+        return new NonBlockingConnectionHandler<>(
+                encdec,
+                protocol,
+                clientChan,
+                this,
+                nextId,
+                new ConnectionsHandlerActions());
+    }
+
+    private void addConnectionHanlder(int connectionId, ConnectionHandler<T> connectionHandler) {
+        connectionHandlersManager.addConnectionHandler(connectionId, connectionHandler);
+    }
+
+    private void removeConnectionHandler(int connectionId) {
+        connectionHandlersManager.disconnect(connectionId);
+    }
+
+    protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
+        @Override
+        public void add(int connectionId, ConnectionHandler<T> connectionHandler) {
+            Reactor.this.addConnectionHanlder(connectionId, connectionHandler);
+        }
+
+        @Override
+        public void remove(int connectionId) {
+            Reactor.this.removeConnectionHandler(connectionId);
+        }
+    }
 }

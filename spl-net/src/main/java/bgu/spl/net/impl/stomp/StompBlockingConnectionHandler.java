@@ -19,7 +19,7 @@ public class StompBlockingConnectionHandler extends BlockingConnectionHandler<Fr
     }
 
     @Override
-    protected void handshakeWithClient() {
+    protected void initialize() {
         ((StompServerConnectionHandlerActions)connections).startProtocol(connectionId, (StompMessagingProtocol)protocol);
     }
 }

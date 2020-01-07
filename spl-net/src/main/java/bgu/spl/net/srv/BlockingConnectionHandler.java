@@ -43,7 +43,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             in = new BufferedInputStream(sock.getInputStream());
             out = new BufferedOutputStream(sock.getOutputStream());
 
-            handshakeWithClient();
+            initialize();
             connections.add(connectionId, this);
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte)read);
@@ -87,5 +87,5 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
      * Perform protocol handshake with client.
      * Allows overriding in deriving classes
      */
-    protected void handshakeWithClient() { }
+    protected void initialize() { }
 }
