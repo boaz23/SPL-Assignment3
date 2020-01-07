@@ -8,11 +8,11 @@ class BookCollection {
     // TODO: not need to synchronize
 
 private:
-    std::unordered_set<std::string> books;
+    const std::unordered_set<std::string> books;
 
 public:
-    void addBook(std::string book);
-    void removeBook(std::string book);
+    void addBook(const std::string &book);
+    void removeBook(const std::string &book);
 
     std::unordered_set<std::string>::iterator begin();
     std::unordered_set<std::string>::iterator end();

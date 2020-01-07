@@ -1,4 +1,3 @@
-
 #ifndef STOMPCLIENT_USERBOOKS_H
 #define STOMPCLIENT_USERBOOKS_H
 
@@ -9,12 +8,14 @@ class UserBooks {
     // TODO: synchronize, only the map with a mutex
 
 private:
-    std::unordered_map<std::string, BookCollection> books;
+    const std::unordered_map<std::string, BookCollection> books;
 
 public:
-    void addBook(std::string genre, std::string book);
-    void removeBook(std::string genre, std::string book);
-    void addGenre(std::string genre);
+    UserBooks();
+
+    void addBook(const std::string &genre, const std::string &book);
+    void removeBook(const std::string &genre, const std::string &book);
+    void addGenre(const std::string &genre);
 
     std::unordered_map<std::string, BookCollection>::iterator begin();
     std::unordered_map<std::string, BookCollection>::iterator end();

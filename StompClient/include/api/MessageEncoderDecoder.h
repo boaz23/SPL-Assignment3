@@ -1,4 +1,4 @@
-#ifndef STOMPCLIENT_MESSAGEENCODERDECODER_H{
+#ifndef STOMPCLIENT_MESSAGEENCODERDECODER_H{../../include/
 #define STOMPCLIENT_MESSAGEENCODERDECODER_H
 
 #include <boost/asio/detail/array.hpp>

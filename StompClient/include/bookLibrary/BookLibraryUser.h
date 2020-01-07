@@ -2,17 +2,22 @@
 #ifndef STOMPCLIENT_BOOKLIBRARYUSER_H
 #define STOMPCLIENT_BOOKLIBRARYUSER_H
 
+#include <string>
 #include "UserBooks.h"
+#include "../stomp/StompConnectionHandler.h"
 
 class BookLibraryUser {
 private:
-    UserBooks _books;
-    std::string _username;
+    UserBooks books;
+    std::string username;
 
+    StompConnectionHandler &_connection;
+    StompMessageEncoderDecoder &_encdec;
 public:
-    BookLibraryUser(std::string username);
+    BookLibraryUser(std::string username, StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec);
 
-    UserBooks& books();
+    bool connect();
+    void run(); // TODO: start thread and input stream loop
 };
 
 
