@@ -7,7 +7,8 @@
 using std::string;
 using std::vector;
 
-Main::Main(std::string host, int port, Printer &printer) : _host(host), _port(port), _printer(printer) { }
+Main::Main(std::string host, int port, Printer &printer) : _host(host), _port(port), _printer(printer),
+    _conn(nullptr), _encdec(nullptr), _user(nullptr), _userThread(nullptr) { }
 
 void Main::start() {
     // TODO: print using the printer
@@ -32,17 +33,18 @@ void Main::start() {
 
         string action = arguments[0];
         if (action == "login") {
-            // TODO: this is pseduo code, refactor this
-            _encdec = std::move(StompMessageEncoderDecoder());
-            _conn = std::move(StompConnectionHandler(_host, _port, _printer, _encdec));
-            _user = std::move(BookLibraryUser(arguments[1], _conn, _encdec));
+            _encdec = new StompMessageEncoderDecoder();
+            _conn = new StompConnectionHandler(_host, _port, _printer, *_encdec);
+            _user = new BookLibraryUser(arguments[1], *_conn, *_encdec);
 
-            if (!_user.connect()) {
+            if (!_user->connect()) {
                 // TODO: delete resources
             }
 
             // TODO: start thread;
-            _userThread = std::move(std::thread(&BookLibraryUser::run, &_user));
+            _userThread = new std::thread(&BookLibraryUser::run, _user);
+
+            // TODO: this is pseduo code, refactor this
 //            array<byte> bytes = encdec.encode(ConnectFrame()); // TODO: delete the bytes array object
 //            connectionHandler.sendBytes(bytes.array, bytes.length);
 //            byte b;

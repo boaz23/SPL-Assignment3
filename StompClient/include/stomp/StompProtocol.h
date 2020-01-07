@@ -1,6 +1,3 @@
-
-
-using StompMessageSender = MessageSender<Frame, Frame>;
 #ifndef STOMPCLIENT_STOMPPROTOCOL_H
 #define STOMPCLIENT_STOMPPROTOCOL_H
 

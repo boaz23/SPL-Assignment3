@@ -21,10 +21,11 @@ private:
 
     Printer &_printer;
 
-    StompConnectionHandler _conn;
-    StompMessageEncoderDecoder _encdec;
-    BookLibraryUser _user;
-    std::thread _userThread;
+    // TODO: maybe change to pointers and initialize with null
+    StompConnectionHandler *_conn;
+    StompMessageEncoderDecoder *_encdec;
+    BookLibraryUser *_user;
+    std::thread *_userThread;
 public:
     Main(std::string host, int port, Printer &printer);
     void start();

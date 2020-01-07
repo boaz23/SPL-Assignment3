@@ -1,4 +1,4 @@
-#ifndef STOMPCLIENT_MESSAGEENCODERDECODER_H{../../include/
+#ifndef STOMPCLIENT_MESSAGEENCODERDECODER_H
 #define STOMPCLIENT_MESSAGEENCODERDECODER_H
 
 #include <boost/asio/detail/array.hpp>
@@ -24,7 +24,7 @@ template <typename Tin, typename Tout> class MessageEncoderDecoder {
      * @param message the message to encode
      * @return the encoded bytes
      */
-    virtual array<byte> encode(Tout message) = 0;
+    virtual Array<byte> encode(const Tout &message) = 0;
 };
 
 

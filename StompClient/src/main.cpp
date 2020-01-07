@@ -27,9 +27,11 @@ int main (int argc, char *argv[]) {
     std::string host = argv[1];
     short port = atoi(argv[2]);
 
-    Main user(host, port);
+    Printer printer;
+    Main user(host, port, printer);
     user.start();
 
+    // TODO: this is pseduo code, refactor this
 //    ConnectionHandler connectionHandler(host, port);
 //    if (!connectionHandler.connect()) {
 //        std::cerr << "Cannot connect to " << host << ":" << port << std::endl;

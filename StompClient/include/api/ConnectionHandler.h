@@ -1,20 +1,4 @@
 #ifndef CONNECTION_HANDLER__
-
-    // Get Ascii data from the server until the delimiter character
-    // Returns false in case connection closed before null can be read.
-    bool getFrameAscii(std::string& frame, char delimiter);
-
-    // Send a message to the remote host.
-    // Returns false in case connection is closed before all the data is sent.
-    bool sendFrameAscii(const std::string& frame, char delimiter);
-
-    // Get Ascii data from the server until the delimiter character
-    // Returns false in case connection closed before null can be read.
-    bool getFrameAscii(std::string& frame, char delimiter);
-
-    // Send a message to the remote host.
-    // Returns false in case connection is closed before all the data is sent.
-    bool sendFrameAscii(const std::string& frame, char delimiter);
 #define CONNECTION_HANDLER__
                                            
 #include <string>

@@ -7,6 +7,8 @@
 
 class StompMessageEncoderDecoder : public MessageEncoderDecoder<Frame, Frame> {
     // TODO: implement
+    virtual Frame* decodeNextByte(byte nextByte);
+    virtual Array<byte> encode(const Frame &message);
 };
 
 
