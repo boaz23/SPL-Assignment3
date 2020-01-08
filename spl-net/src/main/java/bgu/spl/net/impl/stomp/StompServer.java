@@ -82,8 +82,7 @@ public class StompServer {
 
     private static void argumentsError(String message, int exitCode) {
         System.out.println(message);
-        System.out.println("Usage: <port> <policy>");
-        System.out.println("policy = tpc | reactor");
+        System.out.println("Usage: <port> <policy = tpc | reactor>");
         System.exit(exitCode);
     }
 }
