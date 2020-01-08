@@ -10,7 +10,7 @@ public class IdCount
     private AtomicInteger id;
 
     public IdCount(){
-        id.set(0);
+        id = new AtomicInteger(0);
     }
 
     public int getNewId(){
