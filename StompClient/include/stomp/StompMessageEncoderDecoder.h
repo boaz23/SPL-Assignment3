@@ -6,6 +6,7 @@
 #include "Frame.h"
 
 class StompMessageEncoderDecoder : public MessageEncoderDecoder<Frame, Frame> {
+public:
     // TODO: implement
     virtual Frame* decodeNextByte(byte nextByte);
     virtual Array<byte> encode(const Frame &message);

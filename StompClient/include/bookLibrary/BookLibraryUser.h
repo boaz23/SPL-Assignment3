@@ -4,6 +4,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include "UserBooks.h"
 #include "../stomp/StompConnectionHandler.h"
 
@@ -24,6 +25,9 @@ public:
 
     bool connect();
     void run(); // TODO: start thread and input stream loop
+
+private:
+    bool readFrame(std::unique_ptr<Frame> &frame);
 };
 
 

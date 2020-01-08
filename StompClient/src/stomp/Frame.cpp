@@ -8,4 +8,5 @@ const std::string ConnectFrame::HOST_HEADER = "host";
 const std::string ConnectFrame::LOGIN_HEADER = "login";
 const std::string ConnectFrame::PASSCODE_HEADER = "passcode";
 
+const std::string ConnectedFrame::MESSAGE_TYPE = "CONNECTED";
 const std::string ConnectedFrame::VERSION_HEADER = "version";

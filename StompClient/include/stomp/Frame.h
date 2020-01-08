@@ -29,6 +29,8 @@ public:
 
     std::string receiptId();
     void setReceipt(std::string receiptId);
+
+    virtual bool isValid();
 };
 
 class ConnectFrame : public Frame {
@@ -43,9 +45,11 @@ public:
 
 class ConnectedFrame : public Frame {
 public:
+    const static std::string MESSAGE_TYPE;
     const static std::string VERSION_HEADER;
 
     ConnectedFrame(std::string version);
+    ConnectedFrame(Frame &&frame);
 
     std::string version();
 };

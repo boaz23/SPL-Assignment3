@@ -35,6 +35,8 @@ public:
 	
     // Close down the connection properly.
     void close();
+
+    std::string host() const;
  
 }; //class ConnectionHandler
  
