@@ -34,9 +34,10 @@ void Main::start() {
 
         string action = arguments[0];
         if (action == "login") {
+            // TODO: handle the case when already connected
             _encdec = new StompMessageEncoderDecoder();
-            _conn = new StompConnectionHandler(_host, _port, _printer, *_encdec);
-            _activeUser = new BookLibraryUser(arguments[1], *_conn, *_encdec);
+            _conn = new StompConnectionHandler(_host, (short)_port, _printer, *_encdec);
+            _activeUser = new BookLibraryUser(arguments[1], arguments[2], *_conn, *_encdec);
 
             if (!_activeUser->connect()) {
                 // TODO: delete resources
