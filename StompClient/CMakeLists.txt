@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(StompClient)
 
 set(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_FLAGS -pthread)
 
 find_package(Boost 1.57.0 COMPONENTS system filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})

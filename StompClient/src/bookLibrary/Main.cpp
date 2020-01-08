@@ -1,8 +1,6 @@
 #include <iostream>
 #include <vector>
 #include "../../include/bookLibrary/Main.h"
-#include "../../include/api/ConnectionHandler.h"
-#include "../../include/stomp/StompMessageEncoderDecoder.h"
 
 using std::string;
 using std::vector;
