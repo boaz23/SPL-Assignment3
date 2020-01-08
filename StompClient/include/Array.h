@@ -6,7 +6,7 @@
 #include <cstddef>
 
 template <typename T> struct Array {
-    T* array;
+    const T* array;
     size_t  length;
 
     // TODO: maybe implement rule of 5

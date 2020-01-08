@@ -1,12 +1,115 @@
 
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
+StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(){}
+
 Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
-    // TODO: implement
-    throw "Not implemented";
+    if(nextByte != '\0'){
+        byteVector.push_back(nextByte);
+    } else {
+        return createFrame();
+    }
+
+    return nullptr;
 }
 
-Array<byte> StompMessageEncoderDecoder::encode(const Frame &message) {
-    // TODO: implement
-    throw "Not implemented";
+Array<byte> StompMessageEncoderDecoder::encode( Frame &message) {
+    std::string *data = new std::string();
+
+    encodeMessage(message, data);
+    encodeHeaders(message, data);
+    encodeBody(message, data);
+
+    // move op
+    Array<byte> arr();
+    arr.array = data.c_str();
+    arr.size = data.size();
+
+    return  arr;
+}
+
+void StompMessageEncoderDecoder::decodeBody(const Frame &message, const std::string *data) const {
+    data->append(message.body(), message.body().length());
+    data->append("\0");
+}
+
+void StompMessageEncoderDecoder::decodeMessage(const Frame &message, std::string *data) const {
+    data = data->append(message.messageType(), message.messageType().length());
+    data.append("\n");
+}
+
+void StompMessageEncoderDecoder::decodeHeaders(const Frame &message, const std::string *data) const {
+    for(const auto &header : message.headers()){
+        data->append(header.first);
+        data->append(":");
+        data->append(header.second);
+        data->append("\n");
+    }
+    data->append("\n");
+}
+
+Frame* StompMessageEncoderDecoder::createFrame() {
+
+    Frame *frame = new Frame();
+    int index;
+    encodeMessage(frame, &index)T
+
+    if(i < byteVector.size()){
+        byte b = byteVector[index];
+        if(b == '\n') { // body
+        // TODO: decode Body
+        } else {
+
+            while (index < byteVector.size() && byteVector[index] != '\n') {
+                //TODO: check of more delimi
+                std::string key = "";
+                std::string value = "";
+
+                encodeKey(index, key);
+                encodeKey(index, value);
+
+                //TODO : add the header
+            }
+        }
+    }
+}
+
+void StompMessageEncoderDecoder::encodeKey(int &index, std::string &key) const {
+    for (; index < byteVector.size(); index = index + 1) {
+        byte b = byteVector[index];
+        if (b == ':') {
+            break;
+        }
+        key.append(&b, 1);
+    }
+}
+
+void StompMessageEncoderDecoder::encodeValue(int &index, std::string &value) const {
+    for (; index < byteVector.size(); index = index + 1) {
+        byte b = byteVector[index];
+        if (b == '\n') {
+            break;
+        }
+        value.append(&b, 1);
+    }
+}
+
+void StompMessageEncoderDecoder::encodeMessage(Frame *frame, int &index) const {
+    std::string line = "";
+
+    for(index=0; index < byteVector.size(); index = index + 1){
+        byte b = byteVector[index];
+        if(b == '\r'){
+            if(index < byteVector.size() - 1 && byteVector[index + 1] == '\n'){
+                index = index + 1;
+                break;
+            }
+        }
+        if(b == '\n'){
+            break;
+        }
+        line.append(&b, 1);
+
+    }
+    frame->setMessageType(line);
 }
