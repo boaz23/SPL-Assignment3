@@ -6,7 +6,7 @@
 
 class Printer {
     // TODO: implement printing to std::cout and std::err with mutex
-
+public:
     void print(std::string s);
     void println(std::string s);
 };

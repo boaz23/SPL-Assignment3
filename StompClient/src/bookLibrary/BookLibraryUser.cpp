@@ -15,7 +15,9 @@ bool BookLibraryUser::connect() {
     }
 
     std::unique_ptr<Frame> frame = nullptr;
-    readFrame(frame);
+    if (!readFrame(frame)) {
+        return false;
+    }
 
     ConnectedFrame connectedFrame(std::move(*frame));
     if (!connectedFrame.isValid() || connectedFrame.version() != ACCEPT_VERSION) {

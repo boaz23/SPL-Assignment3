@@ -26,7 +26,7 @@ private:
     StompMessageEncoderDecoder *_encdec;
     BookLibraryUser *_activeUser;
     std::thread *_userThread;
-    std::unordered_map<std::string, BookLibraryUser&> _usersMap;
+    std::unordered_map<std::string, BookLibraryUser*> _usersMap;
 public:
     Main(std::string host, int port, Printer &printer);
     void start();

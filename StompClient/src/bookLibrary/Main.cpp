@@ -33,11 +33,23 @@ void Main::start() {
         string action = arguments[0];
         if (action == "login") {
             // TODO: handle the case when already connected
-            _encdec = new StompMessageEncoderDecoder();
-            _conn = new StompConnectionHandler(_host, (short)_port, _printer, *_encdec);
+            if (arguments.size() != 3) {
+                _printer.println("invalid usage of login action.");
+            }
 
             std::string username = arguments[1];
-            _activeUser = new BookLibraryUser(username, arguments[2], *_conn, *_encdec);
+            std::string password = arguments[2];
+            if (_usersMap.count(username) > 0) {
+                _activeUser = _usersMap[username];
+            }
+            else {
+                _encdec = new StompMessageEncoderDecoder();
+                _conn = new StompConnectionHandler(_host, (short)_port, _printer, *_encdec);
+
+                _activeUser = new BookLibraryUser(username, password, *_conn, *_encdec);
+                _usersMap[username] = _activeUser;
+                _printer.println("Login successful");
+            }
 
             if (!_activeUser->connect()) {
                 // TODO: delete resources
