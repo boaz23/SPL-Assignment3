@@ -115,10 +115,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             SubscriptionAttachment subscriptionAttachment = new SubscriptionAttachment(subscriptionId);
-            if(!connections.subscribe(dest ,connectionId, subscriptionAttachment)){
-                errorMessage(message, "Already subscribed to this topic", "");
-                return;
-            }
+            connections.subscribe(dest, connectionId, subscriptionAttachment);
         }
     }
 
@@ -134,11 +131,6 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             String topic = subscriptionMap.remove(subscriptionId);
-            if(topic == null){
-                errorMessage(message, "Try to unsubscribe to a unsubscribe topic", "");
-                return;
-            }
-
             connections.unsubscribe(connectionId, topic);
         }
     }
