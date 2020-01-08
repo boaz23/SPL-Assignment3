@@ -16,16 +16,13 @@ public class NewsFeedServerMain {
 //                ObjectEncoderDecoder::new //message encoder decoder factory
 //        ).serve();
 
-        // TODO: make it work, we might actually have to do so...
-        //  maybe move all the connections logic to the STOMP server class.
-        //  Note: it might be a bit tricky
-        Server.reactor(
-                Runtime.getRuntime().availableProcessors(),
-                7777, //port
-                () ->  new RemoteCommandInvocationProtocol<>(feed), //protocol factory
-                ObjectEncoderDecoder::new, //message encoder decoder factory,
-                null
-        ).serve();
+//        Server.reactor(
+//                Runtime.getRuntime().availableProcessors(),
+//                7777, //port
+//                () ->  new RemoteCommandInvocationProtocol<>(feed), //protocol factory
+//                ObjectEncoderDecoder::new, //message encoder decoder factory,
+//                null
+//        ).serve();
 
     }
 }
