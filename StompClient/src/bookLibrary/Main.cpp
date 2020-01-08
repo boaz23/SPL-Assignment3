@@ -32,15 +32,16 @@ void Main::start() {
 
         string action = arguments[0];
         if (action == "login") {
-            // TODO: handle the case when already connected
             if (arguments.size() != 3) {
                 _printer.println("invalid usage of login action.");
             }
 
             std::string username = arguments[1];
             std::string password = arguments[2];
+            bool justAdded;
             if (_usersMap.count(username) > 0) {
                 _activeUser = _usersMap[username];
+                justAdded = false;
             }
             else {
                 _encdec = new StompMessageEncoderDecoder();
@@ -48,27 +49,24 @@ void Main::start() {
 
                 _activeUser = new BookLibraryUser(username, password, *_conn, *_encdec);
                 _usersMap[username] = _activeUser;
+                justAdded = true;
+            }
+
+            std::string err;
+            if (_activeUser->connect(err)) {
                 _printer.println("Login successful");
+                _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
             }
+            else {
+                _printer(err);
+                if (justAdded) {
+                    std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
+                    _usersMap.erase(username);
+                }
 
-            if (!_activeUser->connect()) {
-                // TODO: delete resources
+                std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter;
+                std::unique_ptr<StompConnectionHandler> connectionDeleter;
             }
-
-            // TODO: start thread;
-            _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
-
-            // TODO: this is pseduo code, refactor this
-//            array<byte> bytes = encdec.encode(ConnectFrame()); // TODO: delete the bytes array object
-//            connectionHandler.sendBytes(bytes.array, bytes.length);
-//            byte b;
-//            while (!connectMessageEnd() && !connectionHandler.getBytes(&b, 1)) {
-//                Frame* frame = encdec.decodeNextByte(b); // TODO: use smart pointer
-//                if (frame) {
-//                    // TODO: parse CONNECTED frame,
-//                    //  if valid, break from the loop and start a new thread which reads frames from the server
-//                }
-//            }
         }
         else if (action == "join") {
 

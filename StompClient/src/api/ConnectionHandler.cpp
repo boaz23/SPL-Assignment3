@@ -25,12 +25,16 @@ bool ConnectionHandler::connect() {
 		socket_.connect(endpoint, error);
 		if (error)
 			throw boost::system::system_error(error);
+        return true;
     }
-    catch (std::exception& e) {
+    catch (boost::system::system_error& e) {
         std::cerr << "Could not connect to server" << std::endl;
-        return false;
     }
-    return true;
+    catch (std::Exception &e) {
+        std::cerr << "Connection failed (Error: " << e.what() << ')' << std::endl
+    }
+
+    return false;
 }
  
 bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
@@ -42,11 +46,13 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
         }
 		if(error)
 			throw boost::system::system_error(error);
-    } catch (std::exception& e) {
-        std::cerr << "Could not connect to server" << std::endl;
-        return false;
+        return true;
     }
-    return true;
+    catch (std::Exception &e) {
+        std::cerr << "recv failed (Error: " << e.what() << ')' << std::endl;
+    }
+
+    return false;
 }
 
 bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
