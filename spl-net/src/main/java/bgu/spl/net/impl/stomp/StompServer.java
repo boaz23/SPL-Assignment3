@@ -17,17 +17,17 @@ public class StompServer {
             argumentsError("Not enough arguments.", 1);
         }
 
-        int port = parsePort(args);
+        int port = parsePort(args[0]);
         String policy = args[1];
 
         Server<Frame> server = initServer(port, policy, StandardCharsets.UTF_8);
         server.serve();
     }
 
-    private static int parsePort(String[] args) {
+    private static int parsePort(String sPort) {
         int port;
         try {
-            port = Integer.parseInt(args[0]);
+            port = Integer.parseInt(sPort);
         }
         catch (NumberFormatException e) {
             argumentsError("Expect a port number in the first argument.", 2);
