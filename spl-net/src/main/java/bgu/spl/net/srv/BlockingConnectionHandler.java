@@ -72,6 +72,8 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void send(T msg) {
+        // TODO: synchronize because multiple threads (of multiple clients)
+        //  might want to send to this socket concurrently
         if (msg != null) {
             try {
                 out.write(encdec.encode(msg));
