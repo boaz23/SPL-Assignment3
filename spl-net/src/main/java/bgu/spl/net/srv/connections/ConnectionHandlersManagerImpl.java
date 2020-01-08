@@ -55,12 +55,6 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
         return true;
     }
 
-//    @Override
-//    public void send(String channel, T msg) {
-//        // TODO: implement
-//        throw new NotImplementedException();
-//    }
-
     @Override
     public void disconnect(int connectionId) {
         removeConnection(connectionId);
