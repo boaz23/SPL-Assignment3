@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 public class StompReactorServer extends Reactor<Frame> {
     public StompReactorServer(int numThreads,
                               int port,
-                              Supplier<MessagingProtocol<Frame>> protocolFactory,
-                              Supplier<MessageEncoderDecoder<Frame>> readerFactory,
+                              Supplier<? extends MessagingProtocol<Frame>> protocolFactory,
+                              Supplier<? extends MessageEncoderDecoder<Frame>> readerFactory,
                               ConnectionIdsManager connectionIdsManager) {
         super(numThreads, port, protocolFactory, readerFactory, new StompConnections(connectionIdsManager));
     }

@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoder<T>> readerFactory;
+    private final Supplier<? extends MessagingProtocol<T>> protocolFactory;
+    private final Supplier<? extends MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
 
@@ -31,8 +31,8 @@ public class Reactor<T> implements Server<T> {
     public Reactor(
             int numThreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> readerFactory,
+            Supplier<? extends MessagingProtocol<T>> protocolFactory,
+            Supplier<? extends MessageEncoderDecoder<T>> readerFactory,
             ConnectionHandlersManager<T> connectionHandlersManager) {
 
         this.pool = new ActorThreadPool(numThreads);
