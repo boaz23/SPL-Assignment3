@@ -21,24 +21,24 @@ Array<byte> StompMessageEncoderDecoder::encode( Frame &message) {
     encodeBody(message, data);
 
     // move op
-    Array<byte> arr();
-    arr.array = data.c_str();
-    arr.size = data.size();
+    Array<byte> arr;
+    arr.array = data->c_str();
+    arr.length = data->length();
 
     return  arr;
 }
 
-void StompMessageEncoderDecoder::decodeBody(const Frame &message, const std::string *data) const {
+void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string *data) const {
     data->append(message.body(), message.body().length());
     data->append("\0");
 }
 
-void StompMessageEncoderDecoder::decodeMessage(const Frame &message, std::string *data) const {
-    data = data->append(message.messageType(), message.messageType().length());
-    data.append("\n");
+void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string *data) const {
+    data->append(message.messageType(), message.messageType().length());
+    data->append("\n");
 }
 
-void StompMessageEncoderDecoder::decodeHeaders(const Frame &message, const std::string *data) const {
+void StompMessageEncoderDecoder::encodeHeaders(Frame &message, std::string *data) const {
     for(const auto &header : message.headers()){
         data->append(header.first);
         data->append(":");
@@ -51,30 +51,43 @@ void StompMessageEncoderDecoder::decodeHeaders(const Frame &message, const std::
 Frame* StompMessageEncoderDecoder::createFrame() {
 
     Frame *frame = new Frame();
-    int index;
-    encodeMessage(frame, &index)T
+    int index = 0;
+    decodeMessage(frame, index);
 
-    if(i < byteVector.size()){
+    if(index < byteVector.size()){
         byte b = byteVector[index];
         if(b == '\n') { // body
-        // TODO: decode Body
+            decodeBody(frame, index);
         } else {
-
             while (index < byteVector.size() && byteVector[index] != '\n') {
                 //TODO: check of more delimi
                 std::string key = "";
                 std::string value = "";
 
-                encodeKey(index, key);
-                encodeKey(index, value);
+                decodeKey(index, key);
+                decodeValue(index, value);
 
                 //TODO : add the header
             }
         }
     }
+
+    return frame;
 }
 
-void StompMessageEncoderDecoder::encodeKey(int &index, std::string &key) const {
+void StompMessageEncoderDecoder::decodeBody(Frame *frame, int &index) const {
+    std::string body = "";
+    for (; index < byteVector.size(); index = index + 1) {
+        byte b = byteVector[index];
+        if (b == '\0') {
+            break;
+        }
+        body.append(&b, 1);
+    }
+    frame->setBody(body);
+}
+
+void StompMessageEncoderDecoder::decodeKey(int &index, std::string &key) const {
     for (; index < byteVector.size(); index = index + 1) {
         byte b = byteVector[index];
         if (b == ':') {
@@ -84,7 +97,7 @@ void StompMessageEncoderDecoder::encodeKey(int &index, std::string &key) const {
     }
 }
 
-void StompMessageEncoderDecoder::encodeValue(int &index, std::string &value) const {
+void StompMessageEncoderDecoder::decodeValue(int &index, std::string &value) const {
     for (; index < byteVector.size(); index = index + 1) {
         byte b = byteVector[index];
         if (b == '\n') {
@@ -94,7 +107,7 @@ void StompMessageEncoderDecoder::encodeValue(int &index, std::string &value) con
     }
 }
 
-void StompMessageEncoderDecoder::encodeMessage(Frame *frame, int &index) const {
+void StompMessageEncoderDecoder::decodeMessage(Frame *frame, int &index) const {
     std::string line = "";
 
     for(index=0; index < byteVector.size(); index = index + 1){

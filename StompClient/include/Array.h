@@ -6,6 +6,7 @@
 #include <cstddef>
 
 template <typename T> struct Array {
+
     const T* array;
     size_t  length;
 

@@ -19,15 +19,15 @@ public:
     Frame();
     Frame(std::string messageType, std::unordered_map<std::string, std::string> headers, std::string body);
 
-    std::string messageType();
+    std::string messageType() const;
     void setMessageType(std::string messageType);
 
-    std::string body();
+    std::string body() const;
     void setBody(std::string body);
 
     std::unordered_map<std::string, std::string> headers();
 
-    std::string receiptId();
+    std::string receiptId() const;
     void setReceipt(std::string receiptId);
 
     virtual bool isValid();
