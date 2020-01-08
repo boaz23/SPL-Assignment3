@@ -24,8 +24,9 @@ private:
     // TODO: maybe change to pointers and initialize with null
     StompConnectionHandler *_conn;
     StompMessageEncoderDecoder *_encdec;
-    BookLibraryUser *_user;
+    BookLibraryUser *_activeUser;
     std::thread *_userThread;
+    std::unordered_map<std::string, BookLibraryUser&> _usersMap;
 public:
     Main(std::string host, int port, Printer &printer);
     void start();

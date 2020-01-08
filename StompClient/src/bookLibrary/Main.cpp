@@ -8,7 +8,8 @@ using std::string;
 using std::vector;
 
 Main::Main(std::string host, int port, Printer &printer) : _host(host), _port(port), _printer(printer),
-    _conn(nullptr), _encdec(nullptr), _user(nullptr), _userThread(nullptr) { }
+                                                           _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
+                                                           _usersMap() { }
 
 void Main::start() {
     // TODO: print using the printer
@@ -35,14 +36,14 @@ void Main::start() {
         if (action == "login") {
             _encdec = new StompMessageEncoderDecoder();
             _conn = new StompConnectionHandler(_host, _port, _printer, *_encdec);
-            _user = new BookLibraryUser(arguments[1], *_conn, *_encdec);
+            _activeUser = new BookLibraryUser(arguments[1], *_conn, *_encdec);
 
-            if (!_user->connect()) {
+            if (!_activeUser->connect()) {
                 // TODO: delete resources
             }
 
             // TODO: start thread;
-            _userThread = new std::thread(&BookLibraryUser::run, _user);
+            _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
 
             // TODO: this is pseduo code, refactor this
 //            array<byte> bytes = encdec.encode(ConnectFrame()); // TODO: delete the bytes array object
