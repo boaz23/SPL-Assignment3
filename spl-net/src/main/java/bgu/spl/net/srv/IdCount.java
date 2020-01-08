@@ -14,12 +14,7 @@ public class IdCount
     }
 
     public int getNewId(){
-        int tId = id.get();
-        while(!id.compareAndSet(tId, tId+1)){
-            tId = id.get();
-        }
-
-        return tId;
+        return id.incrementAndGet();
     }
 
     public String getNewIdAsString(){
