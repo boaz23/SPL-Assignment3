@@ -54,4 +54,14 @@ public:
     std::string version();
 };
 
+class ErrorFrame : public Frame {
+public:
+    const static std::string MESSAGE_HEADER;
+
+    ErrorFrame(std::string msg);
+    ErrorFrame(Frame &&frame);
+
+    std::string errorMessage();
+};
+
 #endif //STOMPCLIENT_FRAME_H

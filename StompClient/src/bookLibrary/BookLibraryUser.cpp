@@ -8,7 +8,7 @@ BookLibraryUser::BookLibraryUser(std::string username, std::string password, Sto
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCSimplifyInspection"
-bool BookLibraryUser::connect() {
+bool BookLibraryUser::connect(std::string &errorMsg) {
     ConnectFrame connectFrame(ACCEPT_VERSION, _connection.host(), username, password);
     if (!_connection.sendFrame(connectFrame)) {
         return false;
@@ -20,7 +20,17 @@ bool BookLibraryUser::connect() {
     }
 
     ConnectedFrame connectedFrame(std::move(*frame));
-    if (!connectedFrame.isValid() || connectedFrame.version() != ACCEPT_VERSION) {
+    if (connectedFrame.isValid()) {
+        if (connectedFrame.version() != ACCEPT_VERSION) {
+            return false;
+        }
+    }
+    else {
+        ErrorFrame errorFrame(std::move(connectedFrame));
+        if (errorFrame.isValid()) {
+            errorMsg = errorFrame.errorMessage();
+        }
+
         return false;
     }
 
