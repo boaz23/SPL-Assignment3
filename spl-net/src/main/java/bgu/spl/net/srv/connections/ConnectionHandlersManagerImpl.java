@@ -1,27 +1,19 @@
 package bgu.spl.net.srv.connections;
 
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentMap;
 
 public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManager<T> {
     private final ConnectionIdsManager connectionIdsManager;
 
-    private final Map<Integer, ConnectionHandler<T>> connectionHandlersMap;
-    private final ReadWriteLock connectionHandlersMapRwLock;
-
-    private final Map<String, Topic<T>> subscriptionsMap;
-    private final ReadWriteLock subscriptionsMapRwLock;
+    private final ConcurrentMap<Integer, Client<T>> clientsMap;
+    private final ConcurrentMap<String, Topic<T>> subscriptionsMap;
 
     public ConnectionHandlersManagerImpl(ConnectionIdsManager connectionIdsManager) {
         this.connectionIdsManager = connectionIdsManager;
 
-        connectionHandlersMap = new ConcurrentHashMap<>();
-        connectionHandlersMapRwLock = new ReentrantReadWriteLock();
-
+        clientsMap = new ConcurrentHashMap<>();
         subscriptionsMap = new ConcurrentHashMap<>();
-        subscriptionsMapRwLock = new ReentrantReadWriteLock();
     }
 
     @Override
@@ -31,27 +23,12 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
 
     @Override
     public void addConnectionHandler(int connectionId, ConnectionHandler<T> connectionHandler) {
-        connectionHandlersMapRwLock.writeLock().lock();
-        try {
-            connectionHandlersMap.put(connectionId, connectionHandler);
-        }
-        finally {
-            connectionHandlersMapRwLock.writeLock().unlock();
-        }
+        clientsMap.put(connectionId, new Client<>(connectionHandler));
     }
 
     @Override
     public boolean send(int connectionId, T msg) {
-        connectionHandlersMapRwLock.readLock().lock();
-        ConnectionHandler<T> connectionHandler;
-        try {
-            connectionHandler = connectionHandlersMap.get(connectionId);
-        }
-        finally {
-            connectionHandlersMapRwLock.readLock().unlock();
-        }
-
-        connectionHandler.send(msg);
+        clientsMap.get(connectionId).connection.send(msg);
         return true;
     }
 
@@ -68,6 +45,7 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
             t = addTopic(topic);
         }
 
+        clientsMap.get(connectionId).addSubscription(topic);
         t.addSubscriber(connectionId, attachment);
         return true;
     }
@@ -75,69 +53,33 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
     @Override
     public boolean unsubscribe(int connectionId, String topic) {
         getTopic(topic).removeSubscriber(connectionId);
+        clientsMap.get(connectionId).removeSubscription(topic);
         return true;
     }
 
     @Override
     public Iterable<ConnectionSubscriptionInfo<T>> getConnectionsSubscribedTo(String topic) {
-        List<ConnectionSubscriptionInfo<T>> subscribers;
-        Topic<T> t = getTopic(topic);
-        t.lock.readLock().lock();
-        try {
-            subscribers = new LinkedList<>(t.subscribers.values());
-        }
-        finally {
-            t.lock.readLock().unlock();
-        }
-
-        return subscribers;
+        return getTopic(topic).subscribers();
     }
 
     private Topic<T> addTopic(String topic) {
-        Topic<T> t;
-        subscriptionsMapRwLock.writeLock().lock();
-        try {
-            t = subscriptionsMap.put(topic, new Topic<>());
-        }
-        finally {
-            subscriptionsMapRwLock.writeLock().unlock();
-        }
-        return t;
+        return subscriptionsMap.put(topic, new Topic<>());
     }
 
     private Topic<T> getTopic(String topic) {
-        Topic<T> t;
-        subscriptionsMapRwLock.readLock().lock();
-        try {
-            t = subscriptionsMap.get(topic);
-        } finally {
-            subscriptionsMapRwLock.readLock().unlock();
-        }
-        return t;
+        return subscriptionsMap.get(topic);
     }
 
     private void removeConnection(int connectionId) {
-        connectionHandlersMapRwLock.writeLock().lock();
-        try {
-            connectionHandlersMap.remove(connectionId);
-        }
-        finally {
-            connectionHandlersMapRwLock.writeLock().unlock();
-        }
+        clientsMap.remove(connectionId);
     }
 
     private void removeAllSubscriptions(int connectionId) {
-        subscriptionsMapRwLock.readLock().lock();
-        try {
-            removeClientFromAllTopics(connectionId);
-        }
-        finally {
-            subscriptionsMapRwLock.readLock().unlock();
-        }
+        removeClientFromAllTopics(connectionId);
     }
 
     private void removeClientFromAllTopics(int connectionId) {
-        for (String topic : subscriptionsMap.keySet()) {
+        for (String topic : clientsMap.get(connectionId).subscriptions()) {
             removeClientFromTopic(connectionId, topic);
         }
     }
@@ -147,32 +89,46 @@ public class ConnectionHandlersManagerImpl<T> implements ConnectionHandlersManag
     }
 
     private static class Topic<T> {
-        Map<Integer, ConnectionSubscriptionInfo<T>> subscribers;
-        ReadWriteLock lock;
+        ConcurrentMap<Integer, ConnectionSubscriptionInfo<T>> subscribers;
 
         Topic() {
-            subscribers = new HashMap<>();
-            lock = new ReentrantReadWriteLock();
+            subscribers = new ConcurrentHashMap<>();
         }
 
         void addSubscriber(int connectionId, Object attachment) {
-            lock.writeLock().lock();
-            try {
-                subscribers.put(connectionId, new ConnectionSubscriptionInfo<>(connectionId, attachment));
-            }
-            finally {
-                lock.writeLock().unlock();
-            }
+            subscribers.put(connectionId, new ConnectionSubscriptionInfo<>(connectionId, attachment));
         }
 
         void removeSubscriber(int connectionId) {
-            lock.writeLock().lock();
-            try {
-                subscribers.remove(connectionId);
-            }
-            finally {
-                lock.writeLock().unlock();
-            }
+            subscribers.remove(connectionId);
+        }
+
+        Iterable<ConnectionSubscriptionInfo<T>> subscribers() {
+            return subscribers.values();
+        }
+    }
+
+    private static class Client<T> {
+        ConnectionHandler<T> connection;
+
+        private static final Object subscriptionValue = new Object();
+        ConcurrentMap<String, Object> subscriptions;
+
+        private Client(ConnectionHandler<T> connection) {
+            this.connection = connection;
+            this.subscriptions = new ConcurrentHashMap<>();
+        }
+
+        void addSubscription(String topic) {
+            subscriptions.put(topic, subscriptionValue);
+        }
+
+        void removeSubscription(String topic) {
+            subscriptions.remove(topic);
+        }
+
+        Iterable<String> subscriptions() {
+            return subscriptions.keySet();
         }
     }
 }

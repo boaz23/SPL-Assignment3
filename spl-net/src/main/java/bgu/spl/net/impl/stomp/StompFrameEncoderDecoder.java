@@ -144,7 +144,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         private String headerName;
 
         HeadersDecodeState() {
-            newLineFeed = false;
+            newLineFeed = true;
             carriageReturn = false;
             headerName = null;
         }
