@@ -24,8 +24,8 @@ public interface Server<T> extends Closeable {
      */
     public static <T> Server<T>  threadPerClient(
         int port,
-        Supplier<? extends MessagingProtocol<T> > protocolFactory,
-        Supplier<? extends MessageEncoderDecoder<T> > encoderDecoderFactory,
+        Supplier<? extends MessagingProtocol<T>> protocolFactory,
+        Supplier<? extends MessageEncoderDecoder<T>> encoderDecoderFactory,
         ConnectionHandlersManager<T> connectionHandlersManager) {
         return new ThreadPerClientServer<T>(
             port,
@@ -46,9 +46,10 @@ public interface Server<T> extends Closeable {
     public static <T> Server<T> reactor(
             int nthreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
-        return new Reactor<T>(nthreads, port, protocolFactory, encoderDecoderFactory);
+            Supplier<? extends MessagingProtocol<T>> protocolFactory,
+            Supplier<? extends MessageEncoderDecoder<T>> encoderDecoderFactory,
+            ConnectionHandlersManager<T> connectionHandlersManager) {
+        return new Reactor<T>(nthreads, port, protocolFactory, encoderDecoderFactory, connectionHandlersManager);
     }
 
 }

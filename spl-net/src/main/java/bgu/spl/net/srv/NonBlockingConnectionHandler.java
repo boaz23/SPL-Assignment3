@@ -20,7 +20,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     private final MessageEncoderDecoder<T> encdec;
     private final Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<>();
     private final SocketChannel chan;
-    private final Reactor reactor;
+    private final Reactor<T> reactor;
 
     protected final int connectionId;
     protected final ServerConnectionHandlerActions<T> connections;
@@ -29,7 +29,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
             MessageEncoderDecoder<T> reader,
             MessagingProtocol<T> protocol,
             SocketChannel chan,
-            Reactor reactor,
+            Reactor<T> reactor,
 
             int connectionId,
             ServerConnectionHandlerActions<T> connections) {
@@ -74,6 +74,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     }
 
     protected void init() {
+        connections.startProtocol(connectionId, protocol);
         connections.add(connectionId, this);
     }
 

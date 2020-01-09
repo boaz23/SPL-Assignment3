@@ -1,7 +1,5 @@
 package bgu.spl.net.api.frames;
 
-import java.util.HashMap;
-
 public class ConnectedFrame extends Frame {
     private static final String VERSION_HEADER = "version";
 

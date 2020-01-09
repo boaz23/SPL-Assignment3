@@ -6,13 +6,13 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.frames.Frame;
 
 import java.nio.charset.Charset;
-import java.util.IllegalFormatException;
 import java.util.Map;
 
 public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
     private static final char EOL_ENCODE = '\n';
     private static final char EOL_OPTIONAL = '\r';
     private static final int BUFFER_START_CAPACITY = 1 << 10;
+    private static final char NULL_TERMINATION = '\0';
 
     private final Charset encoding;
     private final DynamicByteBuffer buffer;
@@ -87,29 +87,52 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
 
         @Override
         public Frame decodeNextByte(byte nextByte) {
+            if (nextByte == NULL_TERMINATION) {
+                throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
+            }
+
             if (nextByte == EOL_ENCODE) {
-                String msgType = bufferReader.popString();
-                frameBuilder.setMessageType(msgType);
-                decodeState = new HeadersDecodeState();
+                decodeEndOfLine();
                 carriageReturn = false;
             }
             else {
-                if (carriageReturn) {
-                    // We skipped it, therefore we're adding it
-                    buffer.pushByte((byte)EOL_OPTIONAL);
-                    carriageReturn = false;
-                }
-
-                if (nextByte == EOL_OPTIONAL) {
-                    // it's optional, we need to skip
-                    carriageReturn = true;
-                }
-                else {
-                    buffer.pushByte(nextByte);
-                }
+                handleCarriedCarriageReturn();
+                decodeByte(nextByte);
             }
 
             return null;
+        }
+
+        private void decodeEndOfLine() {
+            setMessageType();
+            nextDecodingState();
+        }
+
+        private void setMessageType() {
+            String msgType = bufferReader.popString();
+            frameBuilder.setMessageType(msgType);
+        }
+
+        private void nextDecodingState() {
+            decodeState = new HeadersDecodeState();
+        }
+
+        private void decodeByte(byte nextByte) {
+            if (nextByte == EOL_OPTIONAL) {
+                // it's optional, we need to skip
+                carriageReturn = true;
+            }
+            else {
+                buffer.pushByte(nextByte);
+            }
+        }
+
+        private void handleCarriedCarriageReturn() {
+            if (carriageReturn) {
+                // We skipped it, therefore we're adding it
+                buffer.pushByte((byte)EOL_OPTIONAL);
+                carriageReturn = false;
+            }
         }
     }
 
@@ -121,59 +144,84 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         private String headerName;
 
         HeadersDecodeState() {
-            newLineFeed = false;
+            newLineFeed = true;
             carriageReturn = false;
             headerName = null;
         }
 
         @Override
         public Frame decodeNextByte(byte nextByte) {
+            if (nextByte == NULL_TERMINATION) {
+                throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
+            }
+
             if (nextByte == EOL_ENCODE) {
-                if (newLineFeed) {
-                    decodeState = new BodyDecodeState();
-                }
-                else {
-                    if (headerName == null) {
-                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
-                    }
-
-                    String value = bufferReader.popString();
-                    if (value.length() == 0) {
-                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
-                    }
-
-                    frameBuilder.putHeader(headerName, value);
-                    reset();
-                }
-
+                decodeEndOfLine();
                 newLineFeed = true;
                 carriageReturn = false;
             }
             else {
-                if (carriageReturn) {
-                    // We skipped it, therefore we're adding it
-                    buffer.pushByte((byte)EOL_OPTIONAL);
-                    carriageReturn = false;
-                }
-
-                if (nextByte == EOL_OPTIONAL) {
-                    // it's optional, we need to skip
-                    carriageReturn = true;
-                }
-                if (nextByte == HEADER_VALUE_SEPARATOR && headerName == null) {
-                    headerName = bufferReader.popString();
-                    if (headerName.length() == 0) {
-                        throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
-                    }
-                }
-                else {
-                    buffer.pushByte(nextByte);
-                }
-
+                handleCarriedCarriageReturn();
+                decodeByte(nextByte);
                 newLineFeed = false;
             }
 
             return null;
+        }
+
+        private void handleCarriedCarriageReturn() {
+            if (carriageReturn) {
+                // We skipped it, therefore we're adding it
+                buffer.pushByte((byte)EOL_OPTIONAL);
+                carriageReturn = false;
+            }
+        }
+
+        private void decodeByte(byte nextByte) {
+            if (nextByte == EOL_OPTIONAL) {
+                // it's optional, we need to skip
+                carriageReturn = true;
+            }
+            else if (nextByte == HEADER_VALUE_SEPARATOR && headerName == null) {
+                popHeaderName();
+            }
+            else {
+                buffer.pushByte(nextByte);
+            }
+        }
+
+        private void popHeaderName() {
+            headerName = bufferReader.popString();
+            if (headerName.length() == 0) {
+                throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
+            }
+        }
+
+        private void decodeEndOfLine() {
+            if (newLineFeed) {
+                nextDecodingState();
+            }
+            else {
+                appendHeader();
+            }
+        }
+
+        private void nextDecodingState() {
+            decodeState = new BodyDecodeState();
+        }
+
+        private void appendHeader() {
+            if (headerName == null) {
+                throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
+            }
+
+            String value = bufferReader.popString();
+            if (value.length() == 0) {
+                throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
+            }
+
+            frameBuilder.putHeader(headerName, value);
+            reset();
         }
 
         private void reset() {
@@ -182,20 +230,22 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
     }
 
     private class BodyDecodeState implements DecodeState {
-        private static final char NULL_TERMINATION = '\0';
-
         @Override
         public Frame decodeNextByte(byte nextByte) {
             if (nextByte == NULL_TERMINATION) {
-                String body = bufferReader.popString();
-                frameBuilder.setBody(body);
-                Frame frame = frameBuilder.build();
-                StompFrameEncoderDecoder.this.reset();
-                return frame;
+                return buildFrame();
             }
 
             buffer.pushByte(nextByte);
             return null;
+        }
+
+        private Frame buildFrame() {
+            String body = bufferReader.popString();
+            frameBuilder.setBody(body);
+            Frame frame = frameBuilder.build();
+            StompFrameEncoderDecoder.this.reset();
+            return frame;
         }
     }
 }

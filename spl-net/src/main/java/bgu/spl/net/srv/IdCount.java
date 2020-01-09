@@ -10,16 +10,11 @@ public class IdCount
     private AtomicInteger id;
 
     public IdCount(){
-        id.set(0);
+        id = new AtomicInteger(0);
     }
 
     public int getNewId(){
-        int tId = id.get();
-        while(!id.compareAndSet(tId, tId+1)){
-            tId = id.get();
-        }
-
-        return tId;
+        return id.incrementAndGet();
     }
 
     public String getNewIdAsString(){

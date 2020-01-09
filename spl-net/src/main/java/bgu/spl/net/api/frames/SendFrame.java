@@ -1,7 +1,5 @@
 package bgu.spl.net.api.frames;
 
-import java.util.Map;
-
 public class SendFrame extends Frame {
 
     public static final String DESTINATION_HEADER = "destination";

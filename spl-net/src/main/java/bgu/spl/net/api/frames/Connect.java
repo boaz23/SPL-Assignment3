@@ -1,7 +1,5 @@
 package bgu.spl.net.api.frames;
 
-import java.util.Map;
-
 public class Connect extends Frame {
 
     public static final String ACCEPTVERSION_HEADER = "accept-version";

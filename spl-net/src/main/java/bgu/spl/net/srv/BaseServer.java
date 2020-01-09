@@ -82,6 +82,10 @@ public abstract class BaseServer<T> implements Server<T> {
         );
     }
 
+    private void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+        protocol.start(connectionId, connectionHandlersManager);
+    }
+
     protected abstract void execute(BlockingConnectionHandler<T>  handler);
 
     protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
@@ -93,6 +97,11 @@ public abstract class BaseServer<T> implements Server<T> {
         @Override
         public void remove(int connectionId) {
             BaseServer.this.removeConnectionHandler(connectionId);
+        }
+
+        @Override
+        public void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+            BaseServer.this.startProtocol(connectionId, protocol);
         }
     }
 }

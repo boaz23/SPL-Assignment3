@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 public class StompReactorServer extends Reactor<Frame> {
     public StompReactorServer(int numThreads,
                               int port,
-                              Supplier<MessagingProtocol<Frame>> protocolFactory,
-                              Supplier<MessageEncoderDecoder<Frame>> readerFactory,
+                              Supplier<? extends MessagingProtocol<Frame>> protocolFactory,
+                              Supplier<? extends MessageEncoderDecoder<Frame>> readerFactory,
                               ConnectionIdsManager connectionIdsManager) {
         super(numThreads, port, protocolFactory, readerFactory, new StompConnections(connectionIdsManager));
     }
@@ -36,15 +36,6 @@ public class StompReactorServer extends Reactor<Frame> {
         );
     }
 
-    private void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-        protocol.start(connectionId, connectionHandlersManager);
-    }
-
-    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions
-    implements StompServerConnectionHandlerActions {
-        @Override
-        public void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-            StompReactorServer.this.startProtocol(connectionId, protocol);
-        }
+    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions {
     }
 }

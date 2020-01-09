@@ -7,19 +7,15 @@ import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoder<T>> readerFactory;
+    private final Supplier<? extends MessagingProtocol<T>> protocolFactory;
+    private final Supplier<? extends MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
 
@@ -31,8 +27,8 @@ public class Reactor<T> implements Server<T> {
     public Reactor(
             int numThreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> readerFactory,
+            Supplier<? extends MessagingProtocol<T>> protocolFactory,
+            Supplier<? extends MessageEncoderDecoder<T>> readerFactory,
             ConnectionHandlersManager<T> connectionHandlersManager) {
 
         this.pool = new ActorThreadPool(numThreads);
@@ -156,6 +152,10 @@ public class Reactor<T> implements Server<T> {
         connectionHandlersManager.disconnect(connectionId);
     }
 
+    private void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+        protocol.start(connectionId, connectionHandlersManager);
+    }
+
     protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
         @Override
         public void add(int connectionId, ConnectionHandler<T> connectionHandler) {
@@ -165,6 +165,11 @@ public class Reactor<T> implements Server<T> {
         @Override
         public void remove(int connectionId) {
             Reactor.this.removeConnectionHandler(connectionId);
+        }
+
+        @Override
+        public void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+            Reactor.this.startProtocol(connectionId, protocol);
         }
     }
 }

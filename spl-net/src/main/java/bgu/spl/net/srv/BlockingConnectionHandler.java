@@ -4,7 +4,9 @@ import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
@@ -71,14 +73,11 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     }
 
     @Override
-    public void send(T msg) {
+    public void send(T msg) throws IOException {
         if (msg != null) {
-            try {
+            synchronized (this) {
                 out.write(encdec.encode(msg));
                 out.flush();
-            }
-            catch (IOException ex) {
-                ex.printStackTrace();
             }
         }
     }
@@ -87,5 +86,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
      * Perform protocol handshake with client.
      * Allows overriding in deriving classes
      */
-    protected void initialize() { }
+    protected void initialize() {
+        connections.startProtocol(connectionId, protocol);
+    }
 }
