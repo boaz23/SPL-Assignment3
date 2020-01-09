@@ -2,6 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.impl.stomp.StompReactorServer;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
@@ -156,6 +158,10 @@ public class Reactor<T> implements Server<T> {
         connectionHandlersManager.disconnect(connectionId);
     }
 
+    private void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+        protocol.start(connectionId, connectionHandlersManager);
+    }
+
     protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
         @Override
         public void add(int connectionId, ConnectionHandler<T> connectionHandler) {
@@ -165,6 +171,11 @@ public class Reactor<T> implements Server<T> {
         @Override
         public void remove(int connectionId) {
             Reactor.this.removeConnectionHandler(connectionId);
+        }
+
+        @Override
+        public void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+            Reactor.this.startProtocol(connectionId, protocol);
         }
     }
 }

@@ -5,6 +5,7 @@ import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
+import bgu.spl.net.srv.BaseServer;
 import bgu.spl.net.srv.NonBlockingConnectionHandler;
 import bgu.spl.net.srv.Reactor;
 import bgu.spl.net.srv.connections.ConnectionIdsManager;
@@ -36,15 +37,6 @@ public class StompReactorServer extends Reactor<Frame> {
         );
     }
 
-    private void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-        protocol.start(connectionId, connectionHandlersManager);
-    }
-
-    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions
-    implements StompServerConnectionHandlerActions {
-        @Override
-        public void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-            StompReactorServer.this.startProtocol(connectionId, protocol);
-        }
+    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions {
     }
 }

@@ -88,5 +88,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
      * Perform protocol handshake with client.
      * Allows overriding in deriving classes
      */
-    protected void initialize() { }
+    protected void initialize() {
+        connections.startProtocol(connectionId, protocol);
+    }
 }

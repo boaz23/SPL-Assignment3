@@ -4,6 +4,7 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.BlockingConnectionHandler;
+import bgu.spl.net.srv.ServerConnectionHandlerActions;
 
 import java.net.Socket;
 
@@ -13,13 +14,13 @@ public class StompBlockingConnectionHandler extends BlockingConnectionHandler<Fr
         StompMessageEncoderDecoder reader,
         StompMessagingProtocol protocol,
         int connectionId,
-        StompServerConnectionHandlerActions connections) {
+        ServerConnectionHandlerActions<Frame> connections) {
 
         super(socket, reader, protocol, connectionId, connections);
     }
 
     @Override
     protected void initialize() {
-        ((StompServerConnectionHandlerActions)connections).startProtocol(connectionId, (StompMessagingProtocol)protocol);
+        connections.startProtocol(connectionId, protocol);
     }
 }

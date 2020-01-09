@@ -37,15 +37,6 @@ public class StompThreadPerClientServer extends ThreadPerClientServer<Frame> {
         );
     }
 
-    private void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-        protocol.start(connectionId, connectionHandlersManager);
-    }
-
-    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions
-    implements StompServerConnectionHandlerActions {
-        @Override
-        public void startProtocol(int connectionId, StompMessagingProtocol protocol) {
-            StompThreadPerClientServer.this.startProtocol(connectionId, protocol);
-        }
+    protected class StompConnectionsHandlerActions extends ConnectionsHandlerActions {
     }
 }

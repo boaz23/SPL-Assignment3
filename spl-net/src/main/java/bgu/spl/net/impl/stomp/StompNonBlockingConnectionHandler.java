@@ -5,6 +5,7 @@ import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.NonBlockingConnectionHandler;
 import bgu.spl.net.srv.Reactor;
+import bgu.spl.net.srv.ServerConnectionHandlerActions;
 
 import java.nio.channels.SocketChannel;
 
@@ -12,15 +13,15 @@ public class StompNonBlockingConnectionHandler extends NonBlockingConnectionHand
     public StompNonBlockingConnectionHandler(StompMessageEncoderDecoder reader,
                                              StompMessagingProtocol protocol,
                                              SocketChannel chan,
-                                             Reactor reactor,
+                                             Reactor<Frame> reactor,
                                              int connectionId,
-                                             StompServerConnectionHandlerActions connections) {
+                                             ServerConnectionHandlerActions<Frame> connections) {
         super(reader, protocol, chan, reactor, connectionId, connections);
     }
 
     @Override
     protected void init() {
-        ((StompServerConnectionHandlerActions)connections).startProtocol(connectionId, (StompMessagingProtocol)protocol);
+        connections.startProtocol(connectionId, protocol);
         super.init();
     }
 }

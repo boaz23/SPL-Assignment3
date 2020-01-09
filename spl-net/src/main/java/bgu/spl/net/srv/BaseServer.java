@@ -2,6 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.impl.stomp.StompThreadPerClientServer;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
@@ -82,6 +84,10 @@ public abstract class BaseServer<T> implements Server<T> {
         );
     }
 
+    private void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+        protocol.start(connectionId, connectionHandlersManager);
+    }
+
     protected abstract void execute(BlockingConnectionHandler<T>  handler);
 
     protected class ConnectionsHandlerActions implements ServerConnectionHandlerActions<T> {
@@ -93,6 +99,11 @@ public abstract class BaseServer<T> implements Server<T> {
         @Override
         public void remove(int connectionId) {
             BaseServer.this.removeConnectionHandler(connectionId);
+        }
+
+        @Override
+        public void startProtocol(int connectionId, MessagingProtocol<T> protocol) {
+            BaseServer.this.startProtocol(connectionId, protocol);
         }
     }
 }
