@@ -20,6 +20,10 @@ class Topic<T> {
         subscribers.remove(connectionId);
     }
 
+    Object getSubscriptionAttachment(int connectionId) {
+        return subscribers.get(connectionId).getAttachment();
+    }
+
     Iterable<ConnectionSubscriptionInfo<T>> subscribers() {
         return subscribers.values();
     }

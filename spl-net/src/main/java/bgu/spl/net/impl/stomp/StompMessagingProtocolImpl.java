@@ -18,13 +18,17 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private int connectionId;
     private StompConnections connections;
     private Map<String, StompMessageProcessor<Frame>> comMap;
-    private Map<String, String> subscriptionMap;
     private boolean shouldTerminate;
 
+    private final Map<String, StompMessageProcessor<Frame>> NotConnectedProcessorMap;
+    private final Map<String, StompMessageProcessor<Frame>> ConnectedProcessorMap;
+
     public StompMessagingProtocolImpl(){
-        subscriptionMap = new HashMap<>();
-        InitMapNotConnected();
         shouldTerminate = false;
+
+        NotConnectedProcessorMap = InitMapNotConnected();
+        ConnectedProcessorMap = InitMapConnected();
+        comMap = NotConnectedProcessorMap;
     }
 
     @Override
@@ -73,15 +77,26 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            String passwordByUserName = connections.getUserPassword(userName);
-            if(passwordByUserName == null){
-                connections.addUser(userName, passcode);
-                InitMap();
-                return;
+            User user = connections.getUser(userName);
+            boolean connectSuccessful = false;
+            if (user == null) {
+                connectSuccessful = true;
+                connections.addUser(connectionId, userName, passcode);
             }
-            if(!passcode.equals(passwordByUserName)){
-                errorMessage(message,"Check your password", "");
-                return;
+            else if (user.isConnected()) {
+                errorMessage(message, "User already logged in", "");
+            }
+            else if (!passcode.equals(user.password())) {
+                errorMessage(message,"Wrong password", "");
+            }
+            else {
+                connectSuccessful = true;
+                connections.getUser(connectionId).setConnected(true);
+            }
+
+            if (connectSuccessful) {
+                connections.send(connectionId, new ConnectedFrame(version));
+                switchToConnectedProcessorState();
             }
         }
     }
@@ -98,31 +113,27 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            if(dest.equals("")){
+            if (dest.equals("")) {
                 errorMessage(message, "destination header is empty",
                         "The destination cant be empty");
                 return;
             }
 
-            String tmpTopic = subscriptionMap.getOrDefault(subscriptionId, null);
-
-            if(tmpTopic == null){
-                subscriptionMap.put(subscriptionId, dest);
+            SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
+            if (attachment == null) {
+                if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+                    errorMessage(message, "Subscription id already used", "");
+                }
+                else {
+                    connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
+                }
             }
-            else{
-                errorMessage(message, "Already used id", "");
-                return;
-            }
-
-            SubscriptionAttachment subscriptionAttachment = new SubscriptionAttachment(subscriptionId);
-            connections.subscribe(dest, connectionId, subscriptionAttachment);
         }
     }
 
     protected class UnsubscribeMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
-
             String subscriptionId = message.getHeader(UnsubscribeFrame.ID_HEADER);
             if(subscriptionId == null){
                 errorMessage(message, "malformed frame received",
@@ -130,8 +141,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            String topic = subscriptionMap.remove(subscriptionId);
-            connections.unsubscribe(connectionId, topic);
+            connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
         }
     }
 
@@ -150,12 +160,16 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
 
             for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
-                String id = ((SubscriptionAttachment)conn.getAttachment()).getSubscriptionId();
+                int connectionId = conn.getConnectionId();
+                if (!connections.getUser(connectionId).isConnected()) {
+                    continue;
+                }
+
+                SubscriptionAttachment attachment = (SubscriptionAttachment)conn.getAttachment();
                 Frame messageFrame =  new MessageFrame(body,
-                        id,
+                        attachment.getSubscriptionId(),
                         messageId.getNewIdAsString(),
                         topic);
-
                 connections.send(conn.getConnectionId(), messageFrame);
             }
         }
@@ -181,14 +195,6 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
-    protected class ConnectButUserConnectedProcessor implements StompMessageProcessor<Frame>{
-        @Override
-        public void process(Frame message) {
-            errorMessage(message, "Not valid request, user already connected",
-                    "User is connected");
-        }
-    }
-
     private void errorMessage(Frame message, String messageHeader, String addedBodyMessage){
         String body = "The message: \n " + StompFrameEncoderDecoder.toString(message) + "\n" +
                 addedBodyMessage;
@@ -202,21 +208,27 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         shouldTerminate = true;
     }
 
-    private void InitMapNotConnected() {
-        comMap = new HashMap<>();
+    private void switchToConnectedProcessorState() {
+        comMap =  ConnectedProcessorMap;
+    }
+
+    private Map<String, StompMessageProcessor<Frame>> InitMapNotConnected() {
+        Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
         comMap.put("CONNECT", new ConnectMessageProcessor());
         comMap.put("SUBSCRIBE", new UserNotConnectedProcessor());
         comMap.put("UNSUBSCRIBE", new UserNotConnectedProcessor());
         comMap.put("SEND", new UserNotConnectedProcessor());
         comMap.put("DISCONNECT", new UserNotConnectedProcessor());
+        return comMap;
     }
 
-    private void InitMap() {
-        comMap = new HashMap<>();
-        comMap.put("CONNECT", new ConnectButUserConnectedProcessor());
+    private Map<String, StompMessageProcessor<Frame>> InitMapConnected() {
+        Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
+        comMap.put("CONNECT", new ConnectMessageProcessor());
         comMap.put("SUBSCRIBE", new SubscribeMessageProcessor());
         comMap.put("UNSUBSCRIBE", new UnsubscribeMessageProcessor());
         comMap.put("SEND", new SendMessageProcessor());
         comMap.put("DISCONNECT", new DisconnectMessageProcessor());
+        return comMap;
     }
 }
