@@ -158,7 +158,6 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
-
             for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
                 int connectionId = conn.getConnectionId();
                 if (!connections.getUser(connectionId).isConnected()) {
@@ -215,6 +214,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private Map<String, StompMessageProcessor<Frame>> InitMapNotConnected() {
         Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
         comMap.put("CONNECT", new ConnectMessageProcessor());
+        comMap.put("STOMP", comMap.get("CONNECT"));
         comMap.put("SUBSCRIBE", new UserNotConnectedProcessor());
         comMap.put("UNSUBSCRIBE", new UserNotConnectedProcessor());
         comMap.put("SEND", new UserNotConnectedProcessor());
@@ -225,6 +225,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private Map<String, StompMessageProcessor<Frame>> InitMapConnected() {
         Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
         comMap.put("CONNECT", new ConnectMessageProcessor());
+        comMap.put("STOMP", comMap.get("CONNECT"));
         comMap.put("SUBSCRIBE", new SubscribeMessageProcessor());
         comMap.put("UNSUBSCRIBE", new UnsubscribeMessageProcessor());
         comMap.put("SEND", new SendMessageProcessor());
