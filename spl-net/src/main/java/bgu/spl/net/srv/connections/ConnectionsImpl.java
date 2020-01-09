@@ -2,6 +2,7 @@ package bgu.spl.net.srv.connections;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentMap;
 
 public class ConnectionsImpl<T> implements Connections<T> {
@@ -13,8 +14,14 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public boolean send(int connectionId, T msg) {
-        clientsMap.get(connectionId).connection().send(msg);
-        return true;
+        try {
+            clientsMap.get(connectionId).connection().send(msg);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     @Override
