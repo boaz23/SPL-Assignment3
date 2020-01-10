@@ -43,6 +43,18 @@ public:
     const static std::string HEADER_PASSCODE;
 
     ConnectFrame(std::string acceptVersion, std::string host, std::string login, std::string passcode);
+
+    std::string acceptVersion();
+    void setAcceptVersion(std::string acceptVersion);
+
+    std::string host();
+    void setHost(std::string host);
+
+    std::string loginName();
+    void setLoginName(std::string loginName);
+
+    std::string passcode();
+    void setPasscode(std::string passcode);
 };
 
 class ConnectedFrame : public Frame {
@@ -78,6 +90,7 @@ public:
 };
 
 class ReceiptFrame : public Frame {
+public:
     const static std::string MESSAGE_TYPE;
 
     ReceiptFrame(std::string receiptId);
@@ -85,13 +98,66 @@ class ReceiptFrame : public Frame {
 };
 
 class SubscribeFrame : public Frame {
+public:
     const static std::string MESSAGE_TYPE;
 
-    const static std::string HEADER_DESTINATION;
     const static std::string HEADER_ID;
+    const static std::string HEADER_DESTINATION;
 
     SubscribeFrame(std::string destination, std::string subscriptionId);
     SubscribeFrame(Frame &&frame);
+
+    std::string destination();
+    void setDestination(std::string destination);
+
+    std::string subscriptionId();
+    void setSubscriptionId(std::string subscriptionId);
+};
+
+class UnsubscribeFrame : public Frame {
+public:
+    const static std::string MESSAGE_TYPE;
+
+    const static std::string HEADER_ID;
+
+    UnsubscribeFrame(std::string subscriptionId);
+    UnsubscribeFrame(Frame &&frame);
+
+    std::string subscriptionId();
+    void setSubscriptionId(std::string subscriptionId);
+};
+
+class SendFrame : public Frame {
+public:
+    const static std::string MESSAGE_TYPE;
+
+    const static std::string HEADER_DESTINATION;
+
+    SendFrame(std::string destination, std::string body);
+    SendFrame(Frame &&frame);
+
+    std::string destination();
+    void setDestination(std::string destination);
+};
+
+class MessageFrame : public Frame {
+    const static std::string MESSAGE_TYPE;
+
+    const static std::string HEADER_SUBSCRIPTION;
+    const static std::string HEADER_DESTINATION;
+    const static std::string HEADER_MESSAGE_ID;
+
+    MessageFrame(std::string subscriptionId, std::string destination, std::string messageId, std::string body);
+    MessageFrame(Frame &&frame);
+
+    std::string subscriptionId();
+    void setSubscriptionId(std::string subscriptionId);
+
+    std::string destination();
+    void setDestination(std::string destination);
+
+    std::string messageId();
+    void setMessageId(std::string messageId);
 };
 
 #endif //STOMPCLIENT_FRAME_H
