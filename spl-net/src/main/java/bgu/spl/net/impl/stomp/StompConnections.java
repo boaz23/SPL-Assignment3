@@ -64,11 +64,13 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     @Override
     public void disconnect(int connectionId) {
         StompClient client = clientsMap.get(connectionId);
-        if (client.user() != null) {
-            client.user().setConnected(false);
+        if (client != null) {
+            if (client.user() != null) {
+                client.user().setConnected(false);
+            }
+            super.disconnect(connectionId);
+            removeClientFromAllTopics(connectionId, client);
         }
-        super.disconnect(connectionId);
-        removeClientFromAllTopics(connectionId, client);
     }
 
     public boolean subscribe(String topic, int connectionId, SubscriptionAttachment attachment) {

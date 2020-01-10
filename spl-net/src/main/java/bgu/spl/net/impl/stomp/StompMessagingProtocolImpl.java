@@ -178,6 +178,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
+            connections.disconnect(connectionId);
             shouldTerminate = true;
 
             String receiptId  = message.getHeader(Receipt.RECEIPT_ID_HEADER);
