@@ -56,7 +56,7 @@ void Main::start() {
             if (action == "join") {
                 join(arguments);
             } else if (action == "exit") {
-
+                exit(arguments);
             } else if (action == "add") {
 
             } else if (action == "borrow") {
@@ -120,6 +120,15 @@ void Main::join(const std::vector<std::string> &arguments) {
     join(genre, subscriptionId);
 }
 
+void Main::exit(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 2) {
+        _printer.println("invalid usage of the exit command.");
+    }
+
+    std::string genre = arguments[1];
+    exit(genre);
+}
+
 void Main::borrow(const std::vector<std::string> &arguments) {
     if (arguments.size() != 3) {
         _printer.println("invalid usage of the borrow command.");
@@ -167,14 +176,34 @@ void Main::connectAndRun(bool justAdded) {
     }
 }
 
-void Main::join(const std::string &genre, const std::string subscriptionId) {
+void Main::join(const std::string &genre, const std::string& subscriptionId) {
+    std::string tmp;
+    if (_activeUser->getSubscriptionIdFor(genre, tmp)) {
+        return;
+    }
+
     SubscribeFrame sendFrame(genre, subscriptionId);
     std::string receiptId = nextReceiptId();
     sendFrame.setReceiptId(receiptId);
+
+    _activeUser->addSubscription(genre, subscriptionId);
     _activeUser->addReceipt(sendFrame);
     if (!_conn->sendFrame(sendFrame)) {
+        _activeUser->removeSubscription(genre);
         _activeUser->removeReceipt(receiptId);
         _conn->close();
+    }
+}
+
+void Main::exit(const std::string &genre) {
+    std::string subscriptionId;
+    if (_activeUser->getSubscriptionIdFor(genre, subscriptionId)) {
+        UnsubscribeFrame unsubscribeFrame(subscriptionId);
+        if (_conn->sendFrame(unsubscribeFrame)) {
+            _activeUser->removeSubscription(genre);
+        } else {
+            _conn->close();
+        }
     }
 }
 

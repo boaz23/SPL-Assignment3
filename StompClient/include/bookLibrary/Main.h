@@ -38,7 +38,10 @@ private:
     void disconnect();
 
     void join(const std::vector<std::string> &arguments);
-    void join(const std::string &genre, const std::string subscriptionId);
+    void join(const std::string &genre, const std::string& subscriptionId);
+
+    void exit(const std::vector<std::string> &arguments);
+    void exit(const std::string &genre);
 
     void borrow(const std::vector<std::string> &arguments);
     void borrow(const std::string &genre, const std::string &bookName);

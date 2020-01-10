@@ -19,6 +19,8 @@ private:
 
     UserBooks books;
     std::unordered_map<std::string, Frame> receipts;
+    std::unordered_map<std::string, std::string> genreToSubscriptionIds;
+
     std::unordered_map<std::string, std::string> pendingBorrows;
     std::unordered_map<std::string, std::string> successfulBorrows;
 public:
@@ -31,6 +33,10 @@ public:
 
     void addReceipt(const Frame &frame);
     void removeReceipt(const std::string &receiptId);
+
+    void addSubscription(std::string genre, std::string subscriptionId);
+    void removeSubscription(std::string genre);
+    bool getSubscriptionIdFor(std::string genre, std::string &subscriptionId);
 
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
