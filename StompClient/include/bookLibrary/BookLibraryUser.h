@@ -15,13 +15,14 @@ private:
 
     StompConnectionHandler &_connection;
     StompMessageEncoderDecoder &_encdec;
+    Printer &_printer;
 
     UserBooks books;
     std::unordered_map<int, Frame&> receipts;
     std::unordered_map<std::string, std::string> pendingBorrows;
     std::unordered_map<std::string, std::string> sucessfulBorrows;
 public:
-    BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec);
+    BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec, Printer &printer);
 
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop

@@ -2,9 +2,12 @@
 #include "../../include/bookLibrary/BookLibraryUser.h"
 #include "../../include/stomp/StompVersion.h"
 
-BookLibraryUser::BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection,
-                                 StompMessageEncoderDecoder &encdec) : username(username), password(password), _connection(connection), _encdec(encdec),
-                                 books(), receipts(), pendingBorrows(), sucessfulBorrows() {}
+BookLibraryUser::BookLibraryUser(
+    std::string username, std::string password,
+    StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec, Printer &printer
+) : username(username), password(password),
+    _connection(connection), _encdec(encdec), _printer(printer),
+    books(), receipts(), pendingBorrows(), sucessfulBorrows() {}
 
 bool BookLibraryUser::connect(std::string &errorMsg) {
     ConnectFrame connectFrame(ACCEPT_VERSION, _connection.host(), username, password);
