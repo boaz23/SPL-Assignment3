@@ -64,7 +64,7 @@ void Main::start() {
             } else if (action == "return") {
 
             } else if (action == "status") {
-
+                bookStatus(arguments);
             } else if (action == "logout") {
                 logout(arguments);
             } else {
@@ -140,6 +140,15 @@ void Main::borrow(const std::vector<std::string> &arguments) {
     borrow(genre, bookName);
 }
 
+void Main::bookStatus(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 2) {
+        _printer.println("invalid usage of the exit command.");
+    }
+
+    std::string genre = arguments[1];
+    bookStatus(genre);
+}
+
 bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
     bool justAdded;
     _encdec = new StompMessageEncoderDecoder();
@@ -209,6 +218,13 @@ void Main::exit(const std::string &genre) {
 
 void Main::borrow(const std::string &genre, const std::string &bookName) {
     SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
+    if (!_conn->sendFrame(sendFrame)) {
+        _conn->close();
+    }
+}
+
+void Main::bookStatus(const std::string &genre) {
+    SendFrame sendFrame(genre, "book status");
     if (!_conn->sendFrame(sendFrame)) {
         _conn->close();
     }

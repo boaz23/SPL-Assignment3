@@ -46,6 +46,9 @@ private:
     void borrow(const std::vector<std::string> &arguments);
     void borrow(const std::string &genre, const std::string &bookName);
 
+    void bookStatus(const std::vector<std::string> &arguments);
+    void bookStatus(const std::string &genre);
+
     std::string getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end);
 
     std::string nextReceiptId();
