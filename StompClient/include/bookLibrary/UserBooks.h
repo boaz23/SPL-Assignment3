@@ -8,14 +8,16 @@ class UserBooks {
     // TODO: synchronize, only the map with a mutex
 
 private:
-    const std::unordered_map<std::string, BookCollection> books;
+    const std::unordered_map<std::string, BookCollection> _books;
+    const std::unordered_map<std::string, std::string> _bookToGenreMap;
 
 public:
     UserBooks();
 
+    bool getBookGenre(std::string bookName, std::string &genre);
+
     void addBook(const std::string &genre, const std::string &book);
     void removeBook(const std::string &genre, const std::string &book);
-    void addGenre(const std::string &genre);
 
     bool hasBook(const std::string &genre, const std::string &bookName);
     // retrurn if the user want to borrow the book

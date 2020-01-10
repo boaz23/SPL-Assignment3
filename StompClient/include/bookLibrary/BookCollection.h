@@ -15,12 +15,13 @@ private:
 public:
     void addBook(const std::string &book);
     void removeBook(const std::string &book);
+    bool isEmpty() const;
 
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();
 
-    std::vector<Book>::const_iterator cbegin();
-    std::vector<Book>::const_iterator cend();
+    std::vector<Book>::const_iterator begin() const;
+    std::vector<Book>::const_iterator end() const;
 };
 
 

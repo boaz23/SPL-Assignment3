@@ -17,7 +17,7 @@ private:
     StompMessageEncoderDecoder *_encdec;
     Printer &_printer;
 
-    UserBooks books;
+    UserBooks _books;
     std::unordered_map<std::string, Frame> receipts;
     std::unordered_map<std::string, std::string> genreToSubscriptionIds;
 
@@ -27,6 +27,7 @@ public:
     BookLibraryUser(std::string username, std::string password, Printer &printer);
 
     std::string username();
+    UserBooks books() const;
 
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop

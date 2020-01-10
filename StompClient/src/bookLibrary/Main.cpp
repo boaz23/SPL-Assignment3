@@ -58,7 +58,7 @@ void Main::start() {
             } else if (action == "exit") {
                 exit(arguments);
             } else if (action == "add") {
-
+                addBook(arguments);
             } else if (action == "borrow") {
                 borrow(arguments);
             } else if (action == "return") {
@@ -111,7 +111,7 @@ void Main::logout(const vector<string> &arguments) {
 
 void Main::join(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
-        _printer.println("invalid usage of the join command.");
+        _printer.println("invalid usage of the join genre command.");
         return;
     }
 
@@ -122,11 +122,23 @@ void Main::join(const std::vector<std::string> &arguments) {
 
 void Main::exit(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
-        _printer.println("invalid usage of the exit command.");
+        _printer.println("invalid usage of the exit genre command.");
+        return;
     }
 
     std::string genre = arguments[1];
     exit(genre);
+}
+
+void Main::addBook(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 3) {
+        _printer.println("invalid usage of the add book command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
+    std::string bookName = arguments[2];
+    addBook(genre, bookName);
 }
 
 void Main::borrow(const std::vector<std::string> &arguments) {
@@ -142,7 +154,8 @@ void Main::borrow(const std::vector<std::string> &arguments) {
 
 void Main::bookStatus(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
-        _printer.println("invalid usage of the exit command.");
+        _printer.println("invalid usage of the book status command.");
+        return;
     }
 
     std::string genre = arguments[1];
@@ -210,6 +223,22 @@ void Main::exit(const std::string &genre) {
         UnsubscribeFrame unsubscribeFrame(subscriptionId);
         if (_conn->sendFrame(unsubscribeFrame)) {
             _activeUser->removeSubscription(genre);
+        } else {
+            _conn->close();
+        }
+    }
+}
+
+void Main::addBook(const std::string &genre, std::string &bookName) {
+    UserBooks books = _activeUser->books();
+    std::string bookGenre;
+    if (books.getBookGenre(bookName, bookGenre) && genre != bookGenre) {
+        _printer.println("book is already in the inventory in genre '" + bookGenre + "'");
+    }
+    else {
+        SendFrame sendFrame(genre, _activeUser->username() + " has added the book " + bookName);
+        if (_conn->sendFrame(sendFrame)) {
+            books.addBook(genre, bookName);
         } else {
             _conn->close();
         }

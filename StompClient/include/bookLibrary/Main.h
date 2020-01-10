@@ -43,6 +43,9 @@ private:
     void exit(const std::vector<std::string> &arguments);
     void exit(const std::string &genre);
 
+    void addBook(const std::vector<std::string> &arguments);
+    void addBook(const std::string &genre, std::string &bookName);
+
     void borrow(const std::vector<std::string> &arguments);
     void borrow(const std::string &genre, const std::string &bookName);
 
