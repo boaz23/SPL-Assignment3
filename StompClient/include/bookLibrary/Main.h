@@ -17,6 +17,7 @@ class Main {
 private:
     Printer &_printer;
     int _nextReceiptId;
+    int _nextSubscriptionId;
 
     // TODO: maybe change to pointers and initialize with null
     StompConnectionHandler *_conn;
@@ -36,11 +37,18 @@ private:
     void logout(const std::vector<std::string> &arguments);
     void disconnect();
 
+    void join(const std::vector<std::string> &arguments);
+    void join(const std::string &genre, const std::string subscriptionId);
+
     void borrow(const std::vector<std::string> &arguments);
+    void borrow(const std::string &genre, const std::string &bookName);
 
     std::string getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end);
 
     std::string nextReceiptId();
+    std::string nextSubscriptionId();
+    template <typename T> std::string nextId(T &id);
+
     void disconnectionCleanup();
 };
 

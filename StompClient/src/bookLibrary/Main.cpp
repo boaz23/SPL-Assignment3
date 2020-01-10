@@ -7,7 +7,7 @@ using std::string;
 using std::vector;
 
 Main::Main(Printer &printer) :
-    _printer(printer), _nextReceiptId(1),
+    _printer(printer), _nextReceiptId(1), _nextSubscriptionId(1),
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
 
@@ -54,7 +54,7 @@ void Main::start() {
             }
 
             if (action == "join") {
-
+                join(arguments);
             } else if (action == "exit") {
 
             } else if (action == "add") {
@@ -79,7 +79,7 @@ void Main::start() {
 #pragma ide diagnostic ignored "cert-err34-c"
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
-        _printer.println("invalid usage of login command.");
+        _printer.println("invalid usage of the login command.");
         return;
     }
 
@@ -98,7 +98,7 @@ void Main::login(const vector<string> &arguments) {
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
-        _printer.println("invalid usage of logout command.");
+        _printer.println("invalid usage of the logout command.");
         return;
     }
 
@@ -107,6 +107,28 @@ void Main::logout(const vector<string> &arguments) {
     disconnectionCleanup();
     // TODO: clear inventory
     _activeUser = nullptr;
+}
+
+void Main::join(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 2) {
+        _printer.println("invalid usage of the join command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
+    std::string subscriptionId = nextSubscriptionId();
+    join(genre, subscriptionId);
+}
+
+void Main::borrow(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 3) {
+        _printer.println("invalid usage of the borrow command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
+    std::string bookName = arguments[2];
+    borrow(genre, bookName);
 }
 
 bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
@@ -145,6 +167,24 @@ void Main::connectAndRun(bool justAdded) {
     }
 }
 
+void Main::join(const std::string &genre, const std::string subscriptionId) {
+    SubscribeFrame sendFrame(genre, subscriptionId);
+    std::string receiptId = nextReceiptId();
+    sendFrame.setReceiptId(receiptId);
+    _activeUser->addReceipt(sendFrame);
+    if (!_conn->sendFrame(sendFrame)) {
+        _activeUser->removeReceipt(receiptId);
+        _conn->close();
+    }
+}
+
+void Main::borrow(const std::string &genre, const std::string &bookName) {
+    SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
+    if (!_conn->sendFrame(sendFrame)) {
+        _conn->close();
+    }
+}
+
 void Main::disconnect() {
     DisconnectFame disconnectFame;
     std::string receiptId = nextReceiptId();
@@ -152,20 +192,6 @@ void Main::disconnect() {
     _activeUser->addReceipt(disconnectFame);
     if (!_conn->sendFrame(disconnectFame)) {
         _activeUser->removeReceipt(receiptId);
-        _conn->close();
-    }
-}
-
-void Main::borrow(const std::vector<std::string> &arguments) {
-    if (arguments.size() < 3) {
-        _printer.println("invalid usage of borrow command.");
-        return;
-    }
-
-    std::string genre = arguments[1];
-    std::string bookName = getBookName(arguments.begin() + 2, arguments.end());
-    SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
-    if (!_conn->sendFrame(sendFrame)) {
         _conn->close();
     }
 }
@@ -184,7 +210,15 @@ std::string Main::getBookName(const std::vector<std::string>::const_iterator &st
 }
 
 std::string Main::nextReceiptId() {
-    return std::to_string(_nextReceiptId++);
+    return nextId(_nextReceiptId);
+}
+
+std::string Main::nextSubscriptionId() {
+    return nextId(_nextSubscriptionId);
+}
+
+template <typename T> std::string Main::nextId(T &id) {
+    return std::to_string(id++);
 }
 
 void Main::disconnectionCleanup() {
