@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "../../include/Util.h"
 #include "../../include/bookLibrary/Main.h"
 
 using std::string;
@@ -10,8 +11,6 @@ Main::Main(Printer &printer) :
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err34-c"
 void Main::start() {
     // TODO: print using the printer
     while (true) {
@@ -22,14 +21,14 @@ void Main::start() {
                 break;
             }
             else if (std::cin.fail()) {
-                std::cerr << "an unexpected error occured, input couldn't be interpreted";
+                _printer.println("an unexpected error occured, input couldn't be interpreted");
                 break;
             }
         }
 
-        vector<string> arguments = split(command, " ");
+        vector<string> arguments = Util::split(command, " ");
         if (arguments.empty()) {
-            std::cout << "Error - no command entered" << std::endl;
+            _printer.println("Error - no command entered");
             continue;
         }
 
@@ -65,13 +64,15 @@ void Main::start() {
     }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err34-c"
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
         _printer.println("invalid usage of login action.");
     }
 
     std::string sServer = arguments[1];
-    vector<string> vServer = split(sServer, ":");
+    vector<string> vServer = Util::split(sServer, ":");
     string host = vServer[0];
     auto port = (short)atoi(vServer[1].c_str());
 
@@ -81,6 +82,7 @@ void Main::login(const vector<string> &arguments) {
     bool justAdded = initializeUser(host, port, username, password);
     connectAndRun(justAdded);
 }
+#pragma clang diagnostic pop
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
@@ -123,21 +125,4 @@ void Main::connectAndRun(bool justAdded) {
             _usersMap.erase(_activeUser->username());
         }
     }
-}
-
-#pragma clang diagnostic pop
-
-vector<string> split(const string &s, const string &delimiter) {
-    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
-    string token;
-    vector<string> res;
-
-    while ((pos_end = s.find (delimiter, pos_start)) != string::npos) {
-        token = s.substr (pos_start, pos_end - pos_start);
-        pos_start = pos_end + delim_len;
-        res.push_back (token);
-    }
-
-    res.push_back (s.substr (pos_start));
-    return res;
 }

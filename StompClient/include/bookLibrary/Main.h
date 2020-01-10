@@ -1,4 +1,3 @@
-_usersMap
 #ifndef STOMPCLIENT_MAIN_H
 #define STOMPCLIENT_MAIN_H
 
@@ -29,8 +28,6 @@ public:
     void start();
 
 private:
-    std::vector<std::string> split(const std::string &s, const std::string &delimter);
-
     void login(const std::vector<std::string> &arguments);
     bool initializeUser(const std::string &host, short port, const std::string &username, const std::string &password);
     void connectAndRun(bool justAdded);
