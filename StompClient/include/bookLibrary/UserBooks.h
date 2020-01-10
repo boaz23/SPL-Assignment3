@@ -14,6 +14,8 @@ private:
 public:
     UserBooks();
 
+    void clear();
+
     bool getBookGenre(std::string bookName, std::string &genre);
 
     void addBook(const std::string &genre, const std::string &book);
@@ -27,6 +29,8 @@ public:
     void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
     //remove the book from the borrowed book list
     void returnBorrowedBook(const std::string &genre, const std::string &bookName);
+    bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, std::string &borrowedFrom);
+    void removeBorrowedBook(const std::string &genre, const std::string &bookName);
 
     const BookCollection& bookCollection(const std::string &genre);
 

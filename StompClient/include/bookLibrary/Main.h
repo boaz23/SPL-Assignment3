@@ -37,17 +37,20 @@ private:
     void logout(const std::vector<std::string> &arguments);
     void disconnect();
 
-    void join(const std::vector<std::string> &arguments);
-    void join(const std::string &genre, const std::string& subscriptionId);
+    void joinGenre(const std::vector<std::string> &arguments);
+    void joinGenre(const std::string &genre, const std::string& subscriptionId);
 
-    void exit(const std::vector<std::string> &arguments);
-    void exit(const std::string &genre);
+    void exitGenre(const std::vector<std::string> &arguments);
+    void exitGenre(const std::string &genre);
 
     void addBook(const std::vector<std::string> &arguments);
     void addBook(const std::string &genre, std::string &bookName);
 
-    void borrow(const std::vector<std::string> &arguments);
-    void borrow(const std::string &genre, const std::string &bookName);
+    void borrowBook(const std::vector<std::string> &arguments);
+    void borrowBook(const std::string &genre, const std::string &bookName);
+
+    void returnBook(const std::vector<std::string> &arguments);
+    void returnBook(const std::string &genre, const std::string &bookName);
 
     void bookStatus(const std::vector<std::string> &arguments);
     void bookStatus(const std::string &genre);

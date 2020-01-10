@@ -54,15 +54,15 @@ void Main::start() {
             }
 
             if (action == "join") {
-                join(arguments);
+                joinGenre(arguments);
             } else if (action == "exit") {
-                exit(arguments);
+                exitGenre(arguments);
             } else if (action == "add") {
                 addBook(arguments);
             } else if (action == "borrow") {
-                borrow(arguments);
+                borrowBook(arguments);
             } else if (action == "return") {
-
+                returnBook(arguments);
             } else if (action == "status") {
                 bookStatus(arguments);
             } else if (action == "logout") {
@@ -109,7 +109,7 @@ void Main::logout(const vector<string> &arguments) {
     _activeUser = nullptr;
 }
 
-void Main::join(const std::vector<std::string> &arguments) {
+void Main::joinGenre(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
         _printer.println("invalid usage of the join genre command.");
         return;
@@ -117,17 +117,17 @@ void Main::join(const std::vector<std::string> &arguments) {
 
     std::string genre = arguments[1];
     std::string subscriptionId = nextSubscriptionId();
-    join(genre, subscriptionId);
+    joinGenre(genre, subscriptionId);
 }
 
-void Main::exit(const std::vector<std::string> &arguments) {
+void Main::exitGenre(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
         _printer.println("invalid usage of the exit genre command.");
         return;
     }
 
     std::string genre = arguments[1];
-    exit(genre);
+    exitGenre(genre);
 }
 
 void Main::addBook(const std::vector<std::string> &arguments) {
@@ -141,7 +141,7 @@ void Main::addBook(const std::vector<std::string> &arguments) {
     addBook(genre, bookName);
 }
 
-void Main::borrow(const std::vector<std::string> &arguments) {
+void Main::borrowBook(const std::vector<std::string> &arguments) {
     if (arguments.size() != 3) {
         _printer.println("invalid usage of the borrow command.");
         return;
@@ -149,7 +149,18 @@ void Main::borrow(const std::vector<std::string> &arguments) {
 
     std::string genre = arguments[1];
     std::string bookName = arguments[2];
-    borrow(genre, bookName);
+    borrowBook(genre, bookName);
+}
+
+void Main::returnBook(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 3) {
+        _printer.println("invalid usage of the return command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
+    std::string bookName = arguments[2];
+    returnBook(genre, bookName);
 }
 
 void Main::bookStatus(const std::vector<std::string> &arguments) {
@@ -198,7 +209,7 @@ void Main::connectAndRun(bool justAdded) {
     }
 }
 
-void Main::join(const std::string &genre, const std::string& subscriptionId) {
+void Main::joinGenre(const std::string &genre, const std::string& subscriptionId) {
     std::string tmp;
     if (_activeUser->getSubscriptionIdFor(genre, tmp)) {
         return;
@@ -217,10 +228,11 @@ void Main::join(const std::string &genre, const std::string& subscriptionId) {
     }
 }
 
-void Main::exit(const std::string &genre) {
+void Main::exitGenre(const std::string &genre) {
     std::string subscriptionId;
     if (_activeUser->getSubscriptionIdFor(genre, subscriptionId)) {
         UnsubscribeFrame unsubscribeFrame(subscriptionId);
+        unsubscribeFrame.setReceiptId(nextReceiptId());
         if (_conn->sendFrame(unsubscribeFrame)) {
             _activeUser->removeSubscription(genre);
         } else {
@@ -245,7 +257,23 @@ void Main::addBook(const std::string &genre, std::string &bookName) {
     }
 }
 
-void Main::borrow(const std::string &genre, const std::string &bookName) {
+void Main::returnBook(const std::string &genre, const std::string &bookName) {
+    std::string borrowedFrom;
+    UserBooks books = _activeUser->books();
+    if (books.getBorrowedFromUsername(genre, bookName, borrowedFrom)) {
+        SendFrame sendFrame(genre, "Returning " + bookName + " to " + borrowedFrom);
+        if (_conn->sendFrame(sendFrame)) {
+            books.removeBorrowedBook(genre, bookName);
+        } else {
+            _conn->close();
+        }
+    }
+    else {
+        _printer.println("didn't borrow book '" + bookName + "'");
+    }
+}
+
+void Main::borrowBook(const std::string &genre, const std::string &bookName) {
     SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
     if (!_conn->sendFrame(sendFrame)) {
         _conn->close();
@@ -296,6 +324,9 @@ template <typename T> std::string Main::nextId(T &id) {
 }
 
 void Main::disconnectionCleanup() {
+    if (_activeUser) {
+        _activeUser->books().clear();
+    }
     std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
     std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
     std::unique_ptr<std::thread> userThreadDeleter(_userThread);

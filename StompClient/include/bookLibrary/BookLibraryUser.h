@@ -27,7 +27,7 @@ public:
     BookLibraryUser(std::string username, std::string password, Printer &printer);
 
     std::string username();
-    UserBooks books() const;
+    UserBooks& books() const;
 
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop
