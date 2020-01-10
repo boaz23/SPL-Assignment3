@@ -15,38 +15,41 @@ Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
 }
 
 Array<byte> StompMessageEncoderDecoder::encode(Frame &message) {
-    std::string *data = new std::string();
-
+    std::string data;
     encodeMessage(message, data);
     encodeHeaders(message, data);
     encodeBody(message, data);
 
     // move op
-    Array<byte> arr;
-    arr.array = data->c_str();
-    arr.length = data->length();
+    byte *bytes = new byte[data.length()];
+    for (int i = 0; i < data.length(); ++i) {
+        bytes[i] = data[i];
+    }
 
+    Array<byte> arr{};
+    arr.array = bytes;
+    arr.length = data.length();
     return  arr;
 }
 
-void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string *data) const {
-    data->append(message.body(), message.body().length());
-    data->append("\0");
+void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &data) const {
+    data.append(message.body(), message.body().length());
+    data.append("\0");
 }
 
-void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string *data) const {
-    data->append(message.messageType(), message.messageType().length());
-    data->append("\n");
+void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string &data) const {
+    data.append(message.messageType(), message.messageType().length());
+    data.append("\n");
 }
 
-void StompMessageEncoderDecoder::encodeHeaders(Frame &message, std::string *data) const {
+void StompMessageEncoderDecoder::encodeHeaders(Frame &message, std::string &data) const {
     for(const auto &header : message.headers()){
-        data->append(header.first);
-        data->append(":");
-        data->append(header.second);
-        data->append("\n");
+        data.append(header.first);
+        data.append(":");
+        data.append(header.second);
+        data.append("\n");
     }
-    data->append("\n");
+    data.append("\n");
 }
 
 Frame* StompMessageEncoderDecoder::createFrame() {
