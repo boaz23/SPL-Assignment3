@@ -121,12 +121,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
             SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
             if (attachment == null) {
-                if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
-                    errorMessage(message, "Subscription id already used", "");
-                }
-                else {
-                    connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
-                }
+                connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
+            }
+            else if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+                errorMessage(message, "Subscription id already used", "");
             }
         }
     }
@@ -141,7 +139,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
+            SubscriptionAttachment attachment = new SubscriptionAttachment(subscriptionId);
+            if (!connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+                connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
+            }
         }
     }
 
