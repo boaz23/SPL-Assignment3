@@ -38,6 +38,7 @@ public:
     void close();
 
     std::string host() const;
+    bool isClosed();
  
 }; //class ConnectionHandler
  

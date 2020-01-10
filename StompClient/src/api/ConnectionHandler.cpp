@@ -120,3 +120,7 @@ void ConnectionHandler::close() {
 std::string ConnectionHandler::host() const {
     return host_;
 }
+
+bool ConnectionHandler::isClosed() {
+    return closed_;
+}
