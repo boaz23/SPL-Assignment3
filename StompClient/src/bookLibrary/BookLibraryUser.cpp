@@ -105,10 +105,12 @@ void BookLibraryUser::run() {
             std::vector<std::string> message = Util::split(body, " ");
             //TODO: check if body is empty
 
-            if(message.size() > 5 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
+            if(message.size() > 4 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
                 if(!handlerWantToBorrow(dest, message)){ break; }
             } else if(message.size() > 2 && message[1] == "has"){
                 if(!handlerUserHasBook(dest, message)){ break; }
+            } else if(message.size() > 3 && message[0] == "Taking" && message[message.size()-2] == "from"){
+                handlerTakingBook(dest, message);
             } else if(message.size() > 3 && message[0] == "Returning" && message[message.size()-2] == "to"){
                 returnedBook(dest, message);
             } else if(message.size() == 2 && message[0] == "book" && message[1] == "status"){
@@ -131,6 +133,19 @@ void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<st
     }
 }
 
+void BookLibraryUser::handlerTakingBook(const std::string &dest, const std::vector<std::string> &message) {
+    std::string userOfTheBook = message[message.size()-1];
+    std::string bookName = message[1];
+    for(unsigned long i=2; i < message.size()-2; i=i+1) {
+        bookName.append(" ");
+        bookName.append(message[i]);
+    }
+
+    books.borrowBook(dest, bookName, userOfTheBook);
+
+
+}
+
 bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vector<std::string> &message) {
     std::string userOfTheBook = message[0];
 
@@ -140,7 +155,7 @@ bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vec
         bookName.append(message[i]);
     }
 
-    if(books.wantToBorrow(bookName)){
+    if(books.wantToBorrow(dest, bookName)){
         if(!sendTakingBookFrom(dest, bookName, userOfTheBook)){
             return false;
         }
@@ -161,7 +176,7 @@ bool BookLibraryUser::handlerWantToBorrow(const std::string &dest, const std::ve
     }
 
     if(name != _username){
-        if(books.hasBook(bookName)){
+        if(books.hasBook(dest, bookName)){
             return sendHasBookFrame(dest, bookName);
         }
     }

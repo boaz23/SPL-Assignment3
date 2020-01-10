@@ -17,11 +17,14 @@ public:
     void removeBook(const std::string &genre, const std::string &book);
     void addGenre(const std::string &genre);
 
-    bool hasBook(const std::string &bookName);
-    bool wantToBorrow(const std::string &bookName);
-    bool borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
+    bool hasBook(const std::string &genre, const std::string &bookName);
+    // retrurn if the user want to borrow the book
+    bool wantToBorrow(const std::string &genre, const std::string &bookName);
     bool isBorrowed(const std::string &genre, const std::string &bookName);
-    bool returnBorrowedBook(const std::string &genre, const std::string &bookName);
+    //add the book to the borrowed books
+    void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
+    //remove the book from the borrowed book list
+    void returnBorrowedBook(const std::string &genre, const std::string &bookName);
 
     const BookCollection& bookCollection(const std::string &genre);
 

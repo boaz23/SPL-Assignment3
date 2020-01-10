@@ -46,8 +46,9 @@ private:
 
     bool handlerWantToBorrow(const std::string &dest, const std::vector<std::string> &message);
     bool handlerUserHasBook(const std::string &dest, const std::vector<std::string> &message);
-
+    void handlerTakingBook(const std::string &dest, const std::vector<std::string> &message);
     void returnedBook(const std::string &dest, const std::vector<std::string> &message);
+
 };
 
 
