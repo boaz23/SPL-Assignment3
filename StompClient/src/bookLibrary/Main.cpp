@@ -38,7 +38,8 @@ void Main::start() {
         }
         else {
             if (_conn && _conn->isClosed()) {
-                _printer.println("connection is closed, cannot perform that action.");
+                _printer.println("cannot perform that action because the connection is closed.");
+                disconnectionCleanup();
                 continue;
             }
 
@@ -49,7 +50,7 @@ void Main::start() {
             } else if (action == "add") {
 
             } else if (action == "borrow") {
-
+                borrow(arguments);
             } else if (action == "return") {
 
             } else if (action == "status") {
@@ -68,7 +69,7 @@ void Main::start() {
 #pragma ide diagnostic ignored "cert-err34-c"
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
-        _printer.println("invalid usage of login action.");
+        _printer.println("invalid usage of login command.");
         return;
     }
 
@@ -93,12 +94,12 @@ void Main::login(const vector<string> &arguments) {
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
-        _printer.println("invalid usage of logout action.");
+        _printer.println("invalid usage of logout command.");
         return;
     }
 
     if (!_activeUser) {
-        _printer.println("must be logged");
+        _printer.println("must be logged-in to perform that action.");
         return;
     }
 
@@ -154,6 +155,15 @@ void Main::disconnect() {
         _activeUser->removeReceipt(receiptId);
         _conn->close(); // Interrupt the reading thread
     }
+}
+
+void Main::borrow(const std::vector<std::string> &arguments) {
+    if (arguments.size() != 3) {
+        _printer.println("invalid usage of borrow command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
 }
 
 std::string Main::nextReceiptId() {

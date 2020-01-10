@@ -36,6 +36,8 @@ private:
     void logout(const std::vector<std::string> &arguments);
     void disconnect();
 
+    void borrow(const std::vector<std::string> &arguments);
+
     std::string nextReceiptId();
     void disconnectionCleanup();
 };
