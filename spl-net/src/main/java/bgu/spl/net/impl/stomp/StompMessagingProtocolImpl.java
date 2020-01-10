@@ -160,7 +160,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
             for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
                 int connectionId = conn.getConnectionId();
-                if (!connections.getUser(connectionId).isConnected()) {
+                User user = connections.getUser(connectionId);
+                if (user == null || !user.isConnected()) {
                     continue;
                 }
 

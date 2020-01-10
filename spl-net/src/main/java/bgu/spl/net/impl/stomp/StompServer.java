@@ -5,7 +5,6 @@ import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.Server;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
-import bgu.spl.net.srv.connections.ConnectionIdsManager;
 import bgu.spl.net.srv.connections.IncrementConnectionsIdManager;
 
 import java.nio.charset.Charset;
