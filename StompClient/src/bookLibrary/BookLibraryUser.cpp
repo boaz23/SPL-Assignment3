@@ -7,7 +7,7 @@
 BookLibraryUser::BookLibraryUser(
     std::string username, std::string password,
     Printer &printer
-) : username(std::move(username)), password(std::move(password)),
+) : _username(std::move(username)), _password(std::move(password)),
     _connection(nullptr), _encdec(nullptr), _printer(printer),
     books(), receipts(), pendingBorrows(), successfulBorrows() {}
 
@@ -19,8 +19,12 @@ void BookLibraryUser::setEncoderDecoder(StompMessageEncoderDecoder *encdec) {
     _encdec = encdec;
 }
 
+std::string BookLibraryUser::username() {
+    return _username;
+}
+
 bool BookLibraryUser::connect(std::string &errorMsg) {
-    ConnectFrame connectFrame(ACCEPT_VERSION, _connection->host(), username, password);
+    ConnectFrame connectFrame(ACCEPT_VERSION, _connection->host(), _username, _password);
     if (!_connection->sendFrame(connectFrame)) {
         return false;
     }

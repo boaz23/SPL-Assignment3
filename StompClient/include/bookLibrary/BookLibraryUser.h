@@ -10,8 +10,8 @@
 
 class BookLibraryUser {
 private:
-    std::string username;
-    std::string password;
+    std::string _username;
+    std::string _password;
 
     StompConnectionHandler *_connection;
     StompMessageEncoderDecoder *_encdec;
@@ -27,6 +27,7 @@ public:
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop
 
+    std::string username();
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
