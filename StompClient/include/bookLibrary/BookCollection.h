@@ -16,11 +16,11 @@ public:
     void addBook(const std::string &book);
     void removeBook(const std::string &book);
 
-    std::unordered_set<Book>::iterator begin();
-    std::unordered_set<Book>::iterator end();
+    std::vector<Book>::iterator begin();
+    std::vector<Book>::iterator end();
 
-    std::unordered_set<Book>::const_iterator cbegin();
-    std::unordered_set<Book>::const_iterator cend();
+    std::vector<Book>::const_iterator cbegin();
+    std::vector<Book>::const_iterator cend();
 };
 
 
