@@ -46,19 +46,21 @@ void Main::start() {
 
             std::string username = arguments[2];
             std::string password = arguments[3];
+
             bool justAdded;
-            if (_usersMap.count(username) > 0) {
+            _encdec = new StompMessageEncoderDecoder();
+            _conn = new StompConnectionHandler(host, port, _printer, *_encdec);
+            if (_usersMap.count(username)) {
                 _activeUser = _usersMap[username];
                 justAdded = false;
             }
             else {
-                _encdec = new StompMessageEncoderDecoder();
-                _conn = new StompConnectionHandler(host, port, _printer, *_encdec);
-
-                _activeUser = new BookLibraryUser(username, password, *_conn, *_encdec, _printer);
+                _activeUser = new BookLibraryUser(username, password, _printer);
                 _usersMap[username] = _activeUser;
                 justAdded = true;
             }
+            _activeUser->setConnection(_conn);
+            _activeUser->setEncoderDecoder(_encdec);
 
             std::string err;
             if (_activeUser->connect(err)) {
@@ -67,10 +69,10 @@ void Main::start() {
             }
             else {
                 _printer.println(err);
+                std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+                std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
                 if (justAdded) {
                     std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
-                    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-                    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
                     _usersMap.erase(username);
                 }
             }

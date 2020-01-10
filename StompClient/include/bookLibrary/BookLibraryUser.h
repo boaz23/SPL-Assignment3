@@ -13,20 +13,22 @@ private:
     std::string username;
     std::string password;
 
-    StompConnectionHandler &_connection;
-    StompMessageEncoderDecoder &_encdec;
+    StompConnectionHandler *_connection;
+    StompMessageEncoderDecoder *_encdec;
     Printer &_printer;
 
     UserBooks books;
     std::unordered_map<int, Frame&> receipts;
     std::unordered_map<std::string, std::string> pendingBorrows;
-    std::unordered_map<std::string, std::string> sucessfulBorrows;
+    std::unordered_map<std::string, std::string> successfulBorrows;
 public:
-    BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec, Printer &printer);
+    BookLibraryUser(std::string username, std::string password, Printer &printer);
 
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop
 
+    void setConnection(StompConnectionHandler *connection);
+    void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
     bool readFrame(std::unique_ptr<Frame> &frame);
 };

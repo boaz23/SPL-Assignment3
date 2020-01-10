@@ -1,17 +1,27 @@
 
 #include "../../include/bookLibrary/BookLibraryUser.h"
+
+#include <utility>
 #include "../../include/stomp/StompVersion.h"
 
 BookLibraryUser::BookLibraryUser(
     std::string username, std::string password,
-    StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec, Printer &printer
-) : username(username), password(password),
-    _connection(connection), _encdec(encdec), _printer(printer),
-    books(), receipts(), pendingBorrows(), sucessfulBorrows() {}
+    Printer &printer
+) : username(std::move(username)), password(std::move(password)),
+    _connection(nullptr), _encdec(nullptr), _printer(printer),
+    books(), receipts(), pendingBorrows(), successfulBorrows() {}
+
+void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
+    _connection = connection;
+}
+
+void BookLibraryUser::setEncoderDecoder(StompMessageEncoderDecoder *encdec) {
+    _encdec = encdec;
+}
 
 bool BookLibraryUser::connect(std::string &errorMsg) {
-    ConnectFrame connectFrame(ACCEPT_VERSION, _connection.host(), username, password);
-    if (!_connection.sendFrame(connectFrame)) {
+    ConnectFrame connectFrame(ACCEPT_VERSION, _connection->host(), username, password);
+    if (!_connection->sendFrame(connectFrame)) {
         return false;
     }
 
@@ -41,8 +51,8 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
 bool BookLibraryUser::readFrame(std::unique_ptr<Frame> &frame) {
     bool ret;
     byte  b = 0;
-    while ((ret = !_connection.getBytes(&b, 1))) {
-        Frame* frameTmp = _encdec.decodeNextByte(b);
+    while ((ret = !_connection->getBytes(&b, 1))) {
+        Frame* frameTmp = _encdec->decodeNextByte(b);
         if (frameTmp) {
             frame.reset(frameTmp);
             break;
