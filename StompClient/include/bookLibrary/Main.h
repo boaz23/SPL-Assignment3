@@ -38,6 +38,8 @@ private:
 
     void borrow(const std::vector<std::string> &arguments);
 
+    std::string getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end);
+
     std::string nextReceiptId();
     void disconnectionCleanup();
 };
