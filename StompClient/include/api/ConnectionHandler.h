@@ -15,6 +15,7 @@ private:
 	const short port_;
 	boost::asio::io_service io_service_;   // Provides core I/O functionality
 	tcp::socket socket_;
+	bool closed_;
 
 	Printer &_printer;
  

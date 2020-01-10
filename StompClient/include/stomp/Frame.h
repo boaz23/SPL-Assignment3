@@ -17,6 +17,7 @@ public:
     const static std::string HEADER_RECEIPT_ID;
 
     Frame();
+    Frame(const Frame &frame);
     Frame(std::string messageType, std::unordered_map<std::string, std::string> headers, std::string body);
 
     std::string messageType() const;
@@ -28,7 +29,7 @@ public:
     std::unordered_map<std::string, std::string> headers();
 
     std::string receiptId() const;
-    void setReceipt(std::string receiptId);
+    void setReceiptId(std::string receiptId);
 
     virtual bool isValid();
 };

@@ -1,5 +1,5 @@
 #include "../../include/api/ConnectionHandler.h"
- 
+
 using boost::asio::ip::tcp;
 
 using std::cin;
@@ -10,7 +10,9 @@ using std::string;
 
 // TODO: use printer for printing
 // TODO: synchronize with mutex and lock_guard
-ConnectionHandler::ConnectionHandler(string host, short port, Printer &printer): host_(host), port_(port), _printer(printer), io_service_(), socket_(io_service_){}
+ConnectionHandler::ConnectionHandler(string host, short port, Printer &printer):
+    host_(host), port_(port), io_service_(), socket_(io_service_),
+    closed_(false), _printer(printer) {}
     
 ConnectionHandler::~ConnectionHandler() {
     close();
@@ -41,7 +43,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
     size_t tmp = 0;
 	boost::system::error_code error;
     try {
-        while (!error && bytesToRead > tmp ) {
+        while (!error && bytesToRead > tmp) {
 			tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);			
         }
 		if(error)
@@ -100,10 +102,14 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
  
 // Close down the connection properly.
 void ConnectionHandler::close() {
-    try{
-        socket_.close();
-    } catch (...) {
-        std::cout << "closing failed: connection already closed" << std::endl;
+    if (!closed_) {
+        try {
+            socket_.shutdown(boost::asio::socket_base::shutdown_both);
+            socket_.close();
+            closed_ = true;
+        } catch (...) {
+            std::cout << "closing failed: connection already closed" << std::endl;
+        }
     }
 }
 

@@ -7,7 +7,7 @@ using std::string;
 using std::vector;
 
 Main::Main(Printer &printer) :
-    _printer(printer),
+    _printer(printer), _nextReceiptId(1),
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
 
@@ -69,6 +69,7 @@ void Main::start() {
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
         _printer.println("invalid usage of login action.");
+        return;
     }
 
     std::string sServer = arguments[1];
@@ -79,17 +80,32 @@ void Main::login(const vector<string> &arguments) {
     std::string username = arguments[2];
     std::string password = arguments[3];
 
-    bool justAdded = initializeUser(host, port, username, password);
-    connectAndRun(justAdded);
+    if (!_activeUser) {
+        bool justAdded = initializeUser(host, port, username, password);
+        connectAndRun(justAdded);
+    }
+    else {
+        // TODO: ???
+    }
 }
 #pragma clang diagnostic pop
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
         _printer.println("invalid usage of logout action.");
+        return;
     }
 
+    if (!_activeUser) {
+        _printer.println("must be logged");
+        return;
+    }
 
+    disconnect();
+    _userThread->join();
+    disconnectionCleanup();
+    // TODO: clear inventory
+    _activeUser = nullptr;
 }
 
 bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
@@ -118,11 +134,36 @@ void Main::connectAndRun(bool justAdded) {
     }
     else {
         _printer.println(err);
-        std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-        std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
+        _userThread = nullptr;
+        disconnectionCleanup();
         if (justAdded) {
             std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
             _usersMap.erase(_activeUser->username());
+            _activeUser = nullptr;
         }
     }
+}
+
+void Main::disconnect() {
+    DisconnectFame disconnectFame;
+    std::string receiptId = nextReceiptId();
+    disconnectFame.setReceiptId(receiptId);
+    _activeUser->addReceipt(disconnectFame);
+    if (!_conn->sendFrame(disconnectFame)) {
+        _activeUser->removeReceipt(receiptId);
+        _conn->close(); // Interrupt the reading thread
+    }
+}
+
+std::string Main::nextReceiptId() {
+    return std::to_string(_nextReceiptId++);
+}
+
+void Main::disconnectionCleanup() {
+    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
+    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
+    _userThread = nullptr;
+    _conn = nullptr;
+    _encdec = nullptr;
 }

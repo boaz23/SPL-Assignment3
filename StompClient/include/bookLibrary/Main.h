@@ -16,6 +16,7 @@
 class Main {
 private:
     Printer &_printer;
+    int _nextReceiptId;
 
     // TODO: maybe change to pointers and initialize with null
     StompConnectionHandler *_conn;
@@ -33,6 +34,10 @@ private:
     void connectAndRun(bool justAdded);
 
     void logout(const std::vector<std::string> &arguments);
+    void disconnect();
+
+    std::string nextReceiptId();
+    void disconnectionCleanup();
 };
 
 
