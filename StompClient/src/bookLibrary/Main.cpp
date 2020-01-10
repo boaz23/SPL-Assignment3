@@ -36,30 +36,30 @@ void Main::start() {
         if (action == "login") {
             login(arguments);
         }
-        else if (action == "join") {
-
-        }
-        else if (action == "exit") {
-
-        }
-        else if (action == "add") {
-
-        }
-        else if (action == "borrow") {
-
-        }
-        else if (action == "return") {
-
-        }
-        else if (action == "status") {
-
-        }
-        else if (action == "logout") {
-            logout(arguments);
-        }
         else {
-            std::cout << "Error - unknown action entered" << std::endl;
-            continue;
+            if (_conn && _conn->isClosed()) {
+                _printer.println("connection is closed, cannot perform that action.");
+                continue;
+            }
+
+            if (action == "join") {
+
+            } else if (action == "exit") {
+
+            } else if (action == "add") {
+
+            } else if (action == "borrow") {
+
+            } else if (action == "return") {
+
+            } else if (action == "status") {
+
+            } else if (action == "logout") {
+                logout(arguments);
+            } else {
+                _printer.println("Error - unknown action entered");
+                continue;
+            }
         }
     }
 }
@@ -86,6 +86,7 @@ void Main::login(const vector<string> &arguments) {
     }
     else {
         // TODO: ???
+        _printer.println("cannot login when already logged-in.");
     }
 }
 #pragma clang diagnostic pop
