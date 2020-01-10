@@ -76,6 +76,7 @@ void BookLibraryUser::run() {
     //TODO: refactor
     while(true){
         if (!readFrame(frame)) {
+            // TODO: close the connection here
             break;
         }
 
@@ -95,6 +96,7 @@ void BookLibraryUser::run() {
                 }
 
                 receipts.erase(receipt);
+                // TODO: why delete?
                 delete(&receiptFrame);
             }
         }
@@ -221,6 +223,7 @@ void BookLibraryUser::printMessage(const std::string &topic, const std::string &
 bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
     SendFrame frame = SendFrame(topic ,body);
     if(!_connection->sendFrame(frame)){
+        // TODO: don't close it here, see other TODO
         _connection->close();
         return false;
     }
