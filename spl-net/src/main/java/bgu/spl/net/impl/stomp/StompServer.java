@@ -4,6 +4,7 @@ import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.Server;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 import bgu.spl.net.srv.connections.ConnectionIdsManager;
 import bgu.spl.net.srv.connections.IncrementConnectionsIdManager;
 
@@ -41,12 +42,12 @@ public class StompServer {
         Server<Frame> server;
         Supplier<StompMessagingProtocol> protocolFactory = StompMessagingProtocolImpl::new;
         Supplier<StompMessageEncoderDecoder> encoderDecoderFactory = () -> new StompFrameEncoderDecoder(encoding);
-        ConnectionIdsManager connectionIdsManager = new IncrementConnectionsIdManager();
+        ConnectionHandlersManager<Frame> stompConnections = new StompConnections(new IncrementConnectionsIdManager());
         if (policy.equals("tpc")) {
-            server = initTpcServer(port, protocolFactory, encoderDecoderFactory, connectionIdsManager);
+            server = initTpcServer(port, protocolFactory, encoderDecoderFactory, stompConnections);
         }
         else if (policy.equals("reactor")) {
-            server = initReactorServer(port, protocolFactory, encoderDecoderFactory, connectionIdsManager);
+            server = initReactorServer(port, protocolFactory, encoderDecoderFactory, stompConnections);
         }
         else {
             argumentsError("'" + policy + "' is not a valid policy", 3);
@@ -56,28 +57,19 @@ public class StompServer {
         return server;
     }
 
-    private static Server<Frame> initTpcServer(int port, Supplier<StompMessagingProtocol> protocolFactory, Supplier<StompMessageEncoderDecoder> encoderDecoderFactory, ConnectionIdsManager connectionIdsManager) {
-        Server<Frame> server;
-        server = new StompThreadPerClientServer(
-            port,
-            protocolFactory,
-            encoderDecoderFactory,
-            connectionIdsManager
-        );
-        return server;
+    private static Server<Frame> initTpcServer(int port, Supplier<StompMessagingProtocol> protocolFactory, Supplier<StompMessageEncoderDecoder> encoderDecoderFactory, ConnectionHandlersManager<Frame> stompConnections) {
+        return Server.threadPerClient(port, protocolFactory, encoderDecoderFactory, stompConnections);
     }
 
-    private static Server<Frame> initReactorServer(int port, Supplier<StompMessagingProtocol> protocolFactory, Supplier<StompMessageEncoderDecoder> encoderDecoderFactory, ConnectionIdsManager connectionIdsManager) {
-        Server<Frame> server;
+    private static Server<Frame> initReactorServer(int port, Supplier<StompMessagingProtocol> protocolFactory, Supplier<StompMessageEncoderDecoder> encoderDecoderFactory, ConnectionHandlersManager<Frame> stompConnections) {
         int numThreads = Runtime.getRuntime().availableProcessors();
-        server = new StompReactorServer(
+        return Server.reactor(
             numThreads,
             port,
             protocolFactory,
             encoderDecoderFactory,
-            connectionIdsManager
+            stompConnections
         );
-        return server;
     }
 
     private static void argumentsError(String message, int exitCode) {
