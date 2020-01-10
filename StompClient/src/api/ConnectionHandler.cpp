@@ -62,6 +62,10 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 }
 
 bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
+    if (closed_) {
+        return false;
+    }
+
     int tmp = 0;
 	boost::system::error_code error;
     try {
@@ -119,4 +123,8 @@ void ConnectionHandler::close() {
 
 std::string ConnectionHandler::host() const {
     return host_;
+}
+
+bool ConnectionHandler::isClosed() {
+    return closed_;
 }

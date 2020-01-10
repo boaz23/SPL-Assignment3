@@ -34,32 +34,43 @@ void Main::start() {
 
         string action = arguments[0];
         if (action == "login") {
+            if (_activeUser) {
+                // TODO: ???
+                _printer.println("cannot login when already logged-in.");
+                continue;
+            }
+
             login(arguments);
         }
-        else if (action == "join") {
-
-        }
-        else if (action == "exit") {
-
-        }
-        else if (action == "add") {
-
-        }
-        else if (action == "borrow") {
-
-        }
-        else if (action == "return") {
-
-        }
-        else if (action == "status") {
-
-        }
-        else if (action == "logout") {
-            logout(arguments);
-        }
         else {
-            std::cout << "Error - unknown action entered" << std::endl;
-            continue;
+            if (!_activeUser) {
+                _printer.println("must be logged-in to perform that action.");
+                continue;
+            }
+            if (_conn && _conn->isClosed()) {
+                _printer.println("cannot perform that action because the connection is closed.");
+                disconnectionCleanup();
+                continue;
+            }
+
+            if (action == "join") {
+
+            } else if (action == "exit") {
+
+            } else if (action == "add") {
+
+            } else if (action == "borrow") {
+                borrow(arguments);
+            } else if (action == "return") {
+
+            } else if (action == "status") {
+
+            } else if (action == "logout") {
+                logout(arguments);
+            } else {
+                _printer.println("Error - unknown action entered");
+                continue;
+            }
         }
     }
 }
@@ -68,7 +79,7 @@ void Main::start() {
 #pragma ide diagnostic ignored "cert-err34-c"
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
-        _printer.println("invalid usage of login action.");
+        _printer.println("invalid usage of login command.");
         return;
     }
 
@@ -80,24 +91,14 @@ void Main::login(const vector<string> &arguments) {
     std::string username = arguments[2];
     std::string password = arguments[3];
 
-    if (!_activeUser) {
-        bool justAdded = initializeUser(host, port, username, password);
-        connectAndRun(justAdded);
-    }
-    else {
-        // TODO: ???
-    }
+    bool justAdded = initializeUser(host, port, username, password);
+    connectAndRun(justAdded);
 }
 #pragma clang diagnostic pop
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
-        _printer.println("invalid usage of logout action.");
-        return;
-    }
-
-    if (!_activeUser) {
-        _printer.println("must be logged");
+        _printer.println("invalid usage of logout command.");
         return;
     }
 
@@ -151,8 +152,35 @@ void Main::disconnect() {
     _activeUser->addReceipt(disconnectFame);
     if (!_conn->sendFrame(disconnectFame)) {
         _activeUser->removeReceipt(receiptId);
-        _conn->close(); // Interrupt the reading thread
+        _conn->close();
     }
+}
+
+void Main::borrow(const std::vector<std::string> &arguments) {
+    if (arguments.size() < 3) {
+        _printer.println("invalid usage of borrow command.");
+        return;
+    }
+
+    std::string genre = arguments[1];
+    std::string bookName = getBookName(arguments.begin() + 2, arguments.end());
+    SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
+    if (!_conn->sendFrame(sendFrame)) {
+        _conn->close();
+    }
+}
+
+std::string Main::getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end) {
+    std::string bookName;
+    auto word = start;
+    bookName.append(*word);
+    ++word;
+    for (; word != end; ++word) {
+        bookName.append(" ")
+            .append(*word);
+    }
+
+    return bookName;
 }
 
 std::string Main::nextReceiptId() {

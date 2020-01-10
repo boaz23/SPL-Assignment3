@@ -36,6 +36,10 @@ private:
     void logout(const std::vector<std::string> &arguments);
     void disconnect();
 
+    void borrow(const std::vector<std::string> &arguments);
+
+    std::string getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end);
+
     std::string nextReceiptId();
     void disconnectionCleanup();
 };
