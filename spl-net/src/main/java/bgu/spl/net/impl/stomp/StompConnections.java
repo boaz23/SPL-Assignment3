@@ -29,6 +29,12 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         usersMap.put(username, user);
     }
 
+    public void connectUser(String username, int connectionId) {
+        User user = usersMap.get(username);
+        clientsMap.get(connectionId).setUser(user);
+        user.setConnected(true);
+    }
+
     public User getUser(String username) {
         return usersMap.get(username);
     }
@@ -57,9 +63,12 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
 
     @Override
     public void disconnect(int connectionId) {
-        clientsMap.get(connectionId).user().setConnected(false);
+        StompClient client = clientsMap.get(connectionId);
+        if (client.user() != null) {
+            client.user().setConnected(false);
+        }
         super.disconnect(connectionId);
-        removeAllSubscriptions(connectionId);
+        removeClientFromAllTopics(connectionId, client);
     }
 
     public boolean subscribe(String topic, int connectionId, SubscriptionAttachment attachment) {
@@ -94,12 +103,7 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         return subscriptionsMap.get(topic);
     }
 
-    private void removeAllSubscriptions(int connectionId) {
-        removeClientFromAllTopics(connectionId);
-    }
-
-    private void removeClientFromAllTopics(int connectionId) {
-        StompClient client = clientsMap.get(connectionId);
+    private void removeClientFromAllTopics(int connectionId, StompClient client) {
         for (String topic : client.subscriptions()) {
             removeClientFromTopic(connectionId, topic);
         }

@@ -77,8 +77,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            User user = connections.getUser(userName);
             boolean connectSuccessful = false;
+            User user = connections.getUser(userName);
             if (user == null) {
                 connectSuccessful = true;
                 connections.addUser(connectionId, userName, passcode);
@@ -91,7 +91,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
             else {
                 connectSuccessful = true;
-                connections.getUser(connectionId).setConnected(true);
+                connections.connectUser(userName, connectionId);
             }
 
             if (connectSuccessful) {
@@ -198,7 +198,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         String body = "The message: \n " + StompFrameEncoderDecoder.toString(message) + "\n" +
                 addedBodyMessage;
 
-        Frame errorMessage = new ErrorFrame(body , messageHeader);
+        Frame errorMessage = new ErrorFrame(messageHeader, body);
         String receiptId = message.getHeader(Receipt.RECEIPT_ID_HEADER);
         if(receiptId != null){
             errorMessage.setHeader(Receipt.RECEIPT_ID_HEADER, receiptId);
