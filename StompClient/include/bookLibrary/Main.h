@@ -16,9 +16,6 @@
 // TODO: implement rule of 5
 class Main {
 private:
-    std::string _host;
-    int _port;
-
     Printer &_printer;
 
     // TODO: maybe change to pointers and initialize with null
@@ -28,7 +25,7 @@ private:
     std::thread *_userThread;
     std::unordered_map<std::string, BookLibraryUser*> _usersMap;
 public:
-    Main(std::string host, int port, Printer &printer);
+    Main(Printer &printer);
     void start();
 
 private:

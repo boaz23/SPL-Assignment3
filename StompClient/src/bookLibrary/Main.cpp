@@ -5,9 +5,10 @@
 using std::string;
 using std::vector;
 
-Main::Main(std::string host, int port, Printer &printer) : _host(host), _port(port), _printer(printer),
-                                                           _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
-                                                           _usersMap() { }
+Main::Main(Printer &printer) :
+    _printer(printer),
+    _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
+    _usersMap() { }
 
 void Main::start() {
     // TODO: print using the printer
@@ -32,12 +33,15 @@ void Main::start() {
 
         string action = arguments[0];
         if (action == "login") {
-            if (arguments.size() != 3) {
+            if (arguments.size() != 4) {
                 _printer.println("invalid usage of login action.");
             }
 
-            std::string username = arguments[1];
-            std::string password = arguments[2];
+            std::string server = arguments[1];
+
+
+            std::string username = arguments[2];
+            std::string password = arguments[3];
             bool justAdded;
             if (_usersMap.count(username) > 0) {
                 _activeUser = _usersMap[username];
@@ -58,14 +62,13 @@ void Main::start() {
                 _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
             }
             else {
-                _printer(err);
+                _printer.println(err);
                 if (justAdded) {
                     std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
+                    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+                    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
                     _usersMap.erase(username);
                 }
-
-                std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter;
-                std::unique_ptr<StompConnectionHandler> connectionDeleter;
             }
         }
         else if (action == "join") {

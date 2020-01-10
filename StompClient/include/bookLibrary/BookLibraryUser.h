@@ -23,7 +23,7 @@ private:
 public:
     BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, StompMessageEncoderDecoder &encdec);
 
-    bool connect();
+    bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop
 
 private:

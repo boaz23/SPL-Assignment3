@@ -6,8 +6,6 @@ BookLibraryUser::BookLibraryUser(std::string username, std::string password, Sto
                                  StompMessageEncoderDecoder &encdec) : username(username), password(password), _connection(connection), _encdec(encdec),
                                  books(), receipts(), pendingBorrows(), sucessfulBorrows() {}
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCSimplifyInspection"
 bool BookLibraryUser::connect(std::string &errorMsg) {
     ConnectFrame connectFrame(ACCEPT_VERSION, _connection.host(), username, password);
     if (!_connection.sendFrame(connectFrame)) {
@@ -36,7 +34,6 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
 
     return true;
 }
-#pragma clang diagnostic pop
 
 bool BookLibraryUser::readFrame(std::unique_ptr<Frame> &frame) {
     bool ret;
