@@ -1,7 +1,7 @@
 
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
-StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1 << 10) { }
+StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1024) { }
 
 Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     if(nextByte != '\0') {
@@ -54,7 +54,7 @@ void StompMessageEncoderDecoder::encodeHeaders(Frame &message, std::string &data
 
 Frame* StompMessageEncoderDecoder::createFrame() {
 
-    Frame *frame = new Frame();
+    auto *frame = new Frame();
     int index = 0;
     decodeMessage(frame, index);
 
@@ -65,8 +65,8 @@ Frame* StompMessageEncoderDecoder::createFrame() {
         } else {
             while (index < byteVector.size() && byteVector[index] != '\n') {
                 //TODO: check of more delimi
-                std::string key = "";
-                std::string value = "";
+                std::string key;
+                std::string value;
 
                 decodeKey(index, key);
                 decodeValue(index, value);
@@ -80,7 +80,7 @@ Frame* StompMessageEncoderDecoder::createFrame() {
 }
 
 void StompMessageEncoderDecoder::decodeBody(Frame *frame, int &index) const {
-    std::string body = "";
+    std::string body;
     for (; index < byteVector.size(); index = index + 1) {
         byte b = byteVector[index];
         if (b == '\0') {
@@ -112,7 +112,7 @@ void StompMessageEncoderDecoder::decodeValue(int &index, std::string &value) con
 }
 
 void StompMessageEncoderDecoder::decodeMessage(Frame *frame, int &index) const {
-    std::string line = "";
+    std::string line;
 
     for(index=0; index < byteVector.size(); index = index + 1){
         byte b = byteVector[index];
