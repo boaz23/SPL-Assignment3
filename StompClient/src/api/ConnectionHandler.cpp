@@ -40,6 +40,10 @@ bool ConnectionHandler::connect() {
 }
  
 bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
+    if (closed_) {
+        return false;
+    }
+
     size_t tmp = 0;
 	boost::system::error_code error;
     try {
