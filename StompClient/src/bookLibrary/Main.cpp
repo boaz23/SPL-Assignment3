@@ -67,11 +67,11 @@ void Main::start() {
 
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
-        this->_printer.println("invalid usage of login action.");
+        _printer.println("invalid usage of login action.");
     }
 
     std::string sServer = arguments[1];
-    vector<string> vServer = this->split(sServer, ":");
+    vector<string> vServer = split(sServer, ":");
     string host = vServer[0];
     auto port = (short)atoi(vServer[1].c_str());
 
