@@ -37,12 +37,17 @@ public:
 private:
     bool readFrame(std::unique_ptr<Frame> &frame);
 
-    void sendHasBookFrame(const std::string &topic, const std::string &bookName);
-    void sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);
-    void sendSendFrame(const std::string &topic, const std::string &bookName);
+    bool sendHasBookFrame(const std::string &topic, const std::string &bookName);
+    bool sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);
+    bool sendSendFrame(const std::string &topic, const std::string &bookName);
     void printMessage(const std::string &topic, const std::string &body);
 
-    void sendBooksStatus(const std::string &dest);
+    bool sendBooksStatus(const std::string &dest);
+
+    bool handlerWantToBorrow(const std::string &dest, const std::vector<std::string> &message);
+    bool handlerUserHasBook(const std::string &dest, const std::vector<std::string> &message);
+
+    void returnedBook(const std::string &dest, const std::vector<std::string> &message);
 };
 
 

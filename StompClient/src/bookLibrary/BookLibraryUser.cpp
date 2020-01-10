@@ -105,37 +105,71 @@ void BookLibraryUser::run() {
             std::vector<std::string> message = Util::split(body, " ");
             //TODO: check if body is empty
 
-            if(body.find("wish to borrow") != std::string::npos){
-                std::string name = message[0];
-                std::string bookName = message[4];
-
-                if(name != _username){
-                    if(books.hasBook(bookName)){
-                        sendHasBookFrame(dest, bookName);
-                    }
-                }
-            } else if(message.size() == 3 && message[1] == "has"){
-                std::string userOfTheBook = message[0];
-                std::string bookName = message[2];
-                if(books.wantToBorrow(bookName)){
-                    sendTakingBookFrom(dest, bookName, userOfTheBook);
-                    books.borrowBook(dest, bookName, userOfTheBook);
-                }
-            } else if(message.size() == 4 && message[0] == "Returning"){
-                std::string bookName = message[1];
-                std::string userOfTheBook = message[3];
-                if(userOfTheBook == _username && books.isBorrowed(dest, bookName)){
-                    books.returnBorrowedBook(dest, bookName);
-                }
+            if(message.size() > 5 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
+                if(!handlerWantToBorrow(dest, message)){ break; }
+            } else if(message.size() > 2 && message[1] == "has"){
+                if(!handlerUserHasBook(dest, message)){ break; }
+            } else if(message.size() > 3 && message[0] == "Returning" && message[message.size()-2] == "to"){
+                returnedBook(dest, message);
             } else if(message.size() == 2 && message[0] == "book" && message[1] == "status"){
-                sendBooksStatus(dest);
+                if(!sendBooksStatus(dest)){ break; }
             }
         }
 
     }
 }
 
-void BookLibraryUser::sendBooksStatus(const std::string &dest) {
+void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<std::string> &message) {
+    std::string bookName = message[1];
+    for(unsigned long i=2; i < message.size()-2; i=i+1) {
+        bookName.append(" ");
+        bookName.append(message[i]);
+    }
+    std::string userOfTheBook = message[message.size()-2];
+    if(userOfTheBook == _username && books.isBorrowed(dest, bookName)){
+        books.returnBorrowedBook(dest, bookName);
+    }
+}
+
+bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vector<std::string> &message) {
+    std::string userOfTheBook = message[0];
+
+    std::string bookName = message[2];
+    for(unsigned long i=3; i < message.size(); i=i+1) {
+        bookName.append(" ");
+        bookName.append(message[i]);
+    }
+
+    if(books.wantToBorrow(bookName)){
+        if(!sendTakingBookFrom(dest, bookName, userOfTheBook)){
+            return false;
+        }
+        books.borrowBook(dest, bookName, userOfTheBook);
+    }
+
+    return true;
+}
+
+bool BookLibraryUser::handlerWantToBorrow(const std::string &dest, const std::vector<std::string> &message) {
+    std::string name = message[0];
+
+    // username want to borrow bookname
+    std::string bookName = message[4];
+    for(unsigned long i=5; i < message.size(); i=i+1) {
+        bookName.append(" ");
+        bookName.append(message[i]);
+    }
+
+    if(name != _username){
+        if(books.hasBook(bookName)){
+            return sendHasBookFrame(dest, bookName);
+        }
+    }
+
+    return true;
+}
+
+bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
     BookCollection bookCollection = books.bookCollection(dest);
 
     std::string bodyMessage = _username + ":";
@@ -145,17 +179,17 @@ void BookLibraryUser::sendBooksStatus(const std::string &dest) {
     }
 
     bodyMessage.resize(bodyMessage.size()-1);
-    sendSendFrame(dest, bodyMessage);
+    return sendSendFrame(dest, bodyMessage);
 }
 
-void BookLibraryUser::sendHasBookFrame(const std::string &topic, const std::string &bookName) {
+bool BookLibraryUser::sendHasBookFrame(const std::string &topic, const std::string &bookName) {
     std::string body = _username + " has " + bookName;
-    sendSendFrame(topic ,body);
+    return sendSendFrame(topic ,body);
 }
 
-void BookLibraryUser::sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from) {
+bool BookLibraryUser::sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from) {
     std::string body = "Taking " + bookName + " from " + from;
-    sendSendFrame(topic ,body);
+    return sendSendFrame(topic ,body);
 }
 
 void BookLibraryUser::printMessage(const std::string &topic, const std::string &body) {
@@ -163,7 +197,10 @@ void BookLibraryUser::printMessage(const std::string &topic, const std::string &
     _printer.println(message);
 }
 
-void BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
+bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
     SendFrame frame = SendFrame(topic ,body);
-    _connection->sendFrame(frame);
+    if(!_connection->sendFrame(frame)){
+        _connection->close();
+        return false;
+    }
 }
