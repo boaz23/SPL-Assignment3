@@ -103,7 +103,6 @@ void Main::logout(const vector<string> &arguments) {
     }
 
     disconnect();
-    _userThread->join();
     disconnectionCleanup();
     // TODO: clear inventory
     _activeUser = nullptr;
@@ -332,6 +331,9 @@ void Main::disconnectionCleanup() {
     std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
     std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
     std::unique_ptr<std::thread> userThreadDeleter(_userThread);
+    if (_userThread) {
+        _userThread->join();
+    }
     _userThread = nullptr;
     _conn = nullptr;
     _encdec = nullptr;
