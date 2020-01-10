@@ -1,19 +1,20 @@
 
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
-StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1 << 10){}
+StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1 << 10) { }
 
 Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
-    if(nextByte != '\0'){
+    if(nextByte != '\0') {
         byteVector.push_back(nextByte);
-    } else {
+    }
+    else {
         return createFrame();
     }
 
     return nullptr;
 }
 
-Array<byte> StompMessageEncoderDecoder::encode( Frame &message) {
+Array<byte> StompMessageEncoderDecoder::encode(Frame &message) {
     std::string *data = new std::string();
 
     encodeMessage(message, data);
