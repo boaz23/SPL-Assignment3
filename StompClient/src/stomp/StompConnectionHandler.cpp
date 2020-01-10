@@ -2,7 +2,7 @@
 #include "../../include/stomp/StompConnectionHandler.h"
 #include <memory>
 
-bool StompConnectionHandler::sendFrame(const Frame &frame) {
-    Array<byte> bytes = encdec.encode(ConnectFrame());
-    connectionHandler.sendBytes(bytes.array, bytes.length);
+bool StompConnectionHandler::sendFrame(Frame &frame) {
+    Array<byte> bytes = _encdec.encode(frame);
+    sendBytes(bytes.array, bytes.length);
 }

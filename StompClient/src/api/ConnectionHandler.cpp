@@ -30,8 +30,8 @@ bool ConnectionHandler::connect() {
     catch (boost::system::system_error& e) {
         std::cerr << "Could not connect to server" << std::endl;
     }
-    catch (std::Exception &e) {
-        std::cerr << "Connection failed (Error: " << e.what() << ')' << std::endl
+    catch (std::exception &e) {
+        std::cerr << "Connection failed (Error: " << e.what() << ')' << std::endl;
     }
 
     return false;
@@ -48,7 +48,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 			throw boost::system::system_error(error);
         return true;
     }
-    catch (std::Exception &e) {
+    catch (std::exception &e) {
         std::cerr << "recv failed (Error: " << e.what() << ')' << std::endl;
     }
 

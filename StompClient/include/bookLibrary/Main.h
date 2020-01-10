@@ -29,7 +29,7 @@ public:
     void start();
 
 private:
-    std::vector<std::string> splitStringBySpace(std::string s);
+    std::vector<std::string> split(const std::string &s, const std::string &delimter);
 };
 
 

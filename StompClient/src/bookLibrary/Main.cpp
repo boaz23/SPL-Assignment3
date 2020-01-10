@@ -10,6 +10,8 @@ Main::Main(Printer &printer) :
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err34-c"
 void Main::start() {
     // TODO: print using the printer
     while (true) {
@@ -25,7 +27,7 @@ void Main::start() {
             }
         }
 
-        vector<string> arguments = splitStringBySpace(command);
+        vector<string> arguments = split(command, " ");
         if (arguments.empty()) {
             std::cout << "Error - no command entered" << std::endl;
             continue;
@@ -37,8 +39,10 @@ void Main::start() {
                 _printer.println("invalid usage of login action.");
             }
 
-            std::string server = arguments[1];
-
+            std::string sServer = arguments[1];
+            vector<string> vServer = split(sServer, ":");
+            string host = vServer[0];
+            auto port = (short)atoi(vServer[1].c_str());
 
             std::string username = arguments[2];
             std::string password = arguments[3];
@@ -49,9 +53,9 @@ void Main::start() {
             }
             else {
                 _encdec = new StompMessageEncoderDecoder();
-                _conn = new StompConnectionHandler(_host, (short)_port, _printer, *_encdec);
+                _conn = new StompConnectionHandler(host, port, _printer, *_encdec);
 
-                _activeUser = new BookLibraryUser(username, password, *_conn, *_encdec);
+                _activeUser = new BookLibraryUser(username, password, *_conn, *_encdec, _printer);
                 _usersMap[username] = _activeUser;
                 justAdded = true;
             }
@@ -97,4 +101,20 @@ void Main::start() {
             continue;
         }
     }
+}
+#pragma clang diagnostic pop
+
+vector<string> split(const string &s, const string &delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    string token;
+    vector<string> res;
+
+    while ((pos_end = s.find (delimiter, pos_start)) != string::npos) {
+        token = s.substr (pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back (token);
+    }
+
+    res.push_back (s.substr (pos_start));
+    return res;
 }

@@ -1,7 +1,7 @@
 
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
-StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(){}
+StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1 << 10){}
 
 Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     if(nextByte != '\0'){

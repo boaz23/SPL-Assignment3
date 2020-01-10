@@ -8,11 +8,11 @@
 
 class StompConnectionHandler : public ConnectionHandler {
 private:
-    StompMessageEncoderDecoder &_enddec;
+    StompMessageEncoderDecoder &_encdec;
 
 public:
-    StompConnectionHandler(std::string host, short port, Printer &printer, StompMessageEncoderDecoder &enddec);
-    bool sendFrame(const Frame &frame);
+    StompConnectionHandler(std::string host, short port, Printer &printer, StompMessageEncoderDecoder &encdec);
+    bool sendFrame(Frame &frame);
 };
 
 
