@@ -34,6 +34,8 @@ private:
     void login(const std::vector<std::string> &arguments);
     bool initializeUser(const std::string &host, short port, const std::string &username, const std::string &password);
     void connectAndRun(bool justAdded);
+
+    void logout(const std::vector<std::string> &arguments);
 };
 
 

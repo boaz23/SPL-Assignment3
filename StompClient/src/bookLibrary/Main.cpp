@@ -56,7 +56,7 @@ void Main::start() {
 
         }
         else if (action == "logout") {
-            // TODO: delete all resources
+            logout(arguments);
         }
         else {
             std::cout << "Error - unknown action entered" << std::endl;
@@ -80,6 +80,14 @@ void Main::login(const vector<string> &arguments) {
 
     bool justAdded = initializeUser(host, port, username, password);
     connectAndRun(justAdded);
+}
+
+void Main::logout(const vector<string> &arguments) {
+    if (arguments.size() != 1) {
+        _printer.println("invalid usage of logout action.");
+    }
+
+
 }
 
 bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
