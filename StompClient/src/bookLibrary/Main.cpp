@@ -326,6 +326,8 @@ template <typename T> std::string Main::nextId(T &id) {
 void Main::disconnectionCleanup() {
     if (_activeUser) {
         _activeUser->books().clear();
+        _activeUser->setConnection(nullptr);
+        _activeUser->setEncoderDecoder(nullptr);
     }
     std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
     std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
