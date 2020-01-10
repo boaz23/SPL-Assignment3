@@ -17,6 +17,15 @@ public:
     void removeBook(const std::string &genre, const std::string &book);
     void addGenre(const std::string &genre);
 
+    bool hasBook(const std::string &bookName);
+    bool wantToBorrow(const std::string &bookName);
+    bool borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
+    bool isBorrowed(const std::string &genre, const std::string &bookName);
+    bool returnBorrowedBook(const std::string &genre, const std::string &bookName);
+
+    const BookCollection& bookCollection(const std::string &genre);
+
+    //TODO: consider removing this
     std::unordered_map<std::string, BookCollection>::iterator begin();
     std::unordered_map<std::string, BookCollection>::iterator end();
 

@@ -18,7 +18,7 @@ private:
     Printer &_printer;
 
     UserBooks books;
-    std::unordered_map<int, Frame&> receipts;
+    std::unordered_map<std::string, Frame&> receipts;
     std::unordered_map<std::string, std::string> pendingBorrows;
     std::unordered_map<std::string, std::string> successfulBorrows;
 public:
@@ -32,6 +32,13 @@ public:
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
     bool readFrame(std::unique_ptr<Frame> &frame);
+
+    void sendHasBookFrame(const std::string &topic, const std::string &bookName);
+    void sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);
+    void sendSendFrame(const std::string &topic, const std::string &bookName);
+    void printMessage(const std::string &topic, const std::string &body);
+
+    void sendBooksStatus(const std::string &dest);
 };
 
 
