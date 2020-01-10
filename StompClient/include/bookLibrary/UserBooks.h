@@ -25,6 +25,8 @@ public:
     void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
     //remove the book from the borrowed book list
     void returnBorrowedBook(const std::string &genre, const std::string &bookName);
+    // add to the list of users that borrowed books
+    void UserBorrowBookFromThisClient(const std::string &genre, const std::string &bookName, const std::string &user);
 
     const BookCollection& bookCollection(const std::string &genre);
 

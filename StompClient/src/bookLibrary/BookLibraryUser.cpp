@@ -134,14 +134,16 @@ void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<st
 }
 
 void BookLibraryUser::handlerTakingBook(const std::string &dest, const std::vector<std::string> &message) {
-    std::string userOfTheBook = message[message.size()-1];
-    std::string bookName = message[1];
-    for(unsigned long i=2; i < message.size()-2; i=i+1) {
-        bookName.append(" ");
-        bookName.append(message[i]);
-    }
+    if(_username == message[message.size()]) {
+        std::string userOfTheBook = message[0];
+        std::string bookName = message[1];
+        for (unsigned long i = 2; i < message.size() - 2; i = i + 1) {
+            bookName.append(" ");
+            bookName.append(message[i]);
+        }
 
-    books.borrowBook(dest, bookName, userOfTheBook);
+        books.UserBorrowBookFromThisClient(dest, bookName, userOfTheBook);
+    }
 
 
 }
