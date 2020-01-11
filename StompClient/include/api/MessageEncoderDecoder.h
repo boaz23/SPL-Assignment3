@@ -1,7 +1,6 @@
 #ifndef STOMPCLIENT_MESSAGEENCODERDECODER_H
 #define STOMPCLIENT_MESSAGEENCODERDECODER_H
 
-#include <boost/asio/detail/array.hpp>
 #include "../Array.h"
 
 using byte = char;

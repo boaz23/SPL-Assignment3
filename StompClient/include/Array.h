@@ -5,7 +5,8 @@
 
 #include <cstddef>
 
-template <typename T> struct Array {
+template <typename T>
+struct Array {
 public:
     const T* array;
     size_t  length;
