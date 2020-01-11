@@ -17,22 +17,21 @@ public:
     const static std::string HEADER_RECEIPT_ID;
 
     Frame();
-    Frame(const Frame &frame);
-    Frame(std::string messageType, std::unordered_map<std::string, std::string> headers, std::string body);
+    Frame(const std::string &messageType, const std::string &body);
 
-    std::string messageType() const;
-    void setMessageType(std::string messageType);
+    const std::string& messageType() const;
+    void setMessageType(const std::string &messageType);
 
-    std::string body() const;
-    void setBody(std::string body);
+    const std::string& body() const;
+    void setBody(const std::string &body);
 
-    void addHeader(std::string name, std::string value);
+    void addHeader(const std::string &name, const std::string &value);
     const std::unordered_map<std::string, std::string>& headers() const;
 
-    std::string receiptId() const;
-    void setReceiptId(std::string receiptId);
+    const std::string& receiptId() const;
+    void setReceiptId(const std::string &receiptId);
 
-    virtual ~Frame();
+    virtual ~Frame() = default;
 };
 
 class ConnectFrame : public Frame {
@@ -44,19 +43,19 @@ public:
     const static std::string HEADER_LOGIN;
     const static std::string HEADER_PASSCODE;
 
-    ConnectFrame(std::string acceptVersion, std::string host, std::string login, std::string passcode);
+    ConnectFrame(const std::string &acceptVersion, const std::string &host, const std::string &login, const std::string &passcode);
 
-    std::string acceptVersion();
-    void setAcceptVersion(std::string acceptVersion);
+    const std::string& acceptVersion() const;
+    void setAcceptVersion(const std::string &acceptVersion);
 
-    std::string host();
-    void setHost(std::string host);
+    const std::string& host() const;
+    void setHost(const std::string &host);
 
-    std::string loginName();
-    void setLoginName(std::string loginName);
+    const std::string& loginName() const;
+    void setLoginName(const std::string &loginName);
 
-    std::string passcode();
-    void setPasscode(std::string passcode);
+    const std::string& passcode() const;
+    void setPasscode(const std::string &passcode);
 };
 
 class ConnectedFrame : public Frame {
@@ -65,10 +64,9 @@ public:
 
     const static std::string HEADER_VERSION;
 
-    ConnectedFrame(std::string version);
-    ConnectedFrame(Frame &&frame);
+    ConnectedFrame(const std::string &version);
 
-    std::string version();
+    const std::string& version() const;
 };
 
 class DisconnectFame : public Frame {
@@ -76,7 +74,6 @@ public:
     const static std::string MESSAGE_TYPE;
 
     DisconnectFame();
-    DisconnectFame(Frame &&frame);
 };
 
 class ErrorFrame : public Frame {
@@ -85,18 +82,16 @@ public:
 
     const static std::string HEADER_MESSAGE;
 
-    ErrorFrame(std::string msg);
-    ErrorFrame(Frame &&frame);
+    ErrorFrame(const std::string &msg);
 
-    std::string errorMessage();
+    const std::string& errorMessage() const;
 };
 
 class ReceiptFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
-    ReceiptFrame(std::string receiptId);
-    ReceiptFrame(Frame &&frame);
+    ReceiptFrame(const std::string &receiptId);
 };
 
 class SubscribeFrame : public Frame {
@@ -106,14 +101,13 @@ public:
     const static std::string HEADER_ID;
     const static std::string HEADER_DESTINATION;
 
-    SubscribeFrame(std::string destination, std::string subscriptionId);
-    SubscribeFrame(Frame &&frame);
+    SubscribeFrame(const std::string &destination, const std::string &subscriptionId);
 
-    std::string destination();
-    void setDestination(std::string destination);
+    const std::string& destination() const;
+    void setDestination(const std::string &destination);
 
-    std::string subscriptionId();
-    void setSubscriptionId(std::string subscriptionId);
+    const std::string& subscriptionId() const;
+    void setSubscriptionId(const std::string &subscriptionId);
 };
 
 class UnsubscribeFrame : public Frame {
@@ -122,11 +116,10 @@ public:
 
     const static std::string HEADER_ID;
 
-    UnsubscribeFrame(std::string subscriptionId);
-    UnsubscribeFrame(Frame &&frame);
+    UnsubscribeFrame(const std::string &subscriptionId);
 
-    std::string subscriptionId();
-    void setSubscriptionId(std::string subscriptionId);
+    const std::string& subscriptionId() const;
+    void setSubscriptionId(const std::string &subscriptionId);
 };
 
 class SendFrame : public Frame {
@@ -135,11 +128,10 @@ public:
 
     const static std::string HEADER_DESTINATION;
 
-    SendFrame(std::string destination, std::string body);
-    SendFrame(Frame &&frame);
+    SendFrame(const std::string &destination, const std::string &body);
 
-    std::string destination();
-    void setDestination(std::string destination);
+    const std::string& destination() const;
+    void setDestination(const std::string &destination);
 };
 
 class MessageFrame : public Frame {
@@ -149,17 +141,16 @@ class MessageFrame : public Frame {
     const static std::string HEADER_DESTINATION;
     const static std::string HEADER_MESSAGE_ID;
 
-    MessageFrame(std::string subscriptionId, std::string destination, std::string messageId, std::string body);
-    MessageFrame(Frame &&frame);
+    MessageFrame(const std::string &subscriptionId, const std::string &destination, const std::string &messageId, const std::string &body);
 
-    std::string subscriptionId();
-    void setSubscriptionId(std::string subscriptionId);
+    const std::string& subscriptionId() const;
+    void setSubscriptionId(const std::string &subscriptionId);
 
-    std::string destination();
-    void setDestination(std::string destination);
+    const std::string& destination() const;
+    void setDestination(const std::string &destination);
 
-    std::string messageId();
-    void setMessageId(std::string messageId);
+    const std::string& messageId() const;
+    void setMessageId(const std::string &messageId);
 };
 
 #endif //STOMPCLIENT_FRAME_H
