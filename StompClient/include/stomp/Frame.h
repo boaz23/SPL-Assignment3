@@ -64,6 +64,7 @@ public:
 
     const static std::string HEADER_VERSION;
 
+    ConnectedFrame();
     ConnectedFrame(const std::string &version);
 
     const std::string& version() const;
@@ -82,6 +83,7 @@ public:
 
     const static std::string HEADER_MESSAGE;
 
+    ErrorFrame();
     ErrorFrame(const std::string &msg);
 
     const std::string& errorMessage() const;
@@ -91,6 +93,7 @@ class ReceiptFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
+    ReceiptFrame();
     ReceiptFrame(const std::string &receiptId);
 };
 
@@ -135,12 +138,14 @@ public:
 };
 
 class MessageFrame : public Frame {
+public:
     const static std::string MESSAGE_TYPE;
 
     const static std::string HEADER_SUBSCRIPTION;
     const static std::string HEADER_DESTINATION;
     const static std::string HEADER_MESSAGE_ID;
 
+    MessageFrame();
     MessageFrame(const std::string &subscriptionId, const std::string &destination, const std::string &messageId, const std::string &body);
 
     const std::string& subscriptionId() const;

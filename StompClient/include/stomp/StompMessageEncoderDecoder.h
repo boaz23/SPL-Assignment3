@@ -13,12 +13,13 @@ private:
     void encodeHeaders(const Frame &message, std::string &data) const;
     void encodeMessage(const Frame &message, std::string &data) const;
     void encodeBody(const Frame &message, std::string &data) const;
-    void decodeMessage(Frame *frame, int &index) const;
+    void decodeMessage(std::string &line, int &index) const;
     void decodeKey(int &index, std::string &key) const;
     void decodeValue(int &index, std::string &value) const;
     void decodeBody(Frame *frame, int &index) const;
 
-    Frame* createFrame();
+    Frame* buildFrame();
+    Frame* createFrameInstance(const std::string &line);
 
 public:
     StompMessageEncoderDecoder();

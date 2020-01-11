@@ -7,7 +7,7 @@ Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
         byteVector.push_back(nextByte);
     }
     else {
-        return createFrame();
+        return buildFrame();
     }
 
     return nullptr;
@@ -48,11 +48,12 @@ void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &d
     data.append("\0");
 }
 
-Frame* StompMessageEncoderDecoder::createFrame() {
-
-    auto *frame = new Frame();
+Frame* StompMessageEncoderDecoder::buildFrame() {
     int index = 0;
-    decodeMessage(frame, index);
+    std::string line;
+    decodeMessage(line, index);
+    Frame *frame = createFrameInstance(line);
+    frame->setMessageType(line);
 
     if(index < byteVector.size()){
         byte b = byteVector[index];
@@ -77,9 +78,25 @@ Frame* StompMessageEncoderDecoder::createFrame() {
     return frame;
 }
 
-void StompMessageEncoderDecoder::decodeMessage(Frame *frame, int &index) const {
-    std::string line;
+Frame *StompMessageEncoderDecoder::createFrameInstance(const std::string &line) {
+    if (line == ConnectedFrame::MESSAGE_TYPE) {
+        return new ConnectedFrame();
+    }
+    else if (line == ErrorFrame::MESSAGE_TYPE) {
+        return new ErrorFrame();
+    }
+    else if (line == ReceiptFrame::MESSAGE_TYPE) {
+        return new ReceiptFrame();
+    }
+    else if (line == MessageFrame::MESSAGE_TYPE) {
+        return new MessageFrame();
+    }
+    else {
+        return nullptr;
+    }
+}
 
+void StompMessageEncoderDecoder::decodeMessage(std::string &line, int &index) const {
     for(index=0; index < byteVector.size(); index = index + 1){
         byte b = byteVector[index];
         if(b == '\r'){
@@ -95,9 +112,7 @@ void StompMessageEncoderDecoder::decodeMessage(Frame *frame, int &index) const {
             break;
         }
         line.append(&b, 1);
-
     }
-    frame->setMessageType(line);
 }
 
 void StompMessageEncoderDecoder::decodeKey(int &index, std::string &key) const {

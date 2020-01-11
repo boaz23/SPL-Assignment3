@@ -36,17 +36,17 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
         return false;
     }
 
-    std::string messageType = frame->messageType();
+    const std::string &messageType = frame->messageType();
     if (messageType == ConnectedFrame::MESSAGE_TYPE) {
-        ConnectedFrame connectedFrame(std::move(*frame));
-        if (connectedFrame.version() != ACCEPT_VERSION) {
+        auto *connectedFrame = dynamic_cast<ConnectedFrame*>(frame.get());
+        if (connectedFrame->version() != ACCEPT_VERSION) {
             return false;
         }
     }
     else {
         if (messageType == ErrorFrame::MESSAGE_TYPE) {
-            ErrorFrame errorFrame(std::move(*frame));
-            errorMsg = errorFrame.errorMessage();
+            auto *errorFrame = dynamic_cast<ErrorFrame*>(frame.get());
+            errorMsg = errorFrame->errorMessage();
         }
 
         return false;
