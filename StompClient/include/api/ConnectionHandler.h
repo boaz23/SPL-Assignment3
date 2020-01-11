@@ -5,22 +5,30 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include "../Printer.h"
+#include "../Lock.h"
 
 using boost::asio::ip::tcp;
 
 // TODO: implement rule of 5
 class ConnectionHandler {
 private:
+    enum class State {
+        Initialized,
+        Open,
+        Closed,
+    };
+
 	const std::string host_;
 	const short port_;
 	boost::asio::io_service io_service_;   // Provides core I/O functionality
 	tcp::socket socket_;
-	bool closed_;
+	State state_;
 
-	Printer &_printer;
- 
+	std::mutex lock_;
 public:
-    ConnectionHandler(std::string host, short port, Printer &printer);
+    ConnectionHandler(std::string host, short port);
+
+    std::string host() const;
  
     // Connect to the remote machine
     bool connect();
@@ -36,13 +44,14 @@ public:
     // Close down the connection properly.
     void close();
 
-    std::string host() const;
     bool isClosed();
-
+    bool isOpen();
     virtual ~ConnectionHandler();
 
 private:
     void close_noLock();
+    bool isClosed_doubledChecked();
+    bool isOpen_noLock();
 }; //class ConnectionHandler
  
 #endif
