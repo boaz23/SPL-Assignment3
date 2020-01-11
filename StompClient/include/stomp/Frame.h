@@ -26,7 +26,8 @@ public:
     std::string body() const;
     void setBody(std::string body);
 
-    std::unordered_map<std::string, std::string>& headers();
+    void addHeader(std::string name, std::string value);
+    const std::unordered_map<std::string, std::string>& headers() const;
 
     std::string receiptId() const;
     void setReceiptId(std::string receiptId);
