@@ -263,6 +263,8 @@ void Main::returnBook(const std::string &genre, const std::string &bookName) {
     if (books.getBorrowedFromUsername(genre, bookName, borrowedFrom)) {
         SendFrame sendFrame(genre, "Returning " + bookName + " to " + borrowedFrom);
         if (_conn->sendFrame(sendFrame)) {
+            //TODO: add the name of the user that was borrowed from, maybe multiply books with the same
+            // name that was borrowed from different users
             books.removeBorrowedBook(genre, bookName);
         } else {
             _conn->close();

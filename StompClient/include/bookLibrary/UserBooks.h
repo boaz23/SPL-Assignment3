@@ -31,15 +31,16 @@ public:
 
     void addBookAsWantToBorrow(const std::string &genre, const std::string &bookName);
 
-    bool isBorrowed(const std::string &genre, const std::string &bookName);
+    bool isBorrowedFrom(const std::string &genre, const std::string &bookName, const std::string &from) const;
     //add the book to the borrowed books
-    void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
-    //remove the book from the borrowed book list
-    void BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName, const std::string &returnedFromUser);
+    void borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from);
 
-    //TODO: check what this method is
-    bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, std::string &borrowedFrom);
-    void removeBorrowedBook(const std::string &genre, const std::string &bookName);
+    void borrowBookToUser(const std::string &genre, const std::string &bookName);
+    //remove the book from the borrowed book list
+    void BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName);
+
+    bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom);
+    void removeBorrowedBook(const std::string &genre, const std::string &bookName, const std::string &from);
 
     //TODO: const BookCollection& bookCollection(const std::string &genre);
     // The book collection can be modified so a copy of it in the current state should be returned

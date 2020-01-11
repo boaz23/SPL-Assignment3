@@ -20,14 +20,14 @@ public:
     void addBook(const Book& book);
     void removeBook(const std::string &bookName);
 
-    void userReturnTheBook(const std::string &bookName, const std::string &username);
+    void userReturnTheBook(const std::string &bookName);
 
     bool isEmpty() const;
     bool hasBook(const std::string &bookName) const;
-    bool isBorrowed(const std::string &bookName) const;
+    bool isBorrowedFrom(const std::string &bookName, const std::string &from) const;
     bool wantToBorrowBook(const std::string &bookName) const;
 
-    int removeBorrowedBook(const std::string &bookName);
+    int removeBorrowedBook(const std::string &bookName, const std::string &from);
 
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();

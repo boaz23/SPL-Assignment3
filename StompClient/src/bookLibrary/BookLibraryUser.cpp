@@ -76,7 +76,7 @@ void BookLibraryUser::run() {
     //TODO: refactor
     while(true){
         if (!readFrame(frame)) {
-            // TODO: close the connection here
+            _connection->close();
             break;
         }
 
@@ -94,10 +94,7 @@ void BookLibraryUser::run() {
                 } else if(receiptFrame.messageType() == "DISCONNECT"){
                     break;
                 }
-
                 receipts.erase(receipt);
-                // TODO: why delete?
-                delete(&receiptFrame);
             }
         }
         else if(frame->messageType() == "MESSAGE"){
@@ -107,8 +104,8 @@ void BookLibraryUser::run() {
             printMessage(dest, body);
 
             std::vector<std::string> message = Util::split(body, " ");
-            //TODO: check if body is empty
 
+            //TODO: maybe handle book status, check if there is a book that the user want to borrow
             if(message.size() > 4 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
                 if(!handlerWantToBorrow(dest, message)){ break; }
             } else if(message.size() > 2 && message[1] == "has"){
@@ -126,29 +123,26 @@ void BookLibraryUser::run() {
 }
 
 void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<std::string> &message) {
-    std::string userThatBorrowed = message[0];
-    std::string bookName = message[1];
-    for(unsigned long i=2; i < message.size()-1; i=i+1) {
-        bookName.append(" ");
-        bookName.append(message[i]);
-    }
     std::string userOfTheBook = message[message.size()-1];
-    if(userOfTheBook == _username && _books.isBorrowed(dest, bookName)){
-        _books.BookThatWasBorrowedHasReturn(dest, bookName, userThatBorrowed);
+    if(userOfTheBook == _username){
+        std::string bookName = message[1];
+        for(unsigned long i=2; i < message.size()-2; i=i+1) {
+            bookName.append(" ");
+            bookName.append(message[i]);
+        }
+        _books.BookThatWasBorrowedHasReturn(dest, bookName);
     }
 }
 
 void BookLibraryUser::handlerTakingBook(const std::string &dest, const std::vector<std::string> &message) {
     if(_username == message[message.size()-1]) {
-        std::string userOfTheBook = message[0];
+
         std::string bookName = message[1];
         for (unsigned long i = 2; i < message.size() - 2; i = i + 1) {
             bookName.append(" ");
             bookName.append(message[i]);
         }
-        //TODO: check this line of code this code need to handle that a user is borrowing book
-        // from the current client
-        _books.borrowBook(dest, bookName, userOfTheBook);
+        _books.borrowBookToUser(dest, bookName);
     }
 }
 
@@ -165,7 +159,7 @@ bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vec
         if(!sendTakingBookFrom(dest, bookName, userOfTheBook)){
             return false;
         }
-        _books.borrowBook(dest, bookName, userOfTheBook);
+        _books.borrowBookFromUser(dest, bookName, userOfTheBook);
     }
 
     return true;
@@ -227,4 +221,5 @@ bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string 
         _connection->close();
         return false;
     }
+    return true;
 }

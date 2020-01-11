@@ -25,9 +25,9 @@ void BookCollection::removeBook(const std::string &bookName) {
  * @param bookName
  * @param username
  */
-void BookCollection::userReturnTheBook(const std::string &bookName, const std::string &username) {
+void BookCollection::userReturnTheBook(const std::string &bookName) {
     for(auto book : _books){
-        if(book.isBorrowedTo(username)){
+        if(book.isBorrowedTo()){
             book.setToUserOwnership();
             break;
         }
@@ -56,11 +56,12 @@ bool BookCollection::hasBook(const std::string &bookName) const {
 /**
  * Return true if there is an instance of the book in borrowed state
  * @param bookName
+ * @param from
  * @return
  */
-bool BookCollection::isBorrowed(const std::string &bookName) const {
+bool BookCollection::isBorrowedFrom(const std::string &bookName, const std::string &from) const {
     for(const auto& book : _books){
-        if(book.name() == bookName && book.isBorrowed()){
+        if(book.name() == bookName && book.isBorrowedFrom(from)){
             return true;
         }
     }
@@ -84,16 +85,17 @@ bool BookCollection::wantToBorrowBook(const std::string &bookName) const {
  * Remove one instance of a borrowed book
  * Return the number of book with the same name that remain in the vector
  * @param bookName
+ * @param from
  * @return
  */
-int BookCollection::removeBorrowedBook(const std::string &bookName) {
+int BookCollection::removeBorrowedBook(const std::string &bookName, const std::string &from) {
     int numberOfBooks = -1;
     unsigned long index = 0;
     bool b = false;
     for(auto& book : _books){
         if(book.name() == bookName){
             numberOfBooks = numberOfBooks + 1;
-            if(book.isBorrowed() && !b) {
+            if(book.isBorrowedFrom(from) && !b) {
                 _books.erase(_books.begin()+index);
                 b = true;
             }

@@ -27,9 +27,9 @@ public:
     //the book is in the want to borrow list
     bool wantToBorrow() const;
     //Borrowed from a user
-    bool isBorrowed() const;
+    bool isBorrowedFrom(const std::string &from) const;
     //Check if Borrowed to a user
-    bool isBorrowedTo(const std::string &username) const;
+    bool isBorrowedTo() const;
 
     void setToUserOwnership();
 };
