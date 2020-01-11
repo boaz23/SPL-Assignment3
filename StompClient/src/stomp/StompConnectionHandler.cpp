@@ -1,6 +1,5 @@
 
 #include "../../include/stomp/StompConnectionHandler.h"
-#include <memory>
 #include <utility>
 
 StompConnectionHandler::StompConnectionHandler(std::string host, short port, StompMessageEncoderDecoder &encdec) :

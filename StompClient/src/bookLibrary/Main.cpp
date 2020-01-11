@@ -104,8 +104,6 @@ void Main::logout(const vector<string> &arguments) {
 
     disconnect();
     disconnectionCleanup();
-    // TODO: clear inventory
-    _activeUser = nullptr;
 }
 
 void Main::joinGenre(const std::vector<std::string> &arguments) {
@@ -199,12 +197,12 @@ void Main::connectAndRun(bool justAdded) {
     else {
         _printer.println(err);
         _userThread = nullptr;
-        disconnectionCleanup();
         if (justAdded) {
             std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
             _usersMap.erase(_activeUser->username());
             _activeUser = nullptr;
         }
+        disconnectionCleanup();
     }
 }
 
@@ -297,6 +295,34 @@ void Main::disconnect() {
     }
 }
 
+void Main::disconnectionCleanup() {
+    cleanupUser();
+    cleanupConnection();
+}
+
+void Main::cleanupUser() {
+    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
+    if (_activeUser) {
+        _activeUser->books().clear();
+        _activeUser->setConnection(nullptr);
+        _activeUser->setEncoderDecoder(nullptr);
+    }
+    if (_userThread) {
+        _userThread->join();
+    }
+    _activeUser = nullptr;
+    _userThread = nullptr;
+}
+
+void Main::cleanupConnection() {
+    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
+    _nextReceiptId = 1;
+    _nextSubscriptionId = 1;
+    _conn = nullptr;
+    _encdec = nullptr;
+}
+
 std::string Main::getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end) {
     std::string bookName;
     auto word = start;
@@ -320,21 +346,4 @@ std::string Main::nextSubscriptionId() {
 
 template <typename T> std::string Main::nextId(T &id) {
     return std::to_string(id++);
-}
-
-void Main::disconnectionCleanup() {
-    if (_activeUser) {
-        _activeUser->books().clear();
-        _activeUser->setConnection(nullptr);
-        _activeUser->setEncoderDecoder(nullptr);
-    }
-    if (_userThread) {
-        _userThread->join();
-    }
-    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
-    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
-    _userThread = nullptr;
-    _conn = nullptr;
-    _encdec = nullptr;
 }

@@ -36,6 +36,9 @@ private:
 
     void logout(const std::vector<std::string> &arguments);
     void disconnect();
+    void disconnectionCleanup();
+    void cleanupUser();
+    void cleanupConnection();
 
     void joinGenre(const std::vector<std::string> &arguments);
     void joinGenre(const std::string &genre, const std::string& subscriptionId);
@@ -60,8 +63,6 @@ private:
     std::string nextReceiptId();
     std::string nextSubscriptionId();
     template <typename T> std::string nextId(T &id);
-
-    void disconnectionCleanup();
 };
 
 
