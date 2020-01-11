@@ -31,7 +31,7 @@ public:
     std::string receiptId() const;
     void setReceiptId(std::string receiptId);
 
-    virtual bool isValid();
+    virtual ~Frame();
 };
 
 class ConnectFrame : public Frame {

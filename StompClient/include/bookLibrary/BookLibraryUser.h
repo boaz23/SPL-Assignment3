@@ -17,20 +17,27 @@ private:
     StompMessageEncoderDecoder *_encdec;
     Printer &_printer;
 
-    UserBooks books;
+    UserBooks _books;
     std::unordered_map<std::string, Frame> receipts;
+    std::unordered_map<std::string, std::string> genreToSubscriptionIds;
+
     std::unordered_map<std::string, std::string> pendingBorrows;
     std::unordered_map<std::string, std::string> successfulBorrows;
 public:
     BookLibraryUser(std::string username, std::string password, Printer &printer);
 
     std::string username();
+    UserBooks& books() const;
 
     bool connect(std::string &errorMsg);
     void run(); // TODO: start thread and input stream loop
 
     void addReceipt(const Frame &frame);
     void removeReceipt(const std::string &receiptId);
+
+    void addSubscription(std::string genre, std::string subscriptionId);
+    void removeSubscription(std::string genre);
+    bool getSubscriptionIdFor(std::string genre, std::string &subscriptionId);
 
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);

@@ -8,14 +8,18 @@ class UserBooks {
     // TODO: synchronize, only the map with a mutex
 
 private:
-    const std::unordered_map<std::string, BookCollection> books;
+    const std::unordered_map<std::string, BookCollection> _books;
+    const std::unordered_map<std::string, std::string> _bookToGenreMap;
 
 public:
     UserBooks();
 
+    void clear();
+
+    bool getBookGenre(std::string bookName, std::string &genre);
+
     void addBook(const std::string &genre, const std::string &book);
     void removeBook(const std::string &genre, const std::string &book);
-    void addGenre(const std::string &genre);
 
     bool hasBook(const std::string &genre, const std::string &bookName);
     // retrurn if the user want to borrow the book
@@ -25,8 +29,9 @@ public:
     void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
     //remove the book from the borrowed book list
     void returnBorrowedBook(const std::string &genre, const std::string &bookName);
-    // add to the list of users that borrowed books
-    void UserBorrowBookFromThisClient(const std::string &genre, const std::string &bookName, const std::string &user);
+
+    bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, std::string &borrowedFrom);
+    void removeBorrowedBook(const std::string &genre, const std::string &bookName);
 
     const BookCollection& bookCollection(const std::string &genre);
 
