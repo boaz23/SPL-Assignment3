@@ -84,7 +84,7 @@ bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookNa
  * @param bookName
  */
 void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::string &bookName) {
-    Book book = Book::wantToBorrowBook(genre, bookName);
+    Book book = Book::wantToBorrowBook(bookName);
     addBook(genre, book);
 }
 
@@ -97,7 +97,7 @@ bool UserBooks::isBorrowed(const std::string &genre, const std::string &bookName
 }
 
 void UserBooks::borrowBook(const std::string &genre, const std::string &bookName, const std::string &from) {
-    Book book = Book::borrowedBookFrom(genre, bookName, from);
+    Book book = Book::borrowedBookFrom(bookName, from);
     addBook(genre, book);
 }
 

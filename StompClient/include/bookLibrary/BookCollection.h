@@ -10,21 +10,24 @@ class BookCollection {
     // TODO: not need to synchronize
 
 private:
-    const std::vector<Book> books;
+    std::vector<Book> _books;
 
 public:
-    void addBook(const std::string &book);
-    void addBook(const Book book);
-    void removeBook(const std::string &book);
 
-    void userReturnTheBook(const std::string &book, const std::string &username);
+    BookCollection();
+
+    void addBook(const std::string &bookName);
+    void addBook(const Book& book);
+    void removeBook(const std::string &bookName);
+
+    void userReturnTheBook(const std::string &bookName, const std::string &username);
 
     bool isEmpty() const;
-    bool hasBook(const std::string &book) const;
-    bool isBorrowed(const std::string &book) const;
-    bool wantToBorrowBook(const std::string &book) const;
+    bool hasBook(const std::string &bookName) const;
+    bool isBorrowed(const std::string &bookName) const;
+    bool wantToBorrowBook(const std::string &bookName) const;
 
-    int removeBorrowedBook(const std::string &book);
+    int removeBorrowedBook(const std::string &bookName);
 
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();

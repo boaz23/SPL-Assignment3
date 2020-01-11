@@ -196,10 +196,10 @@ bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
     std::string bodyMessage = _username + ":";
     if (!bookCollection.isEmpty()) {
         auto book = bookCollection.begin();
-        bodyMessage.append(book->bookName());
+        bodyMessage.append(book->name());
         for (; book != bookCollection.end(); ++book) {
             bodyMessage.append(",");
-            bodyMessage.append(book->bookName());
+            bodyMessage.append(book->name());
         }
     }
     return sendSendFrame(dest, bodyMessage);
