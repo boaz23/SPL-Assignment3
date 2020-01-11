@@ -6,12 +6,25 @@
 #include <cstddef>
 
 template <typename T> struct Array {
-
+public:
     const T* array;
     size_t  length;
 
-    // TODO: maybe implement rule of 5
-    // TODO: keep in mind the ownership of the array pointer
+    Array();
+    Array(const T array[], size_t length);
+
+    Array(const Array<T> &other);
+    Array(Array<T> &&other) noexcept;
+
+    Array<T>& operator=(const Array<T> &other);
+    Array<T>& operator=(Array<T> &&other) noexcept;
+
+    ~Array();
+
+private:
+    void clean();
+    void copy(const Array<T> &other);
+    void steal(Array<T> &other);
 };
 
 

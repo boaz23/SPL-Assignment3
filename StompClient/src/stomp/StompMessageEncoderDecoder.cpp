@@ -26,10 +26,7 @@ Array<byte> StompMessageEncoderDecoder::encode(Frame &message) {
         bytes[i] = data[i];
     }
 
-    Array<byte> arr{};
-    arr.array = bytes;
-    arr.length = data.length();
-    return  arr;
+    return Array<byte>(bytes, data.length());
 }
 
 void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &data) const {
