@@ -11,7 +11,7 @@ private:
     StompMessageEncoderDecoder &_encdec;
 
 public:
-    StompConnectionHandler(std::string host, short port, Printer &printer, StompMessageEncoderDecoder &encdec);
+    StompConnectionHandler(std::string host, short port, StompMessageEncoderDecoder &encdec);
     bool sendFrame(Frame &frame);
 };
 

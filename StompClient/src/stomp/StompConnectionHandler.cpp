@@ -1,6 +1,10 @@
 
 #include "../../include/stomp/StompConnectionHandler.h"
 #include <memory>
+#include <utility>
+
+StompConnectionHandler::StompConnectionHandler(std::string host, short port, StompMessageEncoderDecoder &encdec) :
+ConnectionHandler(std::move(host), port), _encdec(encdec) {}
 
 bool StompConnectionHandler::sendFrame(Frame &frame) {
     Array<byte> bytes = _encdec.encode(frame);

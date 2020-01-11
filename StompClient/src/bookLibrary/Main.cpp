@@ -175,7 +175,7 @@ void Main::bookStatus(const std::vector<std::string> &arguments) {
 bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
     bool justAdded;
     _encdec = new StompMessageEncoderDecoder();
-    _conn = new StompConnectionHandler(host, port, _printer, *_encdec);
+    _conn = new StompConnectionHandler(host, port, *_encdec);
     if (_usersMap.count(username)) {
         _activeUser = _usersMap[username];
         justAdded = false;
