@@ -21,7 +21,7 @@ template <typename Tin, typename Tout> class MessageEncoderDecoder {
      * @param message the message to encode
      * @return the encoded bytes
      */
-    virtual Array<byte> encode(Tout &message) = 0;
+    virtual Array<byte> encode(const Tout &message) = 0;
 };
 
 

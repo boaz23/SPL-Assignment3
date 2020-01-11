@@ -13,7 +13,7 @@ Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     return nullptr;
 }
 
-Array<byte> StompMessageEncoderDecoder::encode(Frame &message) {
+Array<byte> StompMessageEncoderDecoder::encode(const Frame &message) {
     std::string data;
     encodeMessage(message, data);
     encodeHeaders(message, data);
@@ -33,7 +33,7 @@ void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string
     data.append("\n");
 }
 
-void StompMessageEncoderDecoder::encodeHeaders(Frame &message, std::string &data) const {
+void StompMessageEncoderDecoder::encodeHeaders(const Frame &message, std::string &data) const {
     for(const auto &header : message.headers()){
         data.append(header.first);
         data.append(":");
@@ -67,7 +67,7 @@ Frame* StompMessageEncoderDecoder::createFrame() {
                 decodeKey(index, key);
                 decodeValue(index, value);
 
-                frame->headers()[key] = value;
+                frame->addHeader(key, value);
             }
             index = index + 1;
             decodeBody(frame, index);
