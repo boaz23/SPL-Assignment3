@@ -3,12 +3,17 @@
 #define STOMPCLIENT_PRINTER_H
 
 #include <string>
+#include "Lock.h"
 
 class Printer {
-    // TODO: implement printing to std::cout and std::err with mutex
+private:
+    std::mutex _lock;
+
 public:
-    void print(std::string s);
-    void println(std::string s);
+    Printer();
+
+    void print(const std::string &s);
+    void println(const std::string &s);
 };
 
 #endif //STOMPCLIENT_PRINTER_H

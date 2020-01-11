@@ -12,7 +12,7 @@ using std::string;
 
 ConnectionHandler::ConnectionHandler(string host, short port):
     host_(std::move(host)), port_(port), io_service_(), socket_(io_service_),
-    state_(State::Initialized) {}
+    state_(State::Initialized), lock_() {}
 
 std::string ConnectionHandler::host() const {
     return host_;
