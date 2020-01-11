@@ -11,6 +11,18 @@ Main::Main(Printer &printer) :
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
 
+Main::~Main() {
+    disconnectionCleanup();
+    cleanupUsersMap();
+}
+
+void Main::cleanupUsersMap() {
+    for (auto &user : _usersMap) {
+        std::unique_ptr<BookLibraryUser> userDeleter(user.second);
+        user.second = nullptr;
+    }
+}
+
 void Main::start() {
     while (true) {
         string command;
@@ -105,6 +117,81 @@ void Main::logout(const vector<string> &arguments) {
     disconnectionCleanup();
 }
 
+bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
+    bool justAdded;
+    _encdec = new StompMessageEncoderDecoder();
+    _conn = new StompConnectionHandler(host, port, *_encdec);
+    if (_usersMap.count(username)) {
+        _activeUser = _usersMap[username];
+        justAdded = false;
+    }
+    else {
+        _activeUser = new BookLibraryUser(username, password, _printer);
+        _usersMap[username] = _activeUser;
+        justAdded = true;
+    }
+    _activeUser->setConnection(_conn);
+    _activeUser->setEncoderDecoder(_encdec);
+    return justAdded;
+}
+
+void Main::connectAndRun(bool justAdded) {
+    std::string err;
+    if (_activeUser->connect(err)) {
+        _printer.println("Login successful");
+        _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
+    }
+    else {
+        _printer.println(err);
+        _userThread = nullptr;
+        if (justAdded) {
+            std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
+            _usersMap.erase(_activeUser->username());
+            _activeUser = nullptr;
+        }
+        cleanupConnection();
+    }
+}
+
+void Main::disconnect() {
+    DisconnectFame disconnectFame;
+    std::string receiptId = nextReceiptId();
+    disconnectFame.setReceiptId(receiptId);
+    _activeUser->addReceipt(disconnectFame);
+    if (!_conn->sendFrame(disconnectFame)) {
+        _activeUser->removeReceipt(receiptId);
+        _conn->close();
+    }
+}
+
+void Main::disconnectionCleanup() {
+    cleanupUser();
+    cleanupConnection();
+}
+
+void Main::cleanupUser() {
+    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
+    if (_activeUser) {
+        _activeUser->books().clear();
+        _activeUser->setConnection(nullptr);
+        _activeUser->setEncoderDecoder(nullptr);
+    }
+    if (_userThread) {
+        _userThread->join();
+    }
+    _activeUser = nullptr;
+    _userThread = nullptr;
+}
+
+void Main::cleanupConnection() {
+    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
+    _nextReceiptId = 1;
+    _nextSubscriptionId = 1;
+    _conn = nullptr;
+    _encdec = nullptr;
+}
+
 void Main::joinGenre(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
         _printer.println("invalid usage of the join genre command.");
@@ -167,42 +254,6 @@ void Main::bookStatus(const std::vector<std::string> &arguments) {
 
     std::string genre = arguments[1];
     bookStatus(genre);
-}
-
-bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
-    bool justAdded;
-    _encdec = new StompMessageEncoderDecoder();
-    _conn = new StompConnectionHandler(host, port, *_encdec);
-    if (_usersMap.count(username)) {
-        _activeUser = _usersMap[username];
-        justAdded = false;
-    }
-    else {
-        _activeUser = new BookLibraryUser(username, password, _printer);
-        _usersMap[username] = _activeUser;
-        justAdded = true;
-    }
-    _activeUser->setConnection(_conn);
-    _activeUser->setEncoderDecoder(_encdec);
-    return justAdded;
-}
-
-void Main::connectAndRun(bool justAdded) {
-    std::string err;
-    if (_activeUser->connect(err)) {
-        _printer.println("Login successful");
-        _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
-    }
-    else {
-        _printer.println(err);
-        _userThread = nullptr;
-        if (justAdded) {
-            std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
-            _usersMap.erase(_activeUser->username());
-            _activeUser = nullptr;
-        }
-        disconnectionCleanup();
-    }
 }
 
 void Main::joinGenre(const std::string &genre, const std::string& subscriptionId) {
@@ -281,45 +332,6 @@ void Main::bookStatus(const std::string &genre) {
     if (!_conn->sendFrame(sendFrame)) {
         _conn->close();
     }
-}
-
-void Main::disconnect() {
-    DisconnectFame disconnectFame;
-    std::string receiptId = nextReceiptId();
-    disconnectFame.setReceiptId(receiptId);
-    _activeUser->addReceipt(disconnectFame);
-    if (!_conn->sendFrame(disconnectFame)) {
-        _activeUser->removeReceipt(receiptId);
-        _conn->close();
-    }
-}
-
-void Main::disconnectionCleanup() {
-    cleanupUser();
-    cleanupConnection();
-}
-
-void Main::cleanupUser() {
-    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
-    if (_activeUser) {
-        _activeUser->books().clear();
-        _activeUser->setConnection(nullptr);
-        _activeUser->setEncoderDecoder(nullptr);
-    }
-    if (_userThread) {
-        _userThread->join();
-    }
-    _activeUser = nullptr;
-    _userThread = nullptr;
-}
-
-void Main::cleanupConnection() {
-    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
-    _nextReceiptId = 1;
-    _nextSubscriptionId = 1;
-    _conn = nullptr;
-    _encdec = nullptr;
 }
 
 std::string Main::getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end) {

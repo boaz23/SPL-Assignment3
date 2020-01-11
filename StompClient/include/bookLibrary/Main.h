@@ -12,7 +12,6 @@
 #include "../stomp/StompConnectionHandler.h"
 #include "BookLibraryUser.h"
 
-// TODO: implement rule of 5
 class Main {
 private:
     Printer &_printer;
@@ -26,6 +25,7 @@ private:
     std::unordered_map<std::string, BookLibraryUser*> _usersMap;
 public:
     Main(Printer &printer);
+    ~Main();
     void start();
 
 private:
@@ -38,6 +38,7 @@ private:
     void disconnectionCleanup();
     void cleanupUser();
     void cleanupConnection();
+    void cleanupUsersMap();
 
     void joinGenre(const std::vector<std::string> &arguments);
     void joinGenre(const std::string &genre, const std::string& subscriptionId);
