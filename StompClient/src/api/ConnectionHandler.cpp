@@ -1,5 +1,7 @@
 #include "../../include/api/ConnectionHandler.h"
 
+#include <utility>
+
 using boost::asio::ip::tcp;
 
 using std::cin;
@@ -11,12 +13,8 @@ using std::string;
 // TODO: use printer for printing
 // TODO: synchronize with mutex and lock_guard
 ConnectionHandler::ConnectionHandler(string host, short port, Printer &printer):
-    host_(host), port_(port), io_service_(), socket_(io_service_),
+    host_(std::move(host)), port_(port), io_service_(), socket_(io_service_),
     closed_(false), _printer(printer) {}
-    
-ConnectionHandler::~ConnectionHandler() {
-    close();
-}
  
 bool ConnectionHandler::connect() {
     std::cout << "Starting connect to " 
@@ -80,37 +78,24 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     }
     return true;
 }
-
-//bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
-//    char ch;
-//    // Stop when we encounter the null character.
-//    // Notice that the null character is not appended to the Frame string.
-//    try {
-//	do{
-//		if(!getBytes(&ch, 1))
-//		{
-//			return false;
-//		}
-//		if(ch!='\0')
-//			frame.append(1, ch);
-//	}while (delimiter != ch);
-//    } catch (std::exception& e) {
-//	std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
-//	return false;
-//    }
-//    return true;
-//}
-//
-//
-//bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
-//	bool result=sendBytes(frame.c_str(),frame.length());
-//	if(!result) return false;
-//	return sendBytes(&delimiter,1);
-//}
  
 // Close down the connection properly.
 void ConnectionHandler::close() {
-    if (!closed_) {
+    if (!isClosed()) {
+        close_noLock();
+    }
+}
+
+std::string ConnectionHandler::host() const {
+    return host_;
+}
+
+bool ConnectionHandler::isClosed() {
+    return closed_;
+}
+
+void ConnectionHandler::close_noLock() {
+    if (!isClosed()) {
         try {
             socket_.shutdown(boost::asio::socket_base::shutdown_both);
             socket_.close();
@@ -121,10 +106,6 @@ void ConnectionHandler::close() {
     }
 }
 
-std::string ConnectionHandler::host() const {
-    return host_;
-}
-
-bool ConnectionHandler::isClosed() {
-    return closed_;
+ConnectionHandler::~ConnectionHandler() {
+    close_noLock();
 }

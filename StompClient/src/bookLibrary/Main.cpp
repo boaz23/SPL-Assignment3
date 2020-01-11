@@ -328,12 +328,12 @@ void Main::disconnectionCleanup() {
         _activeUser->setConnection(nullptr);
         _activeUser->setEncoderDecoder(nullptr);
     }
-    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
-    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
     if (_userThread) {
         _userThread->join();
     }
+    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
+    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
+    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
     _userThread = nullptr;
     _conn = nullptr;
     _encdec = nullptr;

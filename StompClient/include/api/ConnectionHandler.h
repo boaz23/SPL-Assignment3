@@ -21,7 +21,6 @@ private:
  
 public:
     ConnectionHandler(std::string host, short port, Printer &printer);
-    virtual ~ConnectionHandler();
  
     // Connect to the remote machine
     bool connect();
@@ -39,7 +38,11 @@ public:
 
     std::string host() const;
     bool isClosed();
- 
+
+    virtual ~ConnectionHandler();
+
+private:
+    void close_noLock();
 }; //class ConnectionHandler
  
 #endif
