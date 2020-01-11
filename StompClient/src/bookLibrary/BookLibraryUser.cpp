@@ -126,14 +126,15 @@ void BookLibraryUser::run() {
 }
 
 void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<std::string> &message) {
+    std::string userThatBorrowed = message[0];
     std::string bookName = message[1];
-    for(unsigned long i=2; i < message.size()-2; i=i+1) {
+    for(unsigned long i=2; i < message.size()-1; i=i+1) {
         bookName.append(" ");
         bookName.append(message[i]);
     }
-    std::string userOfTheBook = message[message.size()-2];
+    std::string userOfTheBook = message[message.size()-1];
     if(userOfTheBook == _username && _books.isBorrowed(dest, bookName)){
-        _books.returnBorrowedBook(dest, bookName);
+        _books.BookThatWasBorrowedHasReturn(dest, bookName, userThatBorrowed);
     }
 }
 

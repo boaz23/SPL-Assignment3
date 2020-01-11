@@ -15,15 +15,20 @@ private:
 
 public:
 
-    enum BookState {HAVE, BORROWED, WANT_TO_BORROW};
+    enum BookState {HAVE, BORROWED, WANT_TO_BORROW, BORROWED_FROM};
 
-    Book(const std::string &genre, const std::string &bookName, BookState bookState);
+    static Book newBook(const std::string &genre, const std::string &bookName);
+    static Book wantToBorrowBook(const std::string &genre, const std::string &bookName);
+    static Book borrowedBookTo(const std::string &genre, const std::string &bookName, const std::string &to);
+    static Book borrowedBookFrom(const std::string &genre, const std::string &bookName, const std::string &from);
 
     const std::string& bookName() const;
     //if the book is not borrowed
     bool hasBook() const;
     //the book is in the want to borrow list
     bool wantToBorrow() const;
+
+    bool isBorrowed() const;
 };
 
 #endif //STOMPCLIENT_BOOK_H

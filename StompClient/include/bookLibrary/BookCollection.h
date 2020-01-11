@@ -16,11 +16,15 @@ public:
     void addBook(const std::string &book);
     void addBook(const Book book);
     void removeBook(const std::string &book);
+
+    void userReturnTheBook(const std::string &book, const std::string &username);
+
     bool isEmpty() const;
-
-    const Book& getBook(const std::string &book) const;
-
+    bool hasBook(const std::string &book) const;
+    bool isBorrowed(const std::string &book) const;
     bool wantToBorrowBook(const std::string &book) const;
+
+    int removeBorrowedBook(const std::string &book);
 
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();
