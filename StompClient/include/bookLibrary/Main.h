@@ -19,7 +19,6 @@ private:
     int _nextReceiptId;
     int _nextSubscriptionId;
 
-    // TODO: maybe change to pointers and initialize with null
     StompConnectionHandler *_conn;
     StompMessageEncoderDecoder *_encdec;
     BookLibraryUser *_activeUser;

@@ -7,8 +7,6 @@
 using byte = char;
 
 template <typename Tin, typename Tout> class MessageEncoderDecoder {
-    // TODO: NOTE: this returns pointers, consider what to do
-
     /**
      * add the next byte to the decoding process
      *

@@ -9,7 +9,6 @@
 
 using boost::asio::ip::tcp;
 
-// TODO: implement rule of 5
 class ConnectionHandler {
 private:
     enum class State {

@@ -30,7 +30,7 @@ public:
     UserBooks& books() const;
 
     bool connect(std::string &errorMsg);
-    void run(); // TODO: start thread and input stream loop
+    void run();
 
     void addReceipt(const Frame &frame);
     void removeReceipt(const std::string &receiptId);

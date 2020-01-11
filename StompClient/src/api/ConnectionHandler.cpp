@@ -10,8 +10,6 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-// TODO: use printer for printing
-// TODO: synchronize with mutex and lock_guard
 ConnectionHandler::ConnectionHandler(string host, short port):
     host_(std::move(host)), port_(port), io_service_(), socket_(io_service_),
     state_(State::Initialized) {}

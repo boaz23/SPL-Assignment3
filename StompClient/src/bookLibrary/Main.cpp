@@ -12,7 +12,6 @@ Main::Main(Printer &printer) :
     _usersMap() { }
 
 void Main::start() {
-    // TODO: print using the printer
     while (true) {
         string command;
         getline(std::cin, command);
