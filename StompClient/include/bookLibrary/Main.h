@@ -63,6 +63,13 @@ private:
     std::string nextReceiptId();
     std::string nextSubscriptionId();
     template <typename T> std::string nextId(T &id);
+
+    bool readCommand(std::string &cmd);
+    bool getArguments(const std::string &cmd, std::vector<std::string> &arguments);
+    bool handleCommand(std::vector<std::string> &arguments);
+    bool handleLoginCommand(const std::vector<std::string> &arguments);
+    bool handleNonLoginCommand(const std::vector<std::string> &arguments);
+    bool invokeCommand(const std::vector<std::string> &arguments);
 };
 
 

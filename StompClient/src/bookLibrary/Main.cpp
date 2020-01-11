@@ -25,64 +25,17 @@ void Main::cleanupUsersMap() {
 
 void Main::start() {
     while (true) {
-        string command;
-        getline(std::cin, command);
-        if (command.empty()) {
-            if (std::cin.eof()) {
-                break;
-            }
-            else if (std::cin.fail()) {
-                _printer.println("an unexpected error occured, input couldn't be interpreted");
-                break;
-            }
+        string cmd;
+        if (!readCommand(cmd)) {
+            break;
         }
 
-        vector<string> arguments = Util::split(command, " ");
-        if (arguments.empty()) {
-            _printer.println("Error - no command entered");
+        vector<string> arguments;
+        if (!getArguments(cmd, arguments)) {
             continue;
         }
 
-        string action = arguments[0];
-        if (action == "login") {
-            if (_activeUser) {
-                // TODO: ???
-                _printer.println("cannot login when already logged-in.");
-                continue;
-            }
-
-            login(arguments);
-        }
-        else {
-            if (!_activeUser) {
-                _printer.println("must be logged-in to perform that action.");
-                continue;
-            }
-            if (_conn && _conn->isClosed()) {
-                _printer.println("cannot perform that action because the connection is closed.");
-                disconnectionCleanup();
-                continue;
-            }
-
-            if (action == "join") {
-                joinGenre(arguments);
-            } else if (action == "exit") {
-                exitGenre(arguments);
-            } else if (action == "add") {
-                addBook(arguments);
-            } else if (action == "borrow") {
-                borrowBook(arguments);
-            } else if (action == "return") {
-                returnBook(arguments);
-            } else if (action == "status") {
-                bookStatus(arguments);
-            } else if (action == "logout") {
-                logout(arguments);
-            } else {
-                _printer.println("Error - unknown action entered");
-                continue;
-            }
-        }
+        handleCommand(arguments);
     }
 }
 
@@ -357,4 +310,88 @@ std::string Main::nextSubscriptionId() {
 
 template <typename T> std::string Main::nextId(T &id) {
     return std::to_string(id++);
+}
+
+bool Main::readCommand(std::string &cmd) {
+    getline(std::cin, cmd);
+    if (cmd.empty()) {
+        if (std::cin.eof()) {
+            return false;
+        }
+        else if (std::cin.fail()) {
+            _printer.println("an unexpected error occured, input couldn't be interpreted");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Main::getArguments(const std::string &cmd, std::vector<std::string> &arguments) {
+    arguments = Util::split(cmd, " ");
+    if (arguments.empty()) {
+        _printer.println("Error - no command entered");
+        return false;
+    }
+
+    return true;
+}
+
+bool Main::handleCommand(std::vector<std::string> &arguments) {
+    string action = arguments[0];
+    if (action == "login") {
+        handleLoginCommand(arguments);
+    }
+    else {
+        handleNonLoginCommand(arguments);
+    }
+}
+
+bool Main::handleLoginCommand(const vector<std::string> &arguments) {
+    if (_activeUser) {
+        // TODO: ???
+        _printer.println("cannot login when already logged-in.");
+        return false;
+    }
+
+    login(arguments);
+    return true;
+}
+
+bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
+    if (!_activeUser) {
+        _printer.println("must be logged-in to perform that action.");
+        return false;
+    }
+    if (_conn && _conn->isClosed()) {
+        _printer.println("cannot perform that action because the connection is closed.");
+        disconnectionCleanup();
+        return false;
+    }
+
+    return invokeCommand(arguments);
+}
+
+bool Main::invokeCommand(const std::vector<std::string> &arguments) {
+    string action = arguments[0];
+    if (action == "join") {
+        joinGenre(arguments);
+    } else if (action == "exit") {
+        exitGenre(arguments);
+    } else if (action == "add") {
+        addBook(arguments);
+    } else if (action == "borrow") {
+        borrowBook(arguments);
+    } else if (action == "return") {
+        returnBook(arguments);
+    } else if (action == "status") {
+        bookStatus(arguments);
+    } else if (action == "logout") {
+        logout(arguments);
+    } else {
+        _printer.println("Error - unknown action entered");
+        return false;
+    }
+
+    return true;
 }
