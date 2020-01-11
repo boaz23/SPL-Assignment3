@@ -17,6 +17,10 @@ public:
     void removeBook(const std::string &book);
     bool isEmpty() const;
 
+    const Book& getBook(const std::string &book) const;
+
+    bool wantToBorrowBook(const std::string &book) const;
+
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();
 

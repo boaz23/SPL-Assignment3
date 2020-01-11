@@ -201,8 +201,6 @@ bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
             bodyMessage.append(book->bookName());
         }
     }
-
-    bodyMessage.resize(bodyMessage.size() - 1);
     return sendSendFrame(dest, bodyMessage);
 }
 

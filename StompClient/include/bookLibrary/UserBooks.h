@@ -6,24 +6,29 @@
 
 class UserBooks {
     // TODO: synchronize, only the map with a mutex
-
+    // TODO: delete the bookCollection maybe rule of five
 private:
-    const std::unordered_map<std::string, BookCollection> _books;
-    const std::unordered_map<std::string, std::string> _bookToGenreMap;
+    std::unordered_map<std::string, BookCollection> _books;
+    std::unordered_map<std::string, std::string> _bookToGenreMap;
+
+    void addBookToBookCollection(const std::string &genre, const std::string &book);
 
 public:
     UserBooks();
 
     void clear();
 
-    bool getBookGenre(std::string bookName, std::string &genre);
+    bool getBookGenre(const std::string &bookName, const std::string &genre) const;
 
     void addBook(const std::string &genre, const std::string &book);
     void removeBook(const std::string &genre, const std::string &book);
 
-    bool hasBook(const std::string &genre, const std::string &bookName);
+    bool haveBook(const std::string &genre, const std::string &bookName) const;
     // retrurn if the user want to borrow the book
-    bool wantToBorrow(const std::string &genre, const std::string &bookName);
+    bool wantToBorrow(const std::string &genre, const std::string &bookName) const;
+
+    void addBookAsWantToBorrow(const std::string &genre, const std::string &bookName);
+
     bool isBorrowed(const std::string &genre, const std::string &bookName);
     //add the book to the borrowed books
     void borrowBook(const std::string &genre, const std::string &bookName, const std::string &from);
@@ -41,6 +46,7 @@ public:
 
     std::unordered_map<std::string, BookCollection>::const_iterator cbegin();
     std::unordered_map<std::string, BookCollection>::const_iterator cend();
+
 };
 
 
