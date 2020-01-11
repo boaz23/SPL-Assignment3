@@ -1,4 +1,3 @@
-
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
 StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1024) { }
@@ -68,7 +67,7 @@ Frame* StompMessageEncoderDecoder::createFrame() {
                 decodeKey(index, key);
                 decodeValue(index, value);
 
-                frame->headers().insert(key, value);
+                frame->headers()[key] = value;
             }
             index = index + 1;
             decodeBody(frame, index);
