@@ -131,7 +131,7 @@ void StompMessageEncoderDecoder::decodeValue(int &index, std::string &value) con
     for (; index < byteVector.size(); index = index + 1) {
         byte b = byteVector[index];
         if (b == '\n') {
-            //TODO: here there is no need to inc because of the while loop condition
+            index = index + 1;
             break;
         }
         value.append(&b, 1);

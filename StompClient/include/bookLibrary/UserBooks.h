@@ -12,6 +12,7 @@ private:
     std::unordered_map<std::string, std::string> _bookToGenreMap;
 
     void addBookToBookCollection(const std::string &genre, const std::string &book);
+    void addBookToBookCollection(const std::string &genre, const Book& book);
 
 public:
     UserBooks();
@@ -23,7 +24,7 @@ public:
     void addBook(const std::string &genre, const std::string &book);
     void removeBook(const std::string &genre, const std::string &book);
 
-    bool haveBook(const std::string &genre, const std::string &bookName) const;
+    bool hasBook(const std::string &genre, const std::string &bookName) const;
     // retrurn if the user want to borrow the book
     bool wantToBorrow(const std::string &genre, const std::string &bookName) const;
 

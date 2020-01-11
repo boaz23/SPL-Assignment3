@@ -14,6 +14,7 @@ private:
 
 public:
     void addBook(const std::string &book);
+    void addBook(const Book book);
     void removeBook(const std::string &book);
     bool isEmpty() const;
 

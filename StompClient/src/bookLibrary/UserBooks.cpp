@@ -14,6 +14,17 @@ void UserBooks::addBook(const std::string &genre, const std::string &book) {
     }
 }
 
+void UserBooks::addBookToBookCollection(const std::string &genre, const Book& book) {
+    if(_books.count(genre) > 0){
+        BookCollection bookCollection1 = _books.at(genre);
+        bookCollection1.addBook(book);
+    } else {
+        auto bookCollection1 = BookCollection();
+        bookCollection1.addBook(book);
+        _books.insert(std::make_pair(genre, bookCollection1));
+    }
+}
+
 void UserBooks::addBookToBookCollection(const std::string &genre, const std::string &book) {
     if(_books.count(genre) > 0){
         BookCollection bookCollection1 = _books.at(genre);
@@ -41,11 +52,11 @@ void UserBooks::removeBook(const std::string &genre, const std::string &book) {
  * @param bookName
  * @return
  */
-bool UserBooks::haveBook(const std::string &genre, const std::string &bookName) const{
+bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) const{
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre){
         BookCollection bookCollection1 = _books.at(genre);
         const Book &book = bookCollection1.getBook(bookName);
-        if(book.haveBook()){
+        if(book.hasBook()){
             return true;
         }
     }
@@ -66,6 +77,16 @@ bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookNa
         }
     }
     return false;
+}
+
+/**
+ * Create a new a book and add it to the corresponding topic as want to borrow
+ * @param genre
+ * @param bookName
+ */
+void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::string &bookName) {
+    Book book = Book(genre, bookName, Book::WANT_TO_BORROW);
+    addBookToBookCollection(genre, book);
 }
 
 

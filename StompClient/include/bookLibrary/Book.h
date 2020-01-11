@@ -14,9 +14,14 @@ private:
     std::pair<bool, std::string> _borrowedTo;
 
 public:
+
+    enum BookState {HAVE, BORROWED, WANT_TO_BORROW};
+
+    Book(const std::string &genre, const std::string &bookName, BookState bookState);
+
     const std::string& bookName() const;
     //if the book is not borrowed
-    bool haveBook() const;
+    bool hasBook() const;
     //the book is in the want to borrow list
     bool wantToBorrow() const;
 };
