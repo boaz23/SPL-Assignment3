@@ -210,16 +210,14 @@ void Main::bookStatus(const std::vector<std::string> &arguments) {
 }
 
 void Main::joinGenre(const std::string &genre, const std::string& subscriptionId) {
-    std::string tmp;
-    if (_activeUser->getSubscriptionIdFor(genre, tmp)) {
-        return;
-    }
-
     SubscribeFrame sendFrame(genre, subscriptionId);
     std::string receiptId = nextReceiptId();
     sendFrame.setReceiptId(receiptId);
 
-    _activeUser->addSubscription(genre, subscriptionId);
+    std::string tmp;
+    if (!_activeUser->getSubscriptionIdFor(genre, tmp)) {
+        _activeUser->setSubscriptionId(genre, subscriptionId);
+    }
     _activeUser->addReceipt(sendFrame);
     if (!_conn->sendFrame(sendFrame)) {
         _activeUser->removeSubscription(genre);
