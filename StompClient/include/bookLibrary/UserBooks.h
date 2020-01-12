@@ -24,13 +24,12 @@ public:
 
     void addBook(const std::string &genre, const std::string &book);
 
-    bool hasBook(const std::string &genre, const std::string &bookName) const;
+    bool hasBook(const std::string &genre, const std::string &bookName);
     // retrurn if the user want to borrow the book
-    bool wantToBorrow(const std::string &genre, const std::string &bookName) const;
+    bool wantToBorrow(const std::string &genre, const std::string &bookName);
 
     void addBookAsWantToBorrow(const std::string &genre, const std::string &bookName);
-
-    bool isBorrowedFrom(const std::string &genre, const std::string &bookName, const std::string &from) const;
+    
     //add the book to the borrowed books
     void borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from);
 

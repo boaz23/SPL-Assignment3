@@ -3,7 +3,16 @@
 
 #include <string>
 
-enum BookState {HAVE, BORROWED_TO, WANT_TO_BORROW, BORROWED_FROM};
+enum BookState {
+    HAVE,
+    BORROWED_TO,
+    WANT_TO_BORROW,
+    BORROWED_FROM,
+
+    // TODO: check changes for this state
+    // short description: we burrowed a book from somone and then we lent it to someone (maybe the same guy)
+    BORROWED_FROM_AND_BORROWED_TO,
+};
 
 class Book{
 private:

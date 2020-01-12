@@ -31,7 +31,7 @@ void UserBooks::addBook(const std::string &genre, const Book& book) {
 
 void UserBooks::addBookToBookCollection(const std::string &genre, const Book &book) {
     if (_books.count(genre) > 0) {
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         bookCollection1.addBook(book);
     } else {
         auto bookCollection1 = BookCollection();
@@ -42,7 +42,7 @@ void UserBooks::addBookToBookCollection(const std::string &genre, const Book &bo
 
 void UserBooks::addBookToBookCollection(const std::string &genre, const std::string &book) {
     if(_books.count(genre) > 0){
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         bookCollection1.addBook(book);
     } else {
         auto bookCollection1 = BookCollection();
@@ -57,9 +57,9 @@ void UserBooks::addBookToBookCollection(const std::string &genre, const std::str
  * @param bookName
  * @return
  */
-bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) const{
+bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre){
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         if(bookCollection1.hasBook(bookName)){
             return true;
         }
@@ -73,9 +73,9 @@ bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) c
  * @param bookName
  * @return
  */
-bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookName) const {
+bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookName) {
     if(_bookToGenreMap.count(bookName) == 0){
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         return bookCollection1.wantToBorrowBook(bookName);
     }
     return false;
@@ -91,14 +91,6 @@ void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::strin
     addBook(genre, book);
 }
 
-bool UserBooks::isBorrowedFrom(const std::string &genre, const std::string &bookName, const std::string &from) const {
-    if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
-        BookCollection bookCollection1 = _books.at(genre);
-        return bookCollection1.isBorrowedFrom(bookName, from);
-    }
-    return false;
-}
-
 void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from) {
     Book book = Book::borrowedBookFrom(bookName, from);
     addBook(genre, book);
@@ -106,7 +98,7 @@ void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &
 
 void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &bookName) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         //There is no more instances of this book in the collection
         if(bookCollection1.removeBorrowedBook(bookName) == 0){
             _bookToGenreMap.erase(bookName);
@@ -123,7 +115,7 @@ void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &
  */
 void UserBooks::BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         bookCollection1.userReturnTheBook(bookName);
     }
 }
@@ -146,7 +138,7 @@ void UserBooks::clear() {
 // TODO: change the param borrowedFrom to hold the first user we successfully borrowed the book from
 bool UserBooks::getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
-        BookCollection bookCollection1 = _books.at(genre);
+        BookCollection &bookCollection1 = _books.at(genre);
         return bookCollection1.isBorrowedFrom(bookName, borrowedFrom);
     }
 
@@ -161,4 +153,12 @@ bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) co
     return false;
 }
 
+void UserBooks::borrowBookToUser(const std::string &genre, const std::string &bookName) {
+    if(_books.count(genre) > 0) {
+        BookCollection &bookCollection1 = _books.at(genre);
+
+    } else {
+        throw std::runtime_error("Someone was taking book from us because we said we have it...");
+    }
+}
 

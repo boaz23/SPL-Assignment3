@@ -107,11 +107,11 @@ void BookLibraryUser::run() {
 
             //TODO: maybe handle book status, check if there is a book that the user want to borrow
             if(message.size() > 4 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
-                if(!handlerWantToBorrow(dest, message)){ break; }
+                if(!handlerSomeoneWantToBorrow(dest, message)){ break; }
             } else if(message.size() > 2 && message[1] == "has"){
                 if(!handlerUserHasBook(dest, message)){ break; }
             } else if(message.size() > 3 && message[0] == "Taking" && message[message.size()-2] == "from"){
-                handlerTakingBook(dest, message);
+                handleSomeoneTakingBookFrom(dest, message);
             } else if(message.size() > 3 && message[0] == "Returning" && message[message.size()-2] == "to"){
                 returnedBook(dest, message);
             } else if(message.size() == 2 && message[0] == "book" && message[1] == "status"){
@@ -134,7 +134,7 @@ void BookLibraryUser::returnedBook(const std::string &dest, const std::vector<st
     }
 }
 
-void BookLibraryUser::handlerTakingBook(const std::string &dest, const std::vector<std::string> &message) {
+void BookLibraryUser::handleSomeoneTakingBookFrom(const std::string &dest, const std::vector<std::string> &message) {
     if(_username == message[message.size()-1]) {
 
         std::string bookName = message[1];
@@ -165,7 +165,7 @@ bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vec
     return true;
 }
 
-bool BookLibraryUser::handlerWantToBorrow(const std::string &dest, const std::vector<std::string> &message) {
+bool BookLibraryUser::handlerSomeoneWantToBorrow(const std::string &dest, const std::vector<std::string> &message) {
     std::string name = message[0];
 
     // username want to borrow bookname

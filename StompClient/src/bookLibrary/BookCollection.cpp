@@ -101,3 +101,19 @@ int BookCollection::removeBorrowedBook(const std::string &bookName) {
     }
     return numberOfBooks;
 }
+
+std::vector<Book>::iterator BookCollection::begin() {
+    return _books.begin();
+}
+
+std::vector<Book>::iterator BookCollection::end() {
+    return _books.end();
+}
+
+std::vector<Book>::const_iterator BookCollection::begin() const {
+    return _books.begin();
+}
+
+std::vector<Book>::const_iterator BookCollection::end() const {
+    return _books.end();
+}
