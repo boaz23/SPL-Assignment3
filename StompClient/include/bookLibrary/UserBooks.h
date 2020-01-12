@@ -6,8 +6,6 @@
 #include "BookCollection.h"
 
 class UserBooks {
-    // TODO: synchronize, only the map with a mutex
-    // TODO: delete the bookCollection maybe rule of five
 private:
     std::unordered_map<std::string, BookCollection> _books;
     std::unordered_map<std::string, std::string> _bookToGenreMap;

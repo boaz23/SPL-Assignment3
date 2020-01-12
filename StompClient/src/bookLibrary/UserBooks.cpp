@@ -140,7 +140,6 @@ void UserBooks::BookThatWasBorrowedHasReturn(const std::string &genre, const std
 }
 
 bool UserBooks::copyOfBookCollection(const std::string &genre, BookCollection &bookCollection) {
-    //TODO: check if a copy is returned
     mutex_lock lock(_mutex);
 
     if (_books.count(genre) > 0) {

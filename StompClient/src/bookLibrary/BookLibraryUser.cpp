@@ -147,7 +147,6 @@ void BookLibraryUser::run() {
 
             std::vector<std::string> message = Util::split(body, " ");
 
-            //TODO: maybe handle book status, check if there is a book that the user want to borrow
             if(message.size() > 4 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
                 if(!handlerSomeoneWantToBorrow(dest, message)){ break; }
             } else if(message.size() > 2 && message[1] == "has"){
