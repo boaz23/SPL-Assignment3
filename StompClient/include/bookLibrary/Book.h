@@ -9,6 +9,7 @@ class Book{
 private:
     std::string _book;
 
+    // TODO: check why there are two fields for state: '_bookState' and '_wantToBoorow'
     BookState _bookState;
     bool _wantToBoorow;
     //if the book is borrowed the bool will be true and the string

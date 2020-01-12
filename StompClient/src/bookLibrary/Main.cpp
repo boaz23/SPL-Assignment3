@@ -277,7 +277,9 @@ void Main::returnBook(const std::string &genre, const std::string &bookName) {
 
 void Main::borrowBook(const std::string &genre, const std::string &bookName) {
     SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
-    if (!_conn->sendFrame(sendFrame)) {
+    if (_conn->sendFrame(sendFrame)) {
+        _activeUser->books().addBookAsWantToBorrow(genre, bookName);
+    } else {
         _conn->close();
     }
 }

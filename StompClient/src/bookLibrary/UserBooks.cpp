@@ -17,7 +17,7 @@ void UserBooks::addBook(const std::string &genre, const std::string &book) {
 }
 
 void UserBooks::addBook(const std::string &genre, const Book& book) {
-    if(_bookToGenreMap.count(book.name()) > 0) {
+    if (_bookToGenreMap.count(book.name()) > 0) {
         if(_bookToGenreMap.at(book.name()) == genre) {
             addBookToBookCollection(genre, book);
         } else {
@@ -26,9 +26,8 @@ void UserBooks::addBook(const std::string &genre, const Book& book) {
     } else {
         _bookToGenreMap.insert(std::make_pair(book.name(), genre));
         addBookToBookCollection(genre, book);
-        }
+    }
 }
-
 
 void UserBooks::addBookToBookCollection(const std::string &genre, const Book &book) {
     if (_books.count(genre) > 0) {
@@ -155,6 +154,7 @@ void UserBooks::clear() {
     _bookToGenreMap.clear();
 }
 
+// TODO: change the param borrowedFrom to hold the first user we successfully borrowed the book from
 bool UserBooks::getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
         BookCollection bookCollection1 = _books.at(genre);

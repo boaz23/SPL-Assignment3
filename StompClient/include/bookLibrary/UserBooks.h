@@ -41,6 +41,7 @@ public:
     void BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName);
 
     bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom);
+    // TODO: we don't need the last param which states the user we borrowed from
     void removeBorrowedBook(const std::string &genre, const std::string &bookName, const std::string &from);
 
     //TODO: const BookCollection& bookCollection(const std::string &genre);
