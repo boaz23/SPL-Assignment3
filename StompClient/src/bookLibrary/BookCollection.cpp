@@ -54,9 +54,10 @@ bool BookCollection::hasBook(const std::string &bookName) const {
  * @param from
  * @return
  */
-bool BookCollection::isBorrowedFrom(const std::string &bookName, const std::string &from) const {
-    for(const auto& book : _books){
-        if(book.name() == bookName && book.isBorrowedFrom(from)){
+bool BookCollection::getBorrowedFrom(const std::string &bookName, std::string &from){
+    for(auto& book : _books){
+        if(book.name() == bookName && book.isBorrowedFromSomeone()){
+            from = book.getBorrowedFromName();
             return true;
         }
     }

@@ -34,6 +34,8 @@ public:
     static Book borrowedBookFrom(const std::string &bookName, const std::string &from);
 
     const std::string& name() const;
+    std::string& getBorrowedFromName();
+
     bool hasBook() const;
     bool wantToBorrow() const;
     bool isBorrowedFromSomeone() const;

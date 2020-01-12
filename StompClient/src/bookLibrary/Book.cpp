@@ -83,4 +83,8 @@ void Book::borrowTheBookToSomeone() {
     }
 }
 
+std::string& Book::getBorrowedFromName() {
+    return _borrowedFrom;
+}
+
 

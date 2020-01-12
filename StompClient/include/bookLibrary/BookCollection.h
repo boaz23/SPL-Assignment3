@@ -21,7 +21,7 @@ public:
 
     bool isEmpty() const;
     bool hasBook(const std::string &bookName) const;
-    bool isBorrowedFrom(const std::string &bookName, const std::string &from) const;
+    bool getBorrowedFrom(const std::string &bookName, std::string &from);
     bool wantToBorrowBook(const std::string &bookName) const;
     bool borrowBookToUser(const std::string &bookName);
 

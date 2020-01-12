@@ -1,27 +1,31 @@
 
 #include "../../include/bookLibrary/UserBooks.h"
+#include "../../include/Lock.h"
 
-UserBooks::UserBooks() : _books(), _bookToGenreMap() {
+UserBooks::UserBooks() : _books(), _bookToGenreMap(), _mutex() {
 }
 
 void UserBooks::addBook(const std::string &genre, const std::string &book) {
+    mutex_lock lock(_mutex);
+
     if(_bookToGenreMap.count(book) == 0){
        _bookToGenreMap.insert(std::make_pair(book, genre));
         addBookToBookCollection(genre, book);
-
     } else if(_bookToGenreMap.at(book) == genre) {
         addBookToBookCollection(genre, book);
     } else {
-        //TODO: may throw exeption here book not with the same topic
+        throw std::runtime_error("Book cant have two different topics");
     }
 }
 
 void UserBooks::addBook(const std::string &genre, const Book& book) {
+    mutex_lock lock(_mutex);
+
     if (_bookToGenreMap.count(book.name()) > 0) {
         if(_bookToGenreMap.at(book.name()) == genre) {
             addBookToBookCollection(genre, book);
         } else {
-            //TODO: book not with the same topic
+            throw std::runtime_error("Book cant have two different topics");
         }
     } else {
         _bookToGenreMap.insert(std::make_pair(book.name(), genre));
@@ -58,7 +62,9 @@ void UserBooks::addBookToBookCollection(const std::string &genre, const std::str
  * @return
  */
 bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) {
-    if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre){
+    mutex_lock lock(_mutex);
+
+    if(isBookExistWithSameTopic(genre, bookName)){
         BookCollection &bookCollection1 = _books.at(genre);
         if(bookCollection1.hasBook(bookName)){
             return true;
@@ -67,6 +73,9 @@ bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) {
     return false;
 }
 
+bool UserBooks::isBookExistWithSameTopic(const std::string &genre,
+                                         const std::string &bookName) const { return _bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre; }
+
 /**
  * The user want to borrow this book.
  * @param genre
@@ -74,6 +83,8 @@ bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) {
  * @return
  */
 bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookName) {
+    mutex_lock lock(_mutex);
+
     if(_bookToGenreMap.count(bookName) == 0){
         BookCollection &bookCollection1 = _books.at(genre);
         return bookCollection1.wantToBorrowBook(bookName);
@@ -87,17 +98,23 @@ bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookNa
  * @param bookName
  */
 void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::string &bookName) {
+    mutex_lock lock(_mutex);
+
     Book book = Book::wantToBorrowBook(bookName);
     addBook(genre, book);
 }
 
 void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from) {
+    mutex_lock lock(_mutex);
+
     Book book = Book::borrowedBookFrom(bookName, from);
     addBook(genre, book);
 }
 
 void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &bookName) {
-    if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
+    mutex_lock lock(_mutex);
+
+    if(isBookExistWithSameTopic(genre, bookName)) {
         BookCollection &bookCollection1 = _books.at(genre);
         //There is no more instances of this book in the collection
         if(bookCollection1.removeBorrowedBook(bookName) == 0){
@@ -114,7 +131,9 @@ void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &
  * @param returnedFromUser
  */
 void UserBooks::BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName) {
-    if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
+    mutex_lock lock(_mutex);
+
+    if(isBookExistWithSameTopic(genre, bookName)) {
         BookCollection &bookCollection1 = _books.at(genre);
         bookCollection1.userReturnTheBook(bookName);
     }
@@ -122,6 +141,8 @@ void UserBooks::BookThatWasBorrowedHasReturn(const std::string &genre, const std
 
 bool UserBooks::copyOfBookCollection(const std::string &genre, BookCollection &bookCollection) {
     //TODO: check if a copy is returned
+    mutex_lock lock(_mutex);
+
     if (_books.count(genre) > 0) {
         bookCollection = _books.at(genre);
         return true;
@@ -131,21 +152,26 @@ bool UserBooks::copyOfBookCollection(const std::string &genre, BookCollection &b
 }
 
 void UserBooks::clear() {
+    mutex_lock lock(_mutex);
+
     _books.clear();
     _bookToGenreMap.clear();
 }
 
-// TODO: change the param borrowedFrom to hold the first user we successfully borrowed the book from
-bool UserBooks::getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom) {
-    if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
+bool UserBooks::getBorrowedFromUsername(const std::string &genre, const std::string &bookName, std::string &borrowedFrom) {
+    mutex_lock lock(_mutex);
+
+    if(isBookExistWithSameTopic(genre, bookName)) {
         BookCollection &bookCollection1 = _books.at(genre);
-        return bookCollection1.isBorrowedFrom(bookName, borrowedFrom);
+        return bookCollection1.getBorrowedFrom(bookName, borrowedFrom);
     }
 
     return false;
 }
 
-bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) const {
+bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) {
+    mutex_lock lock(_mutex);
+
     if(_bookToGenreMap.count(bookName) > 0){
         genre = _bookToGenreMap.at(bookName);
         return true;
@@ -154,6 +180,8 @@ bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) co
 }
 
 void UserBooks::borrowBookToUser(const std::string &genre, const std::string &bookName) {
+    mutex_lock lock(_mutex);
+
     if(_books.count(genre) > 0) {
         BookCollection &bookCollection1 = _books.at(genre);
         bookCollection1.borrowBookToUser(bookName);
