@@ -9,13 +9,29 @@ void UserBooks::addBook(const std::string &genre, const std::string &book) {
        _bookToGenreMap.insert(std::make_pair(book, genre));
         addBookToBookCollection(genre, book);
 
+    } else if(_bookToGenreMap.at(book) == genre) {
+        addBookToBookCollection(genre, book);
     } else {
-        //TODO: may throw exeption here
+        //TODO: may throw exeption here book not with the same topic
     }
 }
 
 void UserBooks::addBook(const std::string &genre, const Book& book) {
-    if(_books.count(genre) > 0){
+    if(_bookToGenreMap.count(book.name()) > 0) {
+        if(_bookToGenreMap.at(book.name()) == genre) {
+            addBookToBookCollection(genre, book);
+        } else {
+            //TODO: book not with the same topic
+        }
+    } else {
+        _bookToGenreMap.insert(std::make_pair(book.name(), genre));
+        addBookToBookCollection(genre, book);
+        }
+}
+
+
+void UserBooks::addBookToBookCollection(const std::string &genre, const Book &book) {
+    if (_books.count(genre) > 0) {
         BookCollection bookCollection1 = _books.at(genre);
         bookCollection1.addBook(book);
     } else {
@@ -130,6 +146,8 @@ BookCollection UserBooks::bookCollection(const std::string &genre) {
     if(_books.count(genre) > 0){
         return _books.at(genre);
     }
+
+    return nullptr;
 }
 
 void UserBooks::clear() {
@@ -142,7 +160,16 @@ bool UserBooks::getBorrowedFromUsername(const std::string &genre, const std::str
         BookCollection bookCollection1 = _books.at(genre);
         return bookCollection1.isBorrowedFrom(bookName, borrowedFrom);
     }
+
+    return false;
 }
 
+bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) const {
+    if(_bookToGenreMap.count(bookName) > 0){
+        genre = _bookToGenreMap.at(bookName);
+        return true;
+    }
+    return false;
+}
 
 
