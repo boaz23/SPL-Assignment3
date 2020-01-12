@@ -89,7 +89,7 @@ void BookLibraryUser::run() {
                     std::string message = "Joined club " + receiptFrame.headers().at("destination");
                     _printer.println(message);
                 } else if(receiptFrame.messageType() == "UNSUBSCRIBE"){
-                    std::string message = "E club " + receiptFrame.headers().at("destination");
+                    std::string message = "Exited club " + receiptFrame.headers().at("destination");
                     _printer.println(message);
                 } else if(receiptFrame.messageType() == "DISCONNECT"){
                     break;
@@ -185,10 +185,10 @@ bool BookLibraryUser::handlerWantToBorrow(const std::string &dest, const std::ve
 }
 
 bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
-    const BookCollection bookCollection = _books.bookCollection(dest);
+    BookCollection bookCollection;
 
     std::string bodyMessage = _username + ":";
-    if (!bookCollection.isEmpty()) {
+    if (_books.copyOfBookCollection(dest, bookCollection) && !bookCollection.isEmpty()) {
         auto book = bookCollection.begin();
         bodyMessage.append(book->name());
         for (; book != bookCollection.end(); ++book) {
@@ -217,7 +217,6 @@ void BookLibraryUser::printMessage(const std::string &topic, const std::string &
 bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
     SendFrame frame = SendFrame(topic ,body);
     if(!_connection->sendFrame(frame)){
-        // TODO: don't close it here, see other TODO
         _connection->close();
         return false;
     }

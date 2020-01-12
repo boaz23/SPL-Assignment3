@@ -79,6 +79,8 @@ bool BookCollection::wantToBorrowBook(const std::string &bookName) const {
             return true;
         }
     }
+
+    return false;
 }
 
 /**
@@ -88,19 +90,19 @@ bool BookCollection::wantToBorrowBook(const std::string &bookName) const {
  * @param from
  * @return
  */
-int BookCollection::removeBorrowedBook(const std::string &bookName, const std::string &from) {
+int BookCollection::removeBorrowedBook(const std::string &bookName) {
     int numberOfBooks = -1;
-    unsigned long index = 0;
+    unsigned long i = 0;
     bool b = false;
     for(auto& book : _books){
         if(book.name() == bookName){
             numberOfBooks = numberOfBooks + 1;
-            if(book.isBorrowedFrom(from) && !b) {
-                _books.erase(_books.begin()+index);
+            if (book.isBorrowedFromSomeone() && !b) {
+                _books.erase(_books.begin() + i);
                 b = true;
             }
         }
-        index = index + 1;
+        i = i + 1;
     }
     return numberOfBooks;
 }

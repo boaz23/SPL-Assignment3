@@ -27,7 +27,7 @@ public:
     bool isBorrowedFrom(const std::string &bookName, const std::string &from) const;
     bool wantToBorrowBook(const std::string &bookName) const;
 
-    int removeBorrowedBook(const std::string &bookName, const std::string &from);
+    int removeBorrowedBook(const std::string &bookName);
 
     std::vector<Book>::iterator begin();
     std::vector<Book>::iterator end();

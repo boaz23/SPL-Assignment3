@@ -11,12 +11,11 @@ private:
 
     // TODO: check why there are two fields for state: '_bookState' and '_wantToBoorow'
     BookState _bookState;
-    bool _wantToBoorow;
     //if the book is borrowed the bool will be true and the string
     // will contain the username of the user that borrowed the book
     std::string _borrowedFrom;
 
-    Book(std::string bookName, BookState bookState, bool wantToBorrow, std::string borrowedFrom);
+    Book(std::string bookName, BookState bookState, std::string borrowedFrom);
     void setState(BookState bookState);
 
 public:
@@ -30,6 +29,7 @@ public:
     const std::string& name() const;
     bool hasBook() const;
     bool wantToBorrow() const;
+    bool isBorrowedFromSomeone() const;
     bool isBorrowedFrom(const std::string &from) const;
     bool isBorrowedTo() const;
 

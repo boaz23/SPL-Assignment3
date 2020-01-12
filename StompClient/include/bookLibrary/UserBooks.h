@@ -42,11 +42,11 @@ public:
 
     bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom);
     // TODO: we don't need the last param which states the user we borrowed from
-    void removeBorrowedBook(const std::string &genre, const std::string &bookName, const std::string &from);
+    void removeBorrowedBook(const std::string &genre, const std::string &bookName);
 
     //TODO: const BookCollection& bookCollection(const std::string &genre);
     // The book collection can be modified so a copy of it in the current state should be returned
-    BookCollection bookCollection(const std::string &genre);
+    bool copyOfBookCollection(const std::string &genre, BookCollection &bookCollection);
 
     //TODO: consider removing this
     std::unordered_map<std::string, BookCollection>::iterator begin();

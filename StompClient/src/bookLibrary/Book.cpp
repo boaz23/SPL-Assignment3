@@ -7,28 +7,28 @@
 #include <utility>
 
 Book::Book(std::string bookName, BookState bookState,
-        bool wantToBorrow, std::string borrowedFrom):
+        std::string borrowedFrom):
         _book(std::move(bookName)), _bookState(bookState),
-        _wantToBoorow(wantToBorrow), _borrowedFrom(std::move(borrowedFrom)) {
+        _borrowedFrom(std::move(borrowedFrom)) {
 }
 
 Book Book::newBook(const std::string &bookName){
-    Book book = Book(bookName, BookState::HAVE, false, "");
+    Book book = Book(bookName, BookState::HAVE, "");
     return book;
 }
 
 Book Book::wantToBorrowBook(const std::string &bookName) {
-    Book book = Book(bookName, BookState::WANT_TO_BORROW, true, "");
+    Book book = Book(bookName, BookState::WANT_TO_BORROW, "");
     return book;
 }
 
 Book Book::borrowedBookTo(const std::string &bookName) {
-    Book book = Book(bookName, BookState::BORROWED, false, "");
+    Book book = Book(bookName, BookState::BORROWED, "");
     return book;
 }
 
 Book Book::borrowedBookFrom(const std::string &bookName, const std::string &from) {
-    Book book = Book(bookName, BookState::BORROWED_FROM, false, from);
+    Book book = Book(bookName, BookState::BORROWED_FROM, from);
     return book;
 }
 
@@ -48,6 +48,10 @@ bool Book::wantToBorrow() const {
     return _bookState == BookState::WANT_TO_BORROW;
 }
 
+bool Book::isBorrowedFromSomeone() const {
+    return _bookState == BookState::BORROWED_FROM;
+}
+
 bool Book::isBorrowedFrom(const std::string &from) const {
     if(_bookState == BookState::BORROWED_FROM){
         if(_borrowedFrom == from){
@@ -63,7 +67,6 @@ bool Book::isBorrowedTo() const {
 
 void Book::setToUserOwnership() {
     _bookState = BookState::HAVE;
-    _wantToBoorow = false;
     _borrowedFrom = "";
 }
 

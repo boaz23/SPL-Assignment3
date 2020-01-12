@@ -116,12 +116,12 @@ void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &
     addBook(genre, book);
 }
 
-void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &bookName, const std::string &from) {
+void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &bookName) {
     if(_bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre) {
         BookCollection bookCollection1 = _books.at(genre);
         //There is no more instances of this book in the collection
-        if(bookCollection1.removeBorrowedBook(bookName, from) == 0){
-            _books.erase(bookName);
+        if(bookCollection1.removeBorrowedBook(bookName) == 0){
+            _bookToGenreMap.erase(bookName);
         }
     }
 }
@@ -140,13 +140,14 @@ void UserBooks::BookThatWasBorrowedHasReturn(const std::string &genre, const std
     }
 }
 
-BookCollection UserBooks::bookCollection(const std::string &genre) {
+bool UserBooks::copyOfBookCollection(const std::string &genre, BookCollection &bookCollection) {
     //TODO: check if a copy is returned
-    if(_books.count(genre) > 0){
-        return _books.at(genre);
+    if (_books.count(genre) > 0) {
+        bookCollection = _books.at(genre);
+        return true;
     }
 
-    return nullptr;
+    return false;
 }
 
 void UserBooks::clear() {
