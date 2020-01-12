@@ -51,31 +51,21 @@ void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &d
 Frame* StompMessageEncoderDecoder::buildFrame() {
     int index = 0;
     std::string line;
-    decodeMessage(line, index);
+    getLine(line, index);
+
     Frame *frame = createFrameInstance(line);
     frame->setMessageType(line);
-
-    // TODO: Boaz: i think this code needs a fix because it seems bugged.
-    //  NOTE: didn't check
-    if(index < byteVector.size()){
-        byte b = byteVector[index];
-        if(b == '\n') { // body
-            decodeBody(frame, index);
-        } else {
-            while (index < byteVector.size() && byteVector[index] != '\n') {
-                //TODO: check of more delimi
-                std::string key;
-                std::string value;
-
-                decodeKey(index, key);
-                decodeValue(index, value);
-
-                frame->setHeader(key, value);
-            }
-            index = index + 1;
-            decodeBody(frame, index);
-        }
+    while (index < byteVector.size() && byteVector[index] != '\n') {
+        std::string key;
+        std::string value;
+        decodeKey(index, key);
+        decodeValue(index, value);
+        frame->setHeader(key, value);
     }
+    if (index >= byteVector.size()) {
+        throw std::runtime_error("Received invalid frame");
+    }
+    decodeBody(frame, index);
 
     return frame;
 }
@@ -98,19 +88,19 @@ Frame *StompMessageEncoderDecoder::createFrameInstance(const std::string &line) 
     }
 }
 
-void StompMessageEncoderDecoder::decodeMessage(std::string &line, int &index) const {
-    for(index=0; index < byteVector.size(); index = index + 1){
+void StompMessageEncoderDecoder::getLine(std::string &line, int &index) const {
+    for(; index < byteVector.size(); ++index){
         byte b = byteVector[index];
-        if(b == '\r'){
-            if(index < byteVector.size() - 1 && byteVector[index + 1] == '\n'){
+        if(b == '\r') {
+            if (index < byteVector.size() - 1 && byteVector[index + 1] == '\n'){
                 //TODO: check the increment
                 index = index + 2;
                 break;
             }
         }
-        if(b == '\n'){
+        else if(b == '\n') {
             //TODO: check the increment
-            index = index + 1;
+            ++index;
             break;
         }
         line.append(&b, 1);
@@ -118,11 +108,11 @@ void StompMessageEncoderDecoder::decodeMessage(std::string &line, int &index) co
 }
 
 void StompMessageEncoderDecoder::decodeKey(int &index, std::string &key) const {
-    for (; index < byteVector.size(); index = index + 1) {
+    for (; index < byteVector.size(); ++index) {
         byte b = byteVector[index];
         if (b == ':') {
             //TODO: check the inc
-            index = index + 1;
+            ++index;
             break;
         }
         key.append(&b, 1);
@@ -130,10 +120,10 @@ void StompMessageEncoderDecoder::decodeKey(int &index, std::string &key) const {
 }
 
 void StompMessageEncoderDecoder::decodeValue(int &index, std::string &value) const {
-    for (; index < byteVector.size(); index = index + 1) {
+    for (; index < byteVector.size(); ++index) {
         byte b = byteVector[index];
         if (b == '\n') {
-            index = index + 1;
+            ++index;
             break;
         }
         value.append(&b, 1);
@@ -145,7 +135,7 @@ void StompMessageEncoderDecoder::decodeBody(Frame *frame, int &index) const {
     for (; index < byteVector.size(); index = index + 1) {
         byte b = byteVector[index];
         if (b == '\0') {
-            index = index + 1;
+            ++index;
             break;
         }
         body.append(&b, 1);
