@@ -240,7 +240,7 @@ void Main::exitGenre(const std::string &genre) {
 }
 
 void Main::addBook(const std::string &genre, std::string &bookName) {
-    UserBooks books = _activeUser->books();
+    UserBooks &books = _activeUser->books();
     std::string bookGenre;
     if (books.getBookGenre(bookName, bookGenre) && genre != bookGenre) {
         _printer.println("book is already in the inventory in genre '" + bookGenre + "'");
@@ -257,7 +257,7 @@ void Main::addBook(const std::string &genre, std::string &bookName) {
 
 void Main::returnBook(const std::string &genre, const std::string &bookName) {
     std::string borrowedFrom;
-    UserBooks books = _activeUser->books();
+    UserBooks &books = _activeUser->books();
     if (books.getBorrowedFromUsername(genre, bookName, borrowedFrom)) {
         SendFrame sendFrame(genre, "Returning " + bookName + " to " + borrowedFrom);
         if (_conn->sendFrame(sendFrame)) {
