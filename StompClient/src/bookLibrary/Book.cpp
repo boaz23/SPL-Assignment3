@@ -23,7 +23,7 @@ Book Book::wantToBorrowBook(const std::string &bookName) {
 }
 
 Book Book::borrowedBookTo(const std::string &bookName) {
-    Book book = Book(bookName, BookState::BORROWED, "");
+    Book book = Book(bookName, BookState::BORROWED_TO, "");
     return book;
 }
 
@@ -41,7 +41,7 @@ const std::string& Book::name() const {
 }
 
 bool Book::hasBook() const {
-    return _bookState == BookState::HAVE;
+    return _bookState == BookState::HAVE || _bookState == BookState::BORROWED_FROM;
 }
 
 bool Book::wantToBorrow() const {
@@ -62,7 +62,7 @@ bool Book::isBorrowedFrom(const std::string &from) const {
 }
 
 bool Book::isBorrowedTo() const {
-    return _bookState == BookState::BORROWED;
+    return _bookState == BookState::BORROWED_TO;
 }
 
 void Book::setToUserOwnership() {

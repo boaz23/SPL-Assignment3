@@ -3,13 +3,12 @@
 
 #include <string>
 
-enum BookState {HAVE, BORROWED, WANT_TO_BORROW, BORROWED_FROM};
+enum BookState {HAVE, BORROWED_TO, WANT_TO_BORROW, BORROWED_FROM};
 
 class Book{
 private:
     std::string _book;
 
-    // TODO: check why there are two fields for state: '_bookState' and '_wantToBoorow'
     BookState _bookState;
     //if the book is borrowed the bool will be true and the string
     // will contain the username of the user that borrowed the book
@@ -19,8 +18,6 @@ private:
     void setState(BookState bookState);
 
 public:
-    //TODO: consider adding a std::string topic to this class
-
     static Book newBook(const std::string &bookName);
     static Book wantToBorrowBook(const std::string &bookName);
     static Book borrowedBookTo(const std::string &bookName);

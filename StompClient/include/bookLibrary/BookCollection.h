@@ -7,8 +7,6 @@
 #include "Book.h"
 
 class BookCollection {
-    // TODO: not need to synchronize
-
 private:
     std::vector<Book> _books;
 
@@ -18,7 +16,6 @@ public:
 
     void addBook(const std::string &bookName);
     void addBook(const Book& book);
-    void removeBook(const std::string &bookName);
 
     void userReturnTheBook(const std::string &bookName);
 

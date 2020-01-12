@@ -20,7 +20,6 @@ public:
 
     void clear();
 
-    //TODO: check what this method is
     bool getBookGenre(const std::string &bookName, std::string &genre) const;
 
     void addBook(const std::string &genre, const std::string &book);
@@ -41,19 +40,11 @@ public:
     void BookThatWasBorrowedHasReturn(const std::string &genre, const std::string &bookName);
 
     bool getBorrowedFromUsername(const std::string &genre, const std::string &bookName, const std::string &borrowedFrom);
-    // TODO: we don't need the last param which states the user we borrowed from
+
     void removeBorrowedBook(const std::string &genre, const std::string &bookName);
 
-    //TODO: const BookCollection& bookCollection(const std::string &genre);
     // The book collection can be modified so a copy of it in the current state should be returned
     bool copyOfBookCollection(const std::string &genre, BookCollection &bookCollection);
-
-    //TODO: consider removing this
-    std::unordered_map<std::string, BookCollection>::iterator begin();
-    std::unordered_map<std::string, BookCollection>::iterator end();
-
-    std::unordered_map<std::string, BookCollection>::const_iterator cbegin();
-    std::unordered_map<std::string, BookCollection>::const_iterator cend();
 };
 
 

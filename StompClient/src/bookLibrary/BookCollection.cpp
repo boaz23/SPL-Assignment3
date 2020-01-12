@@ -15,10 +15,6 @@ void BookCollection::addBook(const Book& book) {
     _books.push_back(book);
 }
 
-void BookCollection::removeBook(const std::string &bookName) {
-    //TODO: if there is multiply book check which one to remove
-}
-
 /**
  * Search the collection for this book. if there is a book that his state is Borrowed_To_User
  * from the @username set his state back to the ownership of this user.
@@ -44,7 +40,6 @@ bool BookCollection::isEmpty() const {
  * @return
  */
 bool BookCollection::hasBook(const std::string &bookName) const {
-    //TODO: check if a borrowed book also can be borrowed to user, if so include it
     for(const auto& book : _books){
         if(book.name() == bookName && book.hasBook()){
             return true;
