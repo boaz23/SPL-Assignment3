@@ -3,32 +3,33 @@
 
 #include <string>
 
+enum BookState {HAVE, BORROWED, WANT_TO_BORROW, BORROWED_FROM};
+
 class Book{
 private:
     std::string _book;
 
-    bool wantToBoorow;
+    BookState _bookState;
+    bool _wantToBoorow;
     //if the book is borrowed the bool will be true and the string
     // will contain the username of the user that borrowed the book
-    std::pair<bool, std::string> _borrowedTo;
+    std::string _borrowedFrom;
+
+    Book(std::string bookName, BookState bookState, bool wantToBorrow, std::string borrowedFrom);
+    void setState(BookState bookState);
 
 public:
     //TODO: consider adding a std::string topic to this class
-    enum BookState {HAVE, BORROWED, WANT_TO_BORROW, BORROWED_FROM};
 
     static Book newBook(const std::string &bookName);
     static Book wantToBorrowBook(const std::string &bookName);
-    static Book borrowedBookTo(const std::string &bookName, const std::string &to);
+    static Book borrowedBookTo(const std::string &bookName);
     static Book borrowedBookFrom(const std::string &bookName, const std::string &from);
 
     const std::string& name() const;
-    //if the book is not borrowed
     bool hasBook() const;
-    //the book is in the want to borrow list
     bool wantToBorrow() const;
-    //Borrowed from a user
     bool isBorrowedFrom(const std::string &from) const;
-    //Check if Borrowed to a user
     bool isBorrowedTo() const;
 
     void setToUserOwnership();

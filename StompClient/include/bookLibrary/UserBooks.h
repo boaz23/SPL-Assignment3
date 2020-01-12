@@ -12,6 +12,7 @@ private:
     std::unordered_map<std::string, std::string> _bookToGenreMap;
 
     void addBookToBookCollection(const std::string &genre, const std::string &book);
+    void addBookToBookCollection(const std::string &genre, const Book &book);
     void addBook(const std::string &genre, const Book& book);
 
 public:
@@ -20,7 +21,7 @@ public:
     void clear();
 
     //TODO: check what this method is
-    bool getBookGenre(const std::string &bookName, const std::string &genre) const;
+    bool getBookGenre(const std::string &bookName, std::string &genre) const;
 
     void addBook(const std::string &genre, const std::string &book);
     void removeBook(const std::string &genre, const std::string &book);
@@ -52,7 +53,6 @@ public:
 
     std::unordered_map<std::string, BookCollection>::const_iterator cbegin();
     std::unordered_map<std::string, BookCollection>::const_iterator cend();
-
 };
 
 
