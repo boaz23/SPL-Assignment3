@@ -5,8 +5,6 @@
 #include <string>
 #include <unordered_map>
 
-// TODO: add fields
-// TODO: add more subclasses
 class Frame {
 private:
     std::string _messageType;
@@ -16,20 +14,43 @@ private:
 public:
     const static std::string HEADER_RECEIPT_ID;
 
-    Frame();
-    Frame(const std::string &messageType, const std::string &body);
+    Frame() : _messageType(), _headers(), _body() { }
+    Frame(std::string messageType) : _messageType(std::move(messageType)), _headers(), _body() { }
+    Frame(std::string messageType, std::string body) : _messageType(std::move(messageType)), _headers(), _body(std::move(body)) { }
 
-    const std::string& messageType() const;
-    void setMessageType(const std::string &messageType);
+    const std::string& messageType() const {
+        return _messageType;
+    }
+    Frame& setMessageType(const std::string &messageType) {
+        _messageType = messageType;
+        return *this;
+    }
 
-    const std::string& body() const;
-    void setBody(const std::string &body);
+    const std::string& body() const {
+        return _body;
+    }
+    Frame& setBody(const std::string &body) {
+        _body = body;
+        return *this;
+    }
 
-    void addHeader(const std::string &name, const std::string &value);
-    const std::unordered_map<std::string, std::string>& headers() const;
+    const std::string& getHeader(const std::string &name) const {
+        return _headers.at(name);
+    }
+    Frame& setHeader(const std::string &name, const std::string &value) {
+        _headers[name] = value;
+        return *this;
+    }
+    const std::unordered_map<std::string, std::string>& headers() const {
+        return _headers;
+    }
 
-    const std::string& receiptId() const;
-    void setReceiptId(const std::string &receiptId);
+    const std::string& receiptId() const {
+        return getHeader(HEADER_RECEIPT_ID);
+    }
+    Frame& setReceiptId(const std::string &receiptId) {
+        return setHeader(HEADER_RECEIPT_ID, receiptId);
+    }
 
     virtual ~Frame() = default;
 };
@@ -43,19 +64,41 @@ public:
     const static std::string HEADER_LOGIN;
     const static std::string HEADER_PASSCODE;
 
-    ConnectFrame(const std::string &acceptVersion, const std::string &host, const std::string &login, const std::string &passcode);
+    ConnectFrame(const std::string &acceptVersion, const std::string &host, const std::string &login, const std::string &passcode) :
+        Frame(MESSAGE_TYPE) {
+        setHeader(HEADER_ACCEPTVERSION, acceptVersion);
+        setHeader(HEADER_HOST, host);
+        setHeader(HEADER_LOGIN, login);
+        setHeader(HEADER_PASSCODE, passcode);
+    }
 
-    const std::string& acceptVersion() const;
-    void setAcceptVersion(const std::string &acceptVersion);
+    const std::string& acceptVersion() const {
+        return getHeader(HEADER_ACCEPTVERSION);
+    }
+    Frame& setAcceptVersion(const std::string &acceptVersion) {
+        return setHeader(HEADER_ACCEPTVERSION, acceptVersion);
+    }
 
-    const std::string& host() const;
-    void setHost(const std::string &host);
+    const std::string& host() const {
+        return getHeader(HEADER_HOST);
+    }
+    Frame& setHost(const std::string &host) {
+        return setHeader(HEADER_HOST, host);
+    }
 
-    const std::string& loginName() const;
-    void setLoginName(const std::string &loginName);
+    const std::string& loginName() const {
+        return getHeader(HEADER_LOGIN);
+    }
+    Frame& setLoginName(const std::string &loginName) {
+        return setHeader(HEADER_LOGIN, loginName);
+    }
 
-    const std::string& passcode() const;
-    void setPasscode(const std::string &passcode);
+    const std::string& passcode() const {
+        return getHeader(HEADER_PASSCODE);
+    }
+    Frame& setPasscode(const std::string &passcode) {
+        return setHeader(HEADER_PASSCODE, passcode);
+    }
 };
 
 class ConnectedFrame : public Frame {
@@ -64,17 +107,21 @@ public:
 
     const static std::string HEADER_VERSION;
 
-    ConnectedFrame();
-    ConnectedFrame(const std::string &version);
+    ConnectedFrame() : Frame(MESSAGE_TYPE) { }
+    ConnectedFrame(const std::string &version) : Frame(MESSAGE_TYPE) {
+        setHeader(HEADER_VERSION, version);
+    }
 
-    const std::string& version() const;
+    const std::string& version() const {
+        return getHeader(HEADER_VERSION);
+    }
 };
 
 class DisconnectFame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
-    DisconnectFame();
+    DisconnectFame() : Frame(MESSAGE_TYPE) { }
 };
 
 class ErrorFrame : public Frame {
@@ -83,34 +130,51 @@ public:
 
     const static std::string HEADER_MESSAGE;
 
-    ErrorFrame();
-    ErrorFrame(const std::string &msg);
+    ErrorFrame() : Frame(MESSAGE_TYPE) { }
+    ErrorFrame(const std::string &msg) : Frame(MESSAGE_TYPE) {
+        setHeader(HEADER_MESSAGE, msg);
+    }
 
-    const std::string& errorMessage() const;
+    const std::string& errorMessage() const {
+        return getHeader(HEADER_MESSAGE);
+    }
 };
 
 class ReceiptFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
-    ReceiptFrame();
-    ReceiptFrame(const std::string &receiptId);
+    ReceiptFrame() : Frame(MESSAGE_TYPE) { }
+    ReceiptFrame(const std::string &receiptId) : Frame(MESSAGE_TYPE) {
+        setReceiptId(receiptId);
+    }
 };
 
 class SubscribeFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
-    const static std::string HEADER_ID;
     const static std::string HEADER_DESTINATION;
+    const static std::string HEADER_ID;
 
-    SubscribeFrame(const std::string &destination, const std::string &subscriptionId);
+    SubscribeFrame(const std::string &destination, const std::string &subscriptionId) : Frame(MESSAGE_TYPE) {
+        setHeader(HEADER_DESTINATION, destination);
+        setHeader(HEADER_ID, subscriptionId);
+    }
 
-    const std::string& destination() const;
-    void setDestination(const std::string &destination);
+    const std::string& destination() const {
+        return getHeader(HEADER_DESTINATION);
+    }
+    Frame& setDestination(const std::string &destination) {
+        return setHeader(HEADER_DESTINATION, destination);
+    }
 
-    const std::string& subscriptionId() const;
-    void setSubscriptionId(const std::string &subscriptionId);
+    const std::string& subscriptionId() const {
+        return getHeader(HEADER_ID);
+    }
+    Frame& setSubscriptionId(const std::string &subscriptionId) {
+        return setHeader(HEADER_ID, subscriptionId);
+    }
 };
 
 class UnsubscribeFrame : public Frame {
@@ -119,10 +183,16 @@ public:
 
     const static std::string HEADER_ID;
 
-    UnsubscribeFrame(const std::string &subscriptionId);
+    UnsubscribeFrame(const std::string &subscriptionId) : Frame(MESSAGE_TYPE) {
+        setHeader(HEADER_ID, subscriptionId);
+    }
 
-    const std::string& subscriptionId() const;
-    void setSubscriptionId(const std::string &subscriptionId);
+    const std::string& subscriptionId() const {
+        return getHeader(HEADER_ID);
+    }
+    Frame& setSubscriptionId(const std::string &subscriptionId) {
+        return setHeader(HEADER_ID, subscriptionId);
+    }
 };
 
 class SendFrame : public Frame {
@@ -131,10 +201,16 @@ public:
 
     const static std::string HEADER_DESTINATION;
 
-    SendFrame(const std::string &destination, const std::string &body);
+    SendFrame(const std::string &destination, const std::string &body) : Frame(MESSAGE_TYPE, body) {
+        setHeader(HEADER_DESTINATION, destination);
+    }
 
-    const std::string& destination() const;
-    void setDestination(const std::string &destination);
+    const std::string& destination() const {
+        return getHeader(HEADER_DESTINATION);
+    }
+    Frame& setDestination(const std::string &destination) {
+        return setHeader(HEADER_DESTINATION, destination);
+    }
 };
 
 class MessageFrame : public Frame {
@@ -145,17 +221,34 @@ public:
     const static std::string HEADER_DESTINATION;
     const static std::string HEADER_MESSAGE_ID;
 
-    MessageFrame();
-    MessageFrame(const std::string &subscriptionId, const std::string &destination, const std::string &messageId, const std::string &body);
+    MessageFrame() : Frame(MESSAGE_TYPE) { }
+    MessageFrame(const std::string &subscriptionId, const std::string &destination, const std::string &messageId, const std::string &body) :
+        Frame(MESSAGE_TYPE, body) {
+        setHeader(HEADER_SUBSCRIPTION, subscriptionId);
+        setHeader(HEADER_DESTINATION, destination);
+        setHeader(HEADER_MESSAGE_ID, messageId);
+    }
 
-    const std::string& subscriptionId() const;
-    void setSubscriptionId(const std::string &subscriptionId);
+    const std::string& subscriptionId() const {
+        return getHeader(HEADER_SUBSCRIPTION);
+    }
+    Frame& setSubscriptionId(const std::string &subscriptionId) {
+        return setHeader(HEADER_SUBSCRIPTION, subscriptionId);
+    }
 
-    const std::string& destination() const;
-    void setDestination(const std::string &destination);
+    const std::string& destination() const {
+        return getHeader(HEADER_DESTINATION);
+    }
+    Frame& setDestination(const std::string &destination) {
+        return setHeader(HEADER_DESTINATION, destination);
+    }
 
-    const std::string& messageId() const;
-    void setMessageId(const std::string &messageId);
+    const std::string& messageId() const {
+        return getHeader(HEADER_MESSAGE_ID);
+    }
+    Frame& setMessageId(const std::string &messageId) {
+        return setHeader(HEADER_MESSAGE_ID, messageId);
+    }
 };
 
 #endif //STOMPCLIENT_FRAME_H

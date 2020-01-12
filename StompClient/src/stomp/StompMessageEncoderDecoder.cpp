@@ -55,6 +55,8 @@ Frame* StompMessageEncoderDecoder::buildFrame() {
     Frame *frame = createFrameInstance(line);
     frame->setMessageType(line);
 
+    // TODO: Boaz: i think this code needs a fix because it seems bugged.
+    //  NOTE: didn't check
     if(index < byteVector.size()){
         byte b = byteVector[index];
         if(b == '\n') { // body
@@ -68,7 +70,7 @@ Frame* StompMessageEncoderDecoder::buildFrame() {
                 decodeKey(index, key);
                 decodeValue(index, value);
 
-                frame->addHeader(key, value);
+                frame->setHeader(key, value);
             }
             index = index + 1;
             decodeBody(frame, index);
