@@ -10,8 +10,7 @@ BookLibraryUser::BookLibraryUser(
     Printer &printer
 ) : _username(std::move(username)), _password(std::move(password)),
     _connection(nullptr), _encdec(nullptr), _printer(printer),
-    _books(), receipts(), genreToSubscriptionIds(),
-    pendingBorrows(), successfulBorrows() {}
+    _books(), receipts(), _receiptsLock(), genreToSubscriptionIds() {}
 
 void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
     _connection = connection;
@@ -23,6 +22,47 @@ void BookLibraryUser::setEncoderDecoder(StompMessageEncoderDecoder *encdec) {
 
 std::string BookLibraryUser::username() {
     return _username;
+}
+
+UserBooks &BookLibraryUser::books() {
+    return _books;
+}
+
+void BookLibraryUser::addReceipt(const Frame &frame) {
+    mutex_lock lock(_receiptsLock);
+    receipts[frame.receiptId()] = frame;
+}
+
+void BookLibraryUser::removeReceipt(const std::string &receiptId) {
+    mutex_lock lock(_receiptsLock);
+    receipts.erase(receiptId);
+}
+
+bool BookLibraryUser::hasReceipt(const std::string &receiptId) {
+    mutex_lock lock(_receiptsLock);
+    return receipts.count(receiptId);
+}
+
+Frame &BookLibraryUser::getFrameForReceipt(const std::string &receiptId) {
+    mutex_lock lock(_receiptsLock);
+    return receipts.at(receiptId);
+}
+
+void BookLibraryUser::setSubscriptionId(const std::string &genre, const std::string &subscriptionId) {
+    genreToSubscriptionIds[genre] = subscriptionId;
+}
+
+void BookLibraryUser::removeSubscription(const std::string &genre) {
+    genreToSubscriptionIds.erase(genre);
+}
+
+bool BookLibraryUser::getSubscriptionIdFor(const std::string &genre, std::string &subscriptionId) {
+    if (genreToSubscriptionIds.count(genre)) {
+        subscriptionId = genreToSubscriptionIds[genre];
+        return true;
+    }
+
+    return false;
 }
 
 bool BookLibraryUser::connect(std::string &errorMsg) {
@@ -80,12 +120,11 @@ void BookLibraryUser::run() {
             break;
         }
 
-        if(frame->messageType() == "RECEIPT"){
+        if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
-            if(receipts.count(receipt) > 0){
-                Frame receiptFrame = receipts.at(receipt);
-
-                if(receiptFrame.messageType() == "SUBSCRIBE"){
+            if(hasReceipt(receipt)){
+                Frame &receiptFrame = getFrameForReceipt(receipt);
+                if(receiptFrame.messageType() == "SUBSCRIBE") {
                     std::string message = "Joined club " + receiptFrame.headers().at("destination");
                     _printer.println(message);
                 } else if(receiptFrame.messageType() == "UNSUBSCRIBE"){
@@ -94,7 +133,10 @@ void BookLibraryUser::run() {
                 } else if(receiptFrame.messageType() == "DISCONNECT"){
                     break;
                 }
-                receipts.erase(receipt);
+                removeReceipt(receipt);
+            }
+            else {
+                _printer.println("received a receipt for an unknown frame.");
             }
         }
         else if(frame->messageType() == "MESSAGE"){

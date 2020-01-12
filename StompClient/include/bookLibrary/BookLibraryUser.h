@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include "../Lock.h"
 #include "UserBooks.h"
 #include "../stomp/StompConnectionHandler.h"
 
@@ -18,26 +19,28 @@ private:
     Printer &_printer;
 
     UserBooks _books;
-    std::unordered_map<std::string, Frame> receipts;
-    std::unordered_map<std::string, std::string> genreToSubscriptionIds;
 
-    std::unordered_map<std::string, std::string> pendingBorrows;
-    std::unordered_map<std::string, std::string> successfulBorrows;
+    std::mutex _receiptsLock;
+    std::unordered_map<std::string, Frame> receipts;
+
+    std::unordered_map<std::string, std::string> genreToSubscriptionIds;
 public:
     BookLibraryUser(std::string username, std::string password, Printer &printer);
 
     std::string username();
-    UserBooks& books() const;
+    UserBooks& books();
 
     bool connect(std::string &errorMsg);
     void run();
 
     void addReceipt(const Frame &frame);
     void removeReceipt(const std::string &receiptId);
+    bool hasReceipt(const std::string &receiptId);
+    Frame& getFrameForReceipt(const std::string &receiptId);
 
-    void addSubscription(std::string genre, std::string subscriptionId);
-    void removeSubscription(std::string genre);
-    bool getSubscriptionIdFor(std::string genre, std::string &subscriptionId);
+    void setSubscriptionId(const std::string &genre, const std::string &subscriptionId);
+    void removeSubscription(const std::string &genre);
+    bool getSubscriptionIdFor(const std::string &genre, std::string &subscriptionId);
 
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
