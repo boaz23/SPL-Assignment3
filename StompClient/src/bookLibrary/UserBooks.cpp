@@ -51,18 +51,6 @@ void UserBooks::addBookToBookCollection(const std::string &genre, const std::str
     }
 }
 
-void UserBooks::removeBook(const std::string &genre, const std::string &book) {
-    //TODO: if the book is borrowed check what to do with it.
-    //TODO: remove from the book to topic map if there is no instance of the book in the book collection
-    if(_bookToGenreMap.count(book) > 0) {
-        _books.erase(book);
-    }
-    if(_books.count(genre) > 0){
-        BookCollection bookCollection1 = _books.at(genre);
-        bookCollection1.removeBook(book);
-    }
-}
-
 /**
  * The user have the book, not borrowed
  * @param genre

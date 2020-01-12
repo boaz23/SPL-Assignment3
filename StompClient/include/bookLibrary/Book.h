@@ -7,7 +7,7 @@ enum BookState {HAVE, BORROWED_TO, WANT_TO_BORROW, BORROWED_FROM};
 
 class Book{
 private:
-    std::string _book;
+    std::string _name;
 
     BookState _bookState;
     //if the book is borrowed the bool will be true and the string
@@ -18,6 +18,7 @@ private:
     void setState(BookState bookState);
 
 public:
+    Book();
     static Book newBook(const std::string &bookName);
     static Book wantToBorrowBook(const std::string &bookName);
     static Book borrowedBookTo(const std::string &bookName);

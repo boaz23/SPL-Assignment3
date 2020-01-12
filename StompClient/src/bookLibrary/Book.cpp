@@ -6,10 +6,12 @@
 
 #include <utility>
 
+Book::Book() : _name(), _bookState(), _borrowedFrom() { }
+
 Book::Book(std::string bookName, BookState bookState,
-        std::string borrowedFrom):
-        _book(std::move(bookName)), _bookState(bookState),
-        _borrowedFrom(std::move(borrowedFrom)) {
+    std::string borrowedFrom):
+    _name(std::move(bookName)), _bookState(bookState),
+    _borrowedFrom(std::move(borrowedFrom)) {
 }
 
 Book Book::newBook(const std::string &bookName){
@@ -37,7 +39,7 @@ void Book::setState(BookState bookState) {
 }
 
 const std::string& Book::name() const {
-    return _book;
+    return _name;
 }
 
 bool Book::hasBook() const {

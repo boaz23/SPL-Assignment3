@@ -23,7 +23,6 @@ public:
     bool getBookGenre(const std::string &bookName, std::string &genre) const;
 
     void addBook(const std::string &genre, const std::string &book);
-    void removeBook(const std::string &genre, const std::string &book);
 
     bool hasBook(const std::string &genre, const std::string &bookName) const;
     // retrurn if the user want to borrow the book
