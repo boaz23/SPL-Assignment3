@@ -23,6 +23,7 @@ public:
     bool hasBook(const std::string &bookName) const;
     bool isBorrowedFrom(const std::string &bookName, const std::string &from) const;
     bool wantToBorrowBook(const std::string &bookName) const;
+    bool borrowBookToUser(const std::string &bookName);
 
     int removeBorrowedBook(const std::string &bookName);
 

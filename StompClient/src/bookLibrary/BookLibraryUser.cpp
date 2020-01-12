@@ -167,17 +167,17 @@ bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vec
 
 bool BookLibraryUser::handlerSomeoneWantToBorrow(const std::string &dest, const std::vector<std::string> &message) {
     std::string name = message[0];
+    if (name != _username) {
+        // username want to borrow bookname
+        std::string bookName = message[4];
+        for (unsigned long i = 5; i < message.size(); i = i + 1) {
+            bookName.append(" ");
+            bookName.append(message[i]);
+        }
 
-    // username want to borrow bookname
-    std::string bookName = message[4];
-    for(unsigned long i=5; i < message.size(); i=i+1) {
-        bookName.append(" ");
-        bookName.append(message[i]);
-    }
-
-    if(name != _username){
-        if(_books.hasBook(dest, bookName)){
+        if (_books.hasBook(dest, bookName)) {
             return sendHasBookFrame(dest, bookName);
+
         }
     }
 

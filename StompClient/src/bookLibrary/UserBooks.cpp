@@ -156,7 +156,7 @@ bool UserBooks::getBookGenre(const std::string &bookName, std::string &genre) co
 void UserBooks::borrowBookToUser(const std::string &genre, const std::string &bookName) {
     if(_books.count(genre) > 0) {
         BookCollection &bookCollection1 = _books.at(genre);
-
+        bookCollection1.borrowBookToUser(bookName);
     } else {
         throw std::runtime_error("Someone was taking book from us because we said we have it...");
     }

@@ -117,3 +117,13 @@ std::vector<Book>::const_iterator BookCollection::begin() const {
 std::vector<Book>::const_iterator BookCollection::end() const {
     return _books.end();
 }
+
+bool BookCollection::borrowBookToUser(const std::string &bookName) {
+    for(auto& book : _books){
+        if(book.name() == bookName && book.hasBook()){
+            book.borrowTheBookToSomeone();
+            return true;
+        }
+    }
+    return false;
+}

@@ -41,6 +41,7 @@ public:
     bool isBorrowedTo() const;
 
     void setToUserOwnership();
+    void borrowTheBookToSomeone();
 };
 
 #endif //STOMPCLIENT_BOOK_H

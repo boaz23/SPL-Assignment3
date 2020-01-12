@@ -5,6 +5,7 @@
 #include "../../include/bookLibrary/Book.h"
 
 #include <utility>
+#include <stdexcept>
 
 Book::Book() : _name(), _bookState(), _borrowedFrom() { }
 
@@ -70,6 +71,16 @@ bool Book::isBorrowedTo() const {
 void Book::setToUserOwnership() {
     _bookState = BookState::HAVE;
     _borrowedFrom = "";
+}
+
+void Book::borrowTheBookToSomeone() {
+    if(_bookState == BookState::HAVE){
+        _bookState = BookState::BORROWED_TO;
+    } else if(_bookState == BookState::BORROWED_FROM){
+        _bookState = BookState::BORROWED_FROM_AND_BORROWED_TO;
+    } else {
+        throw std::runtime_error("Cant borrow the book in this state");
+    }
 }
 
 
