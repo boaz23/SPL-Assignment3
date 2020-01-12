@@ -2,11 +2,12 @@
 #ifndef STOMPCLIENT_STOMPMESSAGEENCODERDECODER_H
 #define STOMPCLIENT_STOMPMESSAGEENCODERDECODER_H
 
-#include "../api/MessageEncoderDecoder.h"
 #include "Frame.h"
 #include <vector>
 
-class StompMessageEncoderDecoder : public MessageEncoderDecoder<Frame, Frame> {
+using byte = char;
+
+class StompMessageEncoderDecoder {
 private:
     std::vector<byte> byteVector;
 
@@ -24,7 +25,7 @@ private:
 public:
     StompMessageEncoderDecoder();
     virtual Frame* decodeNextByte(byte nextByte);
-    virtual Array<byte> encode(const Frame &message);
+    virtual std::string* encode(const Frame &message);
 };
 
 

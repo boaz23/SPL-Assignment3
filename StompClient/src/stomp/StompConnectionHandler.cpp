@@ -6,6 +6,6 @@ StompConnectionHandler::StompConnectionHandler(std::string host, short port, Sto
 ConnectionHandler(std::move(host), port), _encdec(encdec) {}
 
 bool StompConnectionHandler::sendFrame(Frame &frame) {
-    Array<byte> bytes = _encdec.encode(frame);
-    return sendBytes(bytes.array, bytes.length);
+    std::unique_ptr<std::string> str(_encdec.encode(frame));
+    return sendBytes(str->c_str(), str->length());
 }

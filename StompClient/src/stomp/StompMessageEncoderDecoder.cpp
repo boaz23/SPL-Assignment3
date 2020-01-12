@@ -13,19 +13,12 @@ Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     return nullptr;
 }
 
-Array<byte> StompMessageEncoderDecoder::encode(const Frame &message) {
-    std::string data;
-    encodeMessage(message, data);
-    encodeHeaders(message, data);
-    encodeBody(message, data);
-
-    // TODO: move op
-    byte *bytes = new byte[data.length()];
-    for (unsigned long i = 0; i < data.length(); ++i) {
-        bytes[i] = data[i];
-    }
-
-    return Array<byte>(bytes, data.length());
+std::string* StompMessageEncoderDecoder::encode(const Frame &message) {
+    auto *data = new std::string();
+    encodeMessage(message, *data);
+    encodeHeaders(message, *data);
+    encodeBody(message, *data);
+    return data;
 }
 
 void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string &data) const {
