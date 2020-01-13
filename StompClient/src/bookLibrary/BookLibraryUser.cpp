@@ -119,7 +119,6 @@ bool BookLibraryUser::readFrame(std::unique_ptr<Frame> &frame) {
 void BookLibraryUser::run() {
     std::unique_ptr<Frame> frame = nullptr;
 
-    //TODO: check how to stop the thread, maybe use inperept
     //TODO: refactor
     while(true) {
         if (!readFrame(frame)) {
@@ -127,6 +126,9 @@ void BookLibraryUser::run() {
             break;
         }
 
+        // TODO: remove this
+        std::unique_ptr<std::string> f = _encdec->encode(*frame);
+        _printer.println("received frame:\n" + *f);
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
             if(hasReceipt(receipt)){
@@ -148,7 +150,7 @@ void BookLibraryUser::run() {
         }
         else if(frame->messageType() == "MESSAGE"){
             std::string dest = frame->headers().at("destination");
-            std::string body = frame->headers().at("body");
+            std::string body = frame->body();
 
             printMessage(dest, body);
 
