@@ -128,7 +128,7 @@ void BookLibraryUser::run() {
 
         // TODO: remove this
         std::unique_ptr<std::string> f = _encdec->encode(*frame);
-        _printer.println("received frame:\n" + *f);
+        _printer.println("received frame:\n" + *f + "\0");
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
             if(hasReceipt(receipt)){
@@ -240,7 +240,7 @@ bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
     if (_books.copyOfBookCollection(dest, bookCollection) && !bookCollection.isEmpty()) {
         auto book = bookCollection.begin();
         bodyMessage.append(book->name());
-        for (; book != bookCollection.end(); ++book) {
+        for (++book; book != bookCollection.end(); ++book) {
             bodyMessage.append(",");
             bodyMessage.append(book->name());
         }

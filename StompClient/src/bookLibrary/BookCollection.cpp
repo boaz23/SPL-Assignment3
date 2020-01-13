@@ -1,7 +1,7 @@
 
 #include "../../include/bookLibrary/BookCollection.h"
 
-BookCollection::BookCollection(): _books(10) {
+BookCollection::BookCollection(): _books() {
 
 }
 
