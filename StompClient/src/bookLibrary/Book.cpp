@@ -95,4 +95,9 @@ std::string& Book::getUsernameOfBookThatWasBorrowedFrom() {
     }
 }
 
+void Book::markAsBorrowed(const std::string &from) {
+    _bookState = BookState::BORROWED_FROM;
+    _borrowedFrom = from;
+}
+
 

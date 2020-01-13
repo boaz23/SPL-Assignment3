@@ -103,8 +103,8 @@ void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::strin
 }
 
 void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from) {
-    Book book = Book::borrowedBookFrom(bookName, from);
-    addBook(genre, book);
+    BookCollection &bookCollection = _books[genre];
+    bookCollection.markAsBorrowed(bookName, from);
 }
 
 void UserBooks::removeBorrowedBook(const std::string &genre, const std::string &bookName) {

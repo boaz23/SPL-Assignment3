@@ -79,6 +79,15 @@ bool BookCollection::wantToBorrowBook(const std::string &bookName) const {
     return false;
 }
 
+void BookCollection::markAsBorrowed(const std::string &bookName, const std::string &from) {
+    for(auto& book : _books){
+        if(book.name() == bookName && book.wantToBorrow()){
+            book.markAsBorrowed(from);
+            break;
+        }
+    }
+}
+
 /**
  * Remove one instance of a borrowed book
  * Return the number of book with the same name that remain in the vector

@@ -42,6 +42,7 @@ public:
     bool isBorrowedFromSomeone() const;
     bool isBorrowedFrom(const std::string &from) const;
     bool isBorrowedTo() const;
+    void markAsBorrowed(const std::string &from);
 
     void BorrowedBookFromUserHasReturned();
     void borrowTheBookToSomeone();

@@ -24,6 +24,7 @@ public:
     bool getBorrowedFrom(const std::string &bookName, std::string &from);
     bool wantToBorrowBook(const std::string &bookName) const;
     bool borrowBookToUser(const std::string &bookName);
+    void markAsBorrowed(const std::string &bookName, const std::string &from);
 
     int removeBorrowedBook(const std::string &bookName);
 
