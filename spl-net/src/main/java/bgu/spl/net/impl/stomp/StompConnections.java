@@ -3,6 +3,7 @@ package bgu.spl.net.impl.stomp;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.*;
 
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -87,18 +88,31 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     public boolean unsubscribe(int connectionId, SubscriptionAttachment attachment) {
         StompClient client = clientsMap.get(connectionId);
         String topic = client.getTopicOfSubscriptionAttachment(attachment);
+        if (topic == null) {
+            return false;
+        }
 
-        getTopic(topic).removeSubscriber(connectionId);
+        Topic<Frame> t = getTopic(topic);
+        if (t == null) {
+            return false;
+        }
+        t.removeSubscriber(connectionId);
         client.removeSubscription(topic);
         return true;
     }
 
     public Iterable<ConnectionSubscriptionInfo<Frame>> getConnectionsSubscribedTo(String topic) {
-        return getTopic(topic).subscribers();
+        Topic<Frame> t = getTopic(topic);
+        if (t == null) {
+            return Collections.emptyList();
+        }
+        return t.subscribers();
     }
 
     private Topic<Frame> addTopic(String topic) {
-        return subscriptionsMap.put(topic, new Topic<>());
+        Topic<Frame> t = new Topic<>();
+        subscriptionsMap.put(topic, t);
+        return t;
     }
 
     private Topic<Frame> getTopic(String topic) {
@@ -113,6 +127,10 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     }
 
     private void removeClientFromTopic(int connectionId, String topic) {
-        subscriptionsMap.get(topic).removeSubscriber(connectionId);
+        Topic<Frame> t = subscriptionsMap.get(topic);
+        if (t == null) {
+            return;
+        }
+        t.removeSubscriber(connectionId);
     }
 }
