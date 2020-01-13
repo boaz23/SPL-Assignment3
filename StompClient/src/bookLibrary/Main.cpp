@@ -39,8 +39,6 @@ void Main::start() {
     }
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err34-c"
 void Main::login(const vector<string> &arguments) {
     if (arguments.size() != 4) {
         _printer.println("invalid usage of the login command.");
@@ -58,7 +56,6 @@ void Main::login(const vector<string> &arguments) {
     bool justAdded = initializeUser(host, port, username, password);
     connectAndRun(justAdded);
 }
-#pragma clang diagnostic pop
 
 void Main::logout(const vector<string> &arguments) {
     if (arguments.size() != 1) {
