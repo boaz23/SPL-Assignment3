@@ -1,6 +1,6 @@
 #include "../../include/stomp/StompMessageEncoderDecoder.h"
 
-StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1024) { }
+StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector() { }
 
 std::unique_ptr<Frame> StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     if(nextByte != '\0') {
@@ -55,11 +55,13 @@ std::unique_ptr<Frame> StompMessageEncoderDecoder::buildFrame() {
         decodeValue(index, value);
         frame->setHeader(key, value);
     }
-    if (index >= byteVector.size()) {
+    ++index;
+    if (index > byteVector.size()) {
         throw std::runtime_error("Received invalid frame");
     }
     decodeBody(frame, index);
 
+    byteVector.clear();
     return std::unique_ptr<Frame>(frame);
 }
 

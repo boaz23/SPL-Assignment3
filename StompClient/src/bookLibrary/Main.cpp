@@ -364,7 +364,7 @@ bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
         return false;
     }
     if (_conn && _conn->isClosed()) {
-//        _printer.println("cannot perform that action because the connection is closed.");
+        _printer.println("cannot perform that action because the connection is closed.");
         disconnectionCleanup();
         return false;
     }

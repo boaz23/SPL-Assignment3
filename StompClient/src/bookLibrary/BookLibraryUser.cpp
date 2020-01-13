@@ -98,7 +98,7 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
 bool BookLibraryUser::readFrame(std::unique_ptr<Frame> &frame) {
     bool ret;
     byte  b = 0;
-    while ((ret = !_connection->getBytes(&b, 1))) {
+    while ((ret = _connection->getBytes(&b, 1))) {
         frame = _encdec->decodeNextByte(b);
         if (frame) {
             break;
