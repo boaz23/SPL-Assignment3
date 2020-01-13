@@ -22,7 +22,7 @@ std::unique_ptr<std::string> StompMessageEncoderDecoder::encode(const Frame &mes
 }
 
 void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string &data) const {
-    data.append(message.messageType(), message.messageType().length());
+    data.append(message.messageType());
     data.append("\n");
 }
 
@@ -37,8 +37,8 @@ void StompMessageEncoderDecoder::encodeHeaders(const Frame &message, std::string
 }
 
 void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &data) const {
-    data.append(message.body(), message.body().length());
-    data.append("\0");
+    data.append(message.body());
+    data.resize(data.length() + 1, '\0');
 }
 
 std::unique_ptr<Frame> StompMessageEncoderDecoder::buildFrame() {

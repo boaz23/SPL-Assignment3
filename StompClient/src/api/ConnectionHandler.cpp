@@ -31,6 +31,7 @@ bool ConnectionHandler::connect() {
 		socket_.connect(endpoint, error);
 		if (error)
 			throw boost::system::system_error(error);
+		state_ = State::Open;
         return true;
     }
     catch (boost::system::system_error& e) {

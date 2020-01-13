@@ -90,7 +90,7 @@ bool Main::initializeUser(const string &host, short port, const string &username
 
 void Main::connectAndRun(bool justAdded) {
     std::string err;
-    if (_activeUser->connect(err)) {
+    if (_conn->connect() && _activeUser->connect(err)) {
         _printer.println("Login successful");
         _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
     }
