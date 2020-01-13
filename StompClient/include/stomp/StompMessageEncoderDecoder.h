@@ -25,8 +25,8 @@ private:
 
 public:
     StompMessageEncoderDecoder();
-    virtual std::unique_ptr<Frame> decodeNextByte(byte nextByte);
-    virtual std::unique_ptr<std::string> encode(const Frame &message);
+    std::unique_ptr<Frame> decodeNextByte(byte nextByte);
+    std::unique_ptr<std::string> encode(const Frame &message);
 };
 
 

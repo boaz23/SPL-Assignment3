@@ -12,7 +12,7 @@ Book::Book() : _name(), _bookState(), _borrowedFrom(), _emptyStr() { }
 Book::Book(std::string bookName, BookState bookState,
     std::string borrowedFrom):
     _name(std::move(bookName)), _bookState(bookState),
-    _borrowedFrom(std::move(borrowedFrom)) {
+    _borrowedFrom(std::move(borrowedFrom)), _emptyStr() {
 }
 
 Book Book::newBook(const std::string &bookName){

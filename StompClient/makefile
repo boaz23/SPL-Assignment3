@@ -1,19 +1,51 @@
 CC = g++
-CFLAGS = -c -Wall -Wemutexffc++ -g -std=c++11 -Iinclude
+CFLAGS = -c -Wall -Weffc++ -g -std=c++11 -Iinclude
 LDFLAGS = -lboost_system -pthread
 
-link: EchoClient
-    @echo 'Linking...'
-	g++ -o bin/echoExample bin/connectionHandler.o bin/echoClient.o $(LDFLAGS) 
+link: StompBookClubClient
+	@echo 'Linking...'
+	$(CC) -o bin/StompBookClubClient bin/api-ConnectionHandler.o bin/bookLibrary-Book.o bin/bookLibrary-BookCollection.o bin/bookLibrary-BookLibraryUser.o bin/bookLibrary-Main.o bin/bookLibrary-UserBooks.o bin/stomp-Frame.o bin/stomp-StompConnectionHandler.o bin/stomp-StompMessageEncoderDecoder.o bin/stomp-StompVersion.o bin/Lock.o bin/Printer.o bin/Util.o $(LDFLAGS)
 
-EchoClient: bin/connectionHandler.o bin/echoClient.o
-	
-bin/connectionHandler.o: src/connectionHandler.cpp
-	g++ $(CFLAGS) -o bin/connectionHandler.o src/connectionHandler.cpp
+StompBookClubClient: bin/api-ConnectionHandler.o bin/bookLibrary-Book.o bin/bookLibrary-BookCollection.o bin/bookLibrary-BookLibraryUser.o bin/bookLibrary-Main.o bin/bookLibrary-UserBooks.o bin/stomp-Frame.o bin/stomp-StompConnectionHandler.o bin/stomp-StompMessageEncoderDecoder.o bin/stomp-StompVersion.o bin/Lock.o bin/Printer.o bin/Util.o
 
-bin/echoClient.o: src/echoClient.cpp
-	g++ $(CFLAGS) -o bin/echoClient.o src/echoClient.cpp
-	
-.PHONY: clean
+bin/api-ConnectionHandler.o: src/api/ConnectionHandler.cpp include/api/ConnectionHandler.h
+	$(CC) $(CFLAGS) -o bin/api-ConnectionHandler.o src/api/ConnectionHandler.cpp
+
+bin/bookLibrary-Book.o: src/bookLibrary/Book.cpp include/bookLibrary/Book.h
+	$(CC) $(CFLAGS) -o bin/bookLibrary-Book.o src/bookLibrary/Book.cpp
+
+bin/bookLibrary-BookCollection.o: src/bookLibrary/BookCollection.cpp include/bookLibrary/BookCollection.h
+	$(CC) $(CFLAGS) -o bin/bookLibrary-BookCollection.o src/bookLibrary/BookCollection.cpp
+
+bin/bookLibrary-BookLibraryUser.o: src/bookLibrary/BookLibraryUser.cpp include/bookLibrary/BookLibraryUser.h
+	$(CC) $(CFLAGS) -o bin/bookLibrary-BookLibraryUser.o src/bookLibrary/BookLibraryUser.cpp
+
+bin/bookLibrary-Main.o: src/bookLibrary/Main.cpp include/bookLibrary/Main.h
+	$(CC) $(CFLAGS) -o bin/bookLibrary-Main.o src/bookLibrary/Main.cpp
+
+bin/bookLibrary-UserBooks.o: src/bookLibrary/UserBooks.cpp include/bookLibrary/UserBooks.h
+	$(CC) $(CFLAGS) -o bin/bookLibrary-UserBooks.o src/bookLibrary/UserBooks.cpp
+
+bin/stomp-Frame.o: src/stomp/Frame.cpp include/stomp/Frame.h
+	$(CC) $(CFLAGS) -o bin/stomp-Frame.o src/stomp/Frame.cpp
+
+bin/stomp-StompConnectionHandler.o: src/stomp/StompConnectionHandler.cpp include/stomp/StompConnectionHandler.h
+	$(CC) $(CFLAGS) -o bin/stomp-StompConnectionHandler.o src/stomp/StompConnectionHandler.cpp
+
+bin/stomp-StompMessageEncoderDecoder.o: src/stomp/StompMessageEncoderDecoder.cpp include/stomp/StompMessageEncoderDecoder.h
+	$(CC) $(CFLAGS) -o bin/stomp-StompMessageEncoderDecoder.o src/stomp/StompMessageEncoderDecoder.cpp
+
+bin/stomp-StompVersion.o: include/stomp/StompVersion.h
+	$(CC) $(CFLAGS) -o bin/stomp-StompVersion.o include/stomp/StompVersion.h
+
+bin/Lock.o: include/Lock.h
+	$(CC) $(CFLAGS) -o bin/Lock.o include/Lock.h
+
+bin/Printer.o: src/Printer.cpp include/Printer.h
+	$(CC) $(CFLAGS) -o bin/Printer.o src/Printer.cpp
+
+bin/Util.o: src/Util.cpp include/Util.h
+	$(CC) $(CFLAGS) -o bin/Util.o src/Util.cpp
+
 clean:
-	rm -f bin/*
+	rm -f bin/*.o StompBookClubClient
