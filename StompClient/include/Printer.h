@@ -14,6 +14,8 @@ public:
 
     void print(const std::string &s);
     void println(const std::string &s);
+
+    Printer& operator<<(const std::string &s);
 };
 
 #endif //STOMPCLIENT_PRINTER_H

@@ -61,6 +61,7 @@ private:
     void handleSomeoneTakingBookFrom(const std::string &dest, const std::vector<std::string> &message);
     void returnedBook(const std::string &dest, const std::vector<std::string> &message);
 
+    void debugPrintFrame(const Frame &frame);
 };
 
 

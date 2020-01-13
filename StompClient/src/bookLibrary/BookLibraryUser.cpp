@@ -126,9 +126,8 @@ void BookLibraryUser::run() {
             break;
         }
 
-        // TODO: remove this
-        std::unique_ptr<std::string> f = _encdec->encode(*frame);
-        _printer.println("received frame:\n" + *f + "\0");
+        // TODO: remove this call
+        debugPrintFrame(*frame);
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
             if(hasReceipt(receipt)){
@@ -270,4 +269,11 @@ bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string 
         return false;
     }
     return true;
+}
+
+void BookLibraryUser::debugPrintFrame(const Frame &frame) {
+    std::unique_ptr<std::string> f = _encdec->encode(frame);
+    f->resize(f->length() + 1);
+//    _printer.println("----------\nreceived frame:\n" + *f);
+        _printer << "received frame:\n" << *f;
 }

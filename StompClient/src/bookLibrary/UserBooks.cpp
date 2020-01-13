@@ -85,7 +85,7 @@ bool UserBooks::isBookExistWithSameTopic(const std::string &genre,
 bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookName) {
     mutex_lock lock(_mutex);
 
-    if(_bookToGenreMap.count(bookName) == 0){
+    if(_bookToGenreMap.count(bookName)){
         BookCollection &bookCollection1 = _books.at(genre);
         return bookCollection1.wantToBorrowBook(bookName);
     }

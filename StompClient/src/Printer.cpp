@@ -23,3 +23,10 @@ void Printer::println(const std::string &s) {
         std::cout << s << std::endl;
     }
 }
+
+// TODO: refactor all prints to use this method
+Printer &Printer::operator<<(const std::string &s) {
+    mutex_lock lock(_lock);
+    std::cout << s;
+    return *this;
+}
