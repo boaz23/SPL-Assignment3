@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+// TODO: synchronize access
 public class StompConnections extends ConnectionsImpl<Frame> implements ConnectionHandlersManager<Frame> {
     private final ConcurrentMap<String, User> usersMap;
     private final ConnectionIdsManager connectionIdsManager;

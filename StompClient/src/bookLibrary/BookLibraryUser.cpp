@@ -121,6 +121,7 @@ void BookLibraryUser::run() {
 
     //TODO: refactor
     while(true) {
+        // TODO: move this call to the stomp connection handler
         if (!readFrame(frame)) {
             _connection->close();
             break;
@@ -128,6 +129,7 @@ void BookLibraryUser::run() {
 
         // TODO: remove this call
         debugPrintFrame(*frame);
+        // TODO: extract method from this
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
             if(hasReceipt(receipt)){

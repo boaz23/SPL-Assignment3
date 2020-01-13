@@ -88,13 +88,11 @@ void StompMessageEncoderDecoder::getLine(std::string &line, size_t &index) const
         byte b = byteVector[index];
         if(b == '\r') {
             if (index < byteVector.size() - 1 && byteVector[index + 1] == '\n'){
-                //TODO: check the increment
                 index = index + 2;
                 break;
             }
         }
         else if(b == '\n') {
-            //TODO: check the increment
             ++index;
             break;
         }
@@ -106,7 +104,6 @@ void StompMessageEncoderDecoder::decodeKey(size_t &index, std::string &key) cons
     for (; index < byteVector.size(); ++index) {
         byte b = byteVector[index];
         if (b == ':') {
-            //TODO: check the inc
             ++index;
             break;
         }

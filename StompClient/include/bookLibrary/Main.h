@@ -12,6 +12,7 @@
 #include "../stomp/StompConnectionHandler.h"
 #include "BookLibraryUser.h"
 
+// TODO: think of a way to not hold pointers
 class Main {
 private:
     Printer &_printer;

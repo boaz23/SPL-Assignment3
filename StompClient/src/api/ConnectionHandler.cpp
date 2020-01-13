@@ -67,6 +67,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 }
 
 bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
+    // TODO: synchronize
     if (isClosed_doubledChecked()) {
         return false;
     }
