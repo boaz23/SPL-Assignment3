@@ -157,7 +157,7 @@ void BookLibraryUser::run() {
 
             if(message.size() > 4 && message[1] == "wish" && message[2] == "to" && message[3] == "borrow"){
                 if(!handlerSomeoneWantToBorrow(dest, message)){ break; }
-            } else if(message.size() > 2 && message[1] == "has"){
+            } else if(message.size() > 2 && message[1] == "has" && message[2] != "added"){
                 if(!handlerUserHasBook(dest, message)){ break; }
             } else if(message.size() > 3 && message[0] == "Taking" && message[message.size()-2] == "from"){
                 handleSomeoneTakingBookFrom(dest, message);
@@ -196,18 +196,19 @@ void BookLibraryUser::handleSomeoneTakingBookFrom(const std::string &dest, const
 
 bool BookLibraryUser::handlerUserHasBook(const std::string &dest, const std::vector<std::string> &message) {
     std::string userOfTheBook = message[0];
-
-    std::string bookName = message[2];
-    for(unsigned long i=3; i < message.size(); i=i+1) {
-        bookName.append(" ");
-        bookName.append(message[i]);
-    }
-
-    if(_books.wantToBorrow(dest, bookName)){
-        if(!sendTakingBookFrom(dest, bookName, userOfTheBook)){
-            return false;
+    if (userOfTheBook != _username) {
+        std::string bookName = message[2];
+        for (unsigned long i = 3; i < message.size(); i = i + 1) {
+            bookName.append(" ");
+            bookName.append(message[i]);
         }
-        _books.borrowBookFromUser(dest, bookName, userOfTheBook);
+
+        if (_books.wantToBorrow(dest, bookName)) {
+            if (!sendTakingBookFrom(dest, bookName, userOfTheBook)) {
+                return false;
+            }
+            _books.borrowBookFromUser(dest, bookName, userOfTheBook);
+        }
     }
 
     return true;
@@ -273,7 +274,7 @@ bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string 
 
 void BookLibraryUser::debugPrintFrame(const Frame &frame) {
     std::unique_ptr<std::string> f = _encdec->encode(frame);
-    f->resize(f->length() + 1);
+//    f->resize(f->length() + 1);
 //    _printer.println("----------\nreceived frame:\n" + *f);
-        _printer << "received frame:\n" << *f;
+        _printer << "----------\nreceived frame:\n" << *f << "\n";
 }
