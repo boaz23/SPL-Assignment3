@@ -22,7 +22,7 @@ void BookCollection::addBook(const Book& book) {
  * @param username
  */
 void BookCollection::userReturnTheBook(const std::string &bookName) {
-    for(auto book : _books){
+    for(auto &book : _books){
         if(book.isBorrowedTo()){
             book.BorrowedBookFromUserHasReturned();
             break;
