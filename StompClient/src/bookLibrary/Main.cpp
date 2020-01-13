@@ -126,6 +126,8 @@ void Main::cleanupUser() {
     std::unique_ptr<std::thread> userThreadDeleter(_userThread);
     if (_activeUser) {
         _activeUser->books().clear();
+        _activeUser->clearReceipts();
+        _activeUser->clearSubscriptionMap();
         _activeUser->setConnection(nullptr);
         _activeUser->setEncoderDecoder(nullptr);
     }

@@ -48,6 +48,10 @@ Frame &BookLibraryUser::getFrameForReceipt(const std::string &receiptId) {
     return receipts.at(receiptId);
 }
 
+void BookLibraryUser::clearReceipts() {
+    receipts.clear();
+}
+
 void BookLibraryUser::setSubscriptionId(const std::string &genre, const std::string &subscriptionId) {
     genreToSubscriptionIds[genre] = subscriptionId;
 }
@@ -63,6 +67,10 @@ bool BookLibraryUser::getSubscriptionIdFor(const std::string &genre, std::string
     }
 
     return false;
+}
+
+void BookLibraryUser::clearSubscriptionMap() {
+    genreToSubscriptionIds.clear();
 }
 
 bool BookLibraryUser::connect(std::string &errorMsg) {

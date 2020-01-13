@@ -37,10 +37,12 @@ public:
     void removeReceipt(const std::string &receiptId);
     bool hasReceipt(const std::string &receiptId);
     Frame& getFrameForReceipt(const std::string &receiptId);
+    void clearReceipts();
 
     void setSubscriptionId(const std::string &genre, const std::string &subscriptionId);
     void removeSubscription(const std::string &genre);
     bool getSubscriptionIdFor(const std::string &genre, std::string &subscriptionId);
+    void clearSubscriptionMap();
 
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
