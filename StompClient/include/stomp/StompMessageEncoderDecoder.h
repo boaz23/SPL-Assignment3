@@ -4,6 +4,7 @@
 
 #include "Frame.h"
 #include <vector>
+#include <memory>
 
 using byte = char;
 
@@ -19,13 +20,13 @@ private:
     void decodeValue(int &index, std::string &value) const;
     void decodeBody(Frame *frame, int &index) const;
 
-    Frame* buildFrame();
+    std::unique_ptr<Frame> buildFrame();
     static Frame* createFrameInstance(const std::string &line);
 
 public:
     StompMessageEncoderDecoder();
-    virtual Frame* decodeNextByte(byte nextByte);
-    virtual std::string* encode(const Frame &message);
+    virtual std::unique_ptr<Frame> decodeNextByte(byte nextByte);
+    virtual std::unique_ptr<std::string> encode(const Frame &message);
 };
 
 

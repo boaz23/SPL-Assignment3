@@ -2,7 +2,7 @@
 
 StompMessageEncoderDecoder::StompMessageEncoderDecoder() : byteVector(1024) { }
 
-Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
+std::unique_ptr<Frame> StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     if(nextByte != '\0') {
         byteVector.push_back(nextByte);
     }
@@ -13,12 +13,12 @@ Frame* StompMessageEncoderDecoder::decodeNextByte(byte nextByte) {
     return nullptr;
 }
 
-std::string* StompMessageEncoderDecoder::encode(const Frame &message) {
+std::unique_ptr<std::string> StompMessageEncoderDecoder::encode(const Frame &message) {
     auto *data = new std::string();
     encodeMessage(message, *data);
     encodeHeaders(message, *data);
     encodeBody(message, *data);
-    return data;
+    return std::unique_ptr<std::string>(data);
 }
 
 void StompMessageEncoderDecoder::encodeMessage(const Frame &message, std::string &data) const {
@@ -41,7 +41,7 @@ void StompMessageEncoderDecoder::encodeBody(const Frame &message, std::string &d
     data.append("\0");
 }
 
-Frame* StompMessageEncoderDecoder::buildFrame() {
+std::unique_ptr<Frame> StompMessageEncoderDecoder::buildFrame() {
     int index = 0;
     std::string line;
     getLine(line, index);
@@ -60,7 +60,7 @@ Frame* StompMessageEncoderDecoder::buildFrame() {
     }
     decodeBody(frame, index);
 
-    return frame;
+    return std::unique_ptr<Frame>(frame);
 }
 
 Frame *StompMessageEncoderDecoder::createFrameInstance(const std::string &line) {
