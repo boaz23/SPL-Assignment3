@@ -10,7 +10,7 @@ BookLibraryUser::BookLibraryUser(
     Printer &printer
 ) : _username(std::move(username)), _password(std::move(password)),
     _connection(nullptr), _encdec(nullptr), _printer(printer),
-    _books(), receipts(), _receiptsLock(), genreToSubscriptionIds() {}
+    _books(), _receiptsLock(), receipts(), genreToSubscriptionIds() {}
 
 void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
     _connection = connection;
