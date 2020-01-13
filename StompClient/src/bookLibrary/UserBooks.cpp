@@ -98,15 +98,11 @@ bool UserBooks::wantToBorrow(const std::string &genre, const std::string &bookNa
  * @param bookName
  */
 void UserBooks::addBookAsWantToBorrow(const std::string &genre, const std::string &bookName) {
-    mutex_lock lock(_mutex);
-
     Book book = Book::wantToBorrowBook(bookName);
     addBook(genre, book);
 }
 
 void UserBooks::borrowBookFromUser(const std::string &genre, const std::string &bookName, const std::string &from) {
-    mutex_lock lock(_mutex);
-
     Book book = Book::borrowedBookFrom(bookName, from);
     addBook(genre, book);
 }

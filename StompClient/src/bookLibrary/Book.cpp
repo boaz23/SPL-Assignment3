@@ -7,7 +7,7 @@
 #include <utility>
 #include <stdexcept>
 
-Book::Book() : _name(), _bookState(), _borrowedFrom() { }
+Book::Book() : _name(), _bookState(), _borrowedFrom(), _emptyStr() { }
 
 Book::Book(std::string bookName, BookState bookState,
     std::string borrowedFrom):
@@ -25,7 +25,7 @@ Book Book::wantToBorrowBook(const std::string &bookName) {
     return book;
 }
 
-Book Book::borrowedBookTo(const std::string &bookName) {
+Book Book::borrowBookTo(const std::string &bookName) {
     Book book = Book(bookName, BookState::BORROWED_TO, "");
     return book;
 }
@@ -65,12 +65,16 @@ bool Book::isBorrowedFrom(const std::string &from) const {
 }
 
 bool Book::isBorrowedTo() const {
-    return _bookState == BookState::BORROWED_TO;
+    return _bookState == BookState::BORROWED_TO || _bookState == BookState::BORROWED_FROM_AND_BORROWED_TO;
 }
 
-void Book::setToUserOwnership() {
-    _bookState = BookState::HAVE;
-    _borrowedFrom = "";
+void Book::BorrowedBookFromUserHasReturned() {
+    if(_bookState == BookState::BORROWED_TO){
+        _bookState = BookState::HAVE;
+        _borrowedFrom = "";
+    } else if(_bookState == BookState::BORROWED_FROM_AND_BORROWED_TO){
+        _bookState = BookState::BORROWED_FROM;
+    }
 }
 
 void Book::borrowTheBookToSomeone() {
@@ -83,8 +87,12 @@ void Book::borrowTheBookToSomeone() {
     }
 }
 
-std::string& Book::getBorrowedFromName() {
-    return _borrowedFrom;
+std::string& Book::getUsernameOfBookThatWasBorrowedFrom() {
+    if(_bookState == BookState::BORROWED_FROM){
+        return _borrowedFrom;
+    } else {
+        return _emptyStr;
+    }
 }
 
 

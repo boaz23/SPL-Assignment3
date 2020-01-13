@@ -24,7 +24,7 @@ void BookCollection::addBook(const Book& book) {
 void BookCollection::userReturnTheBook(const std::string &bookName) {
     for(auto book : _books){
         if(book.isBorrowedTo()){
-            book.setToUserOwnership();
+            book.BorrowedBookFromUserHasReturned();
             break;
         }
     }
@@ -57,7 +57,7 @@ bool BookCollection::hasBook(const std::string &bookName) const {
 bool BookCollection::getBorrowedFrom(const std::string &bookName, std::string &from){
     for(auto& book : _books){
         if(book.name() == bookName && book.isBorrowedFromSomeone()){
-            from = book.getBorrowedFromName();
+            from = book.getUsernameOfBookThatWasBorrowedFrom();
             return true;
         }
     }
