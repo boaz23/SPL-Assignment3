@@ -74,7 +74,9 @@ bool UserBooks::hasBook(const std::string &genre, const std::string &bookName) {
 }
 
 bool UserBooks::isBookExistWithSameTopic(const std::string &genre,
-                                         const std::string &bookName) const { return _bookToGenreMap.count(bookName) > 0 && _bookToGenreMap.at(bookName) == genre; }
+                                         const std::string &bookName) const {
+    return _bookToGenreMap.count(bookName) && _bookToGenreMap.at(bookName) == genre;
+}
 
 /**
  * The user want to borrow this book.

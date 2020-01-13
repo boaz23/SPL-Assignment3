@@ -260,7 +260,7 @@ bool BookLibraryUser::sendTakingBookFrom(const std::string &topic, const std::st
 
 void BookLibraryUser::printMessage(const std::string &topic, const std::string &body) {
     std::string message = topic + ":" + body;
-    _printer.println(message);
+    _printer << message << "\n";
 }
 
 bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
