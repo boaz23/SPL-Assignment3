@@ -337,13 +337,13 @@ bool Main::getArguments(const std::string &cmd, std::vector<std::string> &argume
     return true;
 }
 
-bool Main::handleCommand(std::vector<std::string> &arguments) {
+bool Main::handleCommand(const std::vector<std::string> &arguments) {
     string action = arguments[0];
     if (action == "login") {
-        handleLoginCommand(arguments);
+        return handleLoginCommand(arguments);
     }
     else {
-        handleNonLoginCommand(arguments);
+        return handleNonLoginCommand(arguments);
     }
 }
 
@@ -364,7 +364,7 @@ bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
         return false;
     }
     if (_conn && _conn->isClosed()) {
-        _printer.println("cannot perform that action because the connection is closed.");
+//        _printer.println("cannot perform that action because the connection is closed.");
         disconnectionCleanup();
         return false;
     }

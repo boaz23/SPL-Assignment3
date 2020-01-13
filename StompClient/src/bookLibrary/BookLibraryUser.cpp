@@ -113,7 +113,7 @@ void BookLibraryUser::run() {
 
     //TODO: check how to stop the thread, maybe use inperept
     //TODO: refactor
-    while(true){
+    while(true) {
         if (!readFrame(frame)) {
             _connection->close();
             break;
@@ -158,7 +158,6 @@ void BookLibraryUser::run() {
                 if(!sendBooksStatus(dest)){ break; }
             }
         }
-
     }
 }
 

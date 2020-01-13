@@ -1,7 +1,9 @@
-CFLAGS:=-c -Wall -Wemutexffc++ -g -std=c++11 -Iinclude
-LDFLAGS:=-lboost_system -pthread
+CC = g++
+CFLAGS = -c -Wall -Wemutexffc++ -g -std=c++11 -Iinclude
+LDFLAGS = -lboost_system -pthread
 
-all: EchoClient
+link: EchoClient
+    @echo 'Linking...'
 	g++ -o bin/echoExample bin/connectionHandler.o bin/echoClient.o $(LDFLAGS) 
 
 EchoClient: bin/connectionHandler.o bin/echoClient.o
