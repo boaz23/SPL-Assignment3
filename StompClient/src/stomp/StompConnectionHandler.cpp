@@ -2,8 +2,8 @@
 #include "../../include/stomp/StompConnectionHandler.h"
 #include <utility>
 
-StompConnectionHandler::StompConnectionHandler(std::string host, short port, StompMessageEncoderDecoder &encdec) :
-ConnectionHandler(std::move(host), port), _encdec(encdec) {}
+StompConnectionHandler::StompConnectionHandler(StompMessageEncoderDecoder &encdec) :
+    ConnectionHandler(), _encdec(encdec) {}
 
 
 bool StompConnectionHandler::readFrame(std::unique_ptr<Frame> &frame) {

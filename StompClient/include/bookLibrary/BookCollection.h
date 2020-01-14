@@ -11,7 +11,6 @@ private:
     std::vector<Book> _books;
 
 public:
-
     BookCollection();
 
     void addBook(const std::string &bookName);

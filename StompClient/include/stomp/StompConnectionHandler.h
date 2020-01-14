@@ -13,7 +13,7 @@ private:
     StompMessageEncoderDecoder &_encdec;
 
 public:
-    StompConnectionHandler(std::string host, short port, StompMessageEncoderDecoder &encdec);
+    StompConnectionHandler(StompMessageEncoderDecoder &encdec);
 
     bool readFrame(std::unique_ptr<Frame> &frame);
     bool sendFrame(const Frame &frame);

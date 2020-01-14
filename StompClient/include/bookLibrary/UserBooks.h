@@ -20,6 +20,8 @@ private:
 
 public:
     UserBooks();
+    UserBooks(const UserBooks &other);
+    UserBooks& operator=(const UserBooks &other);
 
     void clear();
 

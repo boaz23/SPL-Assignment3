@@ -14,7 +14,7 @@ private:
     std::string _username;
     std::string _password;
 
-    StompConnectionHandler *_connection;
+    StompConnectionHandler &_connection;
     Printer &_printer;
 
     UserBooks _books;
@@ -24,7 +24,9 @@ private:
 
     std::unordered_map<std::string, std::string> genreToSubscriptionIds;
 public:
-    BookLibraryUser(std::string username, std::string password, Printer &printer);
+    BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, Printer &printer);
+    BookLibraryUser(const BookLibraryUser &other);
+    BookLibraryUser& operator=(const BookLibraryUser other);
 
     std::string username();
     UserBooks& books();
@@ -42,9 +44,6 @@ public:
     void removeSubscription(const std::string &genre);
     bool getSubscriptionIdFor(const std::string &genre, std::string &subscriptionId);
     void clearSubscriptionMap();
-
-    void setConnection(StompConnectionHandler *connection);
-    void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
     bool sendHasBookFrame(const std::string &topic, const std::string &bookName);
     bool sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);
@@ -58,7 +57,9 @@ private:
     void handleSomeoneTakingBookFrom(const std::string &dest, const std::vector<std::string> &message);
     void returnedBook(const std::string &dest, const std::vector<std::string> &message);
 
+#ifdef DEBUG_PRINT_FRAMES
     void debugPrintFrame(const Frame &frame);
+#endif
 };
 
 

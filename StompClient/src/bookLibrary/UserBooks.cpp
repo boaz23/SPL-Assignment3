@@ -2,7 +2,15 @@
 #include "../../include/bookLibrary/UserBooks.h"
 #include "../../include/Lock.h"
 
-UserBooks::UserBooks() : _books(), _bookToGenreMap(), _mutex() {
+UserBooks::UserBooks() : _books(), _bookToGenreMap(), _mutex() { }
+UserBooks::UserBooks(const UserBooks &other) : _books(other._books), _bookToGenreMap(other._bookToGenreMap), _mutex() {}
+UserBooks & UserBooks::operator=(const UserBooks &other) {
+    if (&other != this) {
+        _books = other._books;
+        _bookToGenreMap = other._bookToGenreMap;
+    }
+
+    return *this;
 }
 
 void UserBooks::addBook(const std::string &genre, const std::string &book) {

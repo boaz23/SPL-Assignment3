@@ -10,12 +10,26 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-ConnectionHandler::ConnectionHandler(string host, short port):
-    host_(std::move(host)), port_(port), io_service_(), socket_(io_service_),
-    state_(State::Initialized), lock_() {}
+ConnectionHandler::ConnectionHandler():
+    _host(), _port(), _io_service(), _socket(_io_service),
+    _state(State::Initialized), _lock() {}
 
 std::string ConnectionHandler::host() const {
-    return host_;
+    return _host;
+}
+
+short ConnectionHandler::port() const {
+    return _port;
+}
+
+bool ConnectionHandler::setServer(const std::string &host, const short port) {
+    if (!isClosed_doubledChecked()) {
+        return false;
+    }
+
+    _host = host;
+    _port = port;
+    return true;
 }
  
 bool ConnectionHandler::connect() {
@@ -24,14 +38,14 @@ bool ConnectionHandler::connect() {
     }
 
     std::cout << "Starting connect to "
-        << host_ << ":" << port_ << std::endl;
+        << _host << ":" << _port << std::endl;
     try {
-		tcp::endpoint endpoint(boost::asio::ip::address::from_string(host_), port_); // the server endpoint
+		tcp::endpoint endpoint(boost::asio::ip::address::from_string(_host), _port); // the server endpoint
 		boost::system::error_code error;
-		socket_.connect(endpoint, error);
+		_socket.connect(endpoint, error);
 		if (error)
 			throw boost::system::system_error(error);
-		state_ = State::Open;
+        _state = State::Open;
         return true;
     }
     catch (boost::system::system_error& e) {
@@ -53,7 +67,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToRead > tmp) {
-			tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);			
+			tmp += _socket.read_some(boost::asio::buffer(bytes + tmp, bytesToRead - tmp), error);
         }
 		if(error)
 			throw boost::system::system_error(error);
@@ -70,7 +84,7 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     if (!isOpen_noLock()) {
         return false;
     }
-    mutex_lock lock(lock_);
+    mutex_lock lock(_lock);
     if (!isOpen_noLock()) {
         return false;
     }
@@ -79,7 +93,7 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToWrite > tmp ) {
-			tmp += socket_.write_some(boost::asio::buffer(bytes + tmp, bytesToWrite - tmp), error);
+			tmp += _socket.write_some(boost::asio::buffer(bytes + tmp, bytesToWrite - tmp), error);
         }
 		if(error)
 			throw boost::system::system_error(error);
@@ -93,18 +107,18 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 // Close down the connection properly.
 void ConnectionHandler::close() {
     if (isOpen_noLock()) {
-        mutex_lock lock(lock_);
+        mutex_lock lock(_lock);
         close_noLock();
     }
 }
 
 bool ConnectionHandler::isOpen() {
-    mutex_lock lock(lock_);
+    mutex_lock lock(_lock);
     return isOpen_noLock();
 }
 
 bool ConnectionHandler::isOpen_noLock() {
-    return state_ == State::Open;
+    return _state == State::Open;
 }
 
 bool ConnectionHandler::isClosed() {
@@ -113,7 +127,7 @@ bool ConnectionHandler::isClosed() {
 
 bool ConnectionHandler::isClosed_doubledChecked() {
     if (isOpen_noLock()) {
-        mutex_lock lock(lock_);
+        mutex_lock lock(_lock);
         return !isOpen_noLock();
     }
 
@@ -123,9 +137,9 @@ bool ConnectionHandler::isClosed_doubledChecked() {
 void ConnectionHandler::close_noLock() {
     if (isOpen_noLock()) {
         try {
-            socket_.shutdown(boost::asio::socket_base::shutdown_both);
-            socket_.close();
-            state_ = State::Closed;
+            _socket.shutdown(boost::asio::socket_base::shutdown_both);
+            _socket.close();
+            _state = State::Closed;
         } catch (...) {
             std::cout << "connection closing failed" << std::endl;
         }

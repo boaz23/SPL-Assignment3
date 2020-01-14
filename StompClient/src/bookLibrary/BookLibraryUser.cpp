@@ -7,17 +7,26 @@
 
 BookLibraryUser::BookLibraryUser(
     std::string username, std::string password,
-    Printer &printer
+    StompConnectionHandler &connection, Printer &printer
 ) : _username(std::move(username)), _password(std::move(password)),
-    _connection(nullptr), _printer(printer),
+    _connection(connection), _printer(printer),
     _books(), _receiptsLock(), receipts(), genreToSubscriptionIds() {}
 
-void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
-    _connection = connection;
-}
+BookLibraryUser::BookLibraryUser(const BookLibraryUser &other) :
+_username(other._username), _password(other._password),
+_connection(other._connection), _printer(other._printer),
+_books(other._books), _receiptsLock(), receipts(other.receipts), genreToSubscriptionIds(other.genreToSubscriptionIds) { }
 
-void BookLibraryUser::setEncoderDecoder(StompMessageEncoderDecoder *encdec) {
-    _encdec = encdec;
+BookLibraryUser & BookLibraryUser::operator=(const BookLibraryUser other) {
+    if (&other != this) {
+        _username = other._username;
+        _password = other._password;
+        _books = other._books;
+        receipts = other.receipts;
+        genreToSubscriptionIds = other.genreToSubscriptionIds;
+    }
+
+    return *this;
 }
 
 std::string BookLibraryUser::username() {
@@ -74,13 +83,13 @@ void BookLibraryUser::clearSubscriptionMap() {
 }
 
 bool BookLibraryUser::connect(std::string &errorMsg) {
-    ConnectFrame connectFrame(ACCEPT_VERSION, _connection->host(), _username, _password);
-    if (!_connection->sendFrame(connectFrame)) {
+    ConnectFrame connectFrame(ACCEPT_VERSION, _connection.host(), _username, _password);
+    if (!_connection.sendFrame(connectFrame)) {
         return false;
     }
 
     std::unique_ptr<Frame> frame = nullptr;
-    if (!_connection->readFrame(frame)) {
+    if (!_connection.readFrame(frame)) {
         return false;
     }
 
@@ -108,13 +117,15 @@ void BookLibraryUser::run() {
 
     //TODO: refactor
     while(true) {
-        if (!_connection->readFrame(frame)) {
-            _connection->close();
+        if (!_connection.readFrame(frame)) {
+            _connection.close();
             break;
         }
 
         // TODO: remove this call
+#ifdef DEBUG_PRINT_FRAMES
         debugPrintFrame(*frame);
+#endif
         // TODO: extract method from this
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->receiptId();
@@ -248,22 +259,20 @@ bool BookLibraryUser::sendTakingBookFrom(const std::string &topic, const std::st
 
 void BookLibraryUser::printMessage(const std::string &topic, const std::string &body) {
     std::string message = topic + ":" + body;
-    _printer << message << "\n";
+    _printer.println(message);
 }
 
 bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
     SendFrame frame = SendFrame(topic ,body);
-    if(!_connection->sendFrame(frame)){
-        _connection->close();
+    if(!_connection.sendFrame(frame)){
+        _connection.close();
         return false;
     }
     return true;
 }
 
-#ifdef DEBUG_PRINT_FRAMES
 void BookLibraryUser::debugPrintFrame(const Frame &frame) {
-    std::unique_ptr<std::string> f = _connection->encode(frame);
+    std::unique_ptr<std::string> f = _connection.encode(frame);
     f->resize(f->length() + 1);
     _printer.println("----------\nreceived frame:\n" + *f);
 }
-#endif

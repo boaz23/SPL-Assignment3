@@ -6,21 +6,13 @@
 using std::string;
 using std::vector;
 
-Main::Main(Printer &printer) :
-    _printer(printer), _nextReceiptId(1), _nextSubscriptionId(1),
-    _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
-    _usersMap() { }
+Main::Main(StompMessageEncoderDecoder &encdec, StompConnectionHandler &connection, Printer &printer) :
+    _encdec(encdec), _connection(connection), _printer(printer),
+    _nextReceiptId(1), _nextSubscriptionId(1),
+    _users(), _userThread() { }
 
 Main::~Main() {
     disconnectionCleanup();
-    cleanupUsersMap();
-}
-
-void Main::cleanupUsersMap() {
-    for (auto &user : _usersMap) {
-        std::unique_ptr<BookLibraryUser> userDeleter(user.second);
-        user.second = nullptr;
-    }
 }
 
 void Main::start() {
@@ -53,8 +45,8 @@ void Main::login(const vector<string> &arguments) {
     std::string username = arguments[2];
     std::string password = arguments[3];
 
-    bool justAdded = initializeUser(host, port, username, password);
-    connectAndRun(justAdded);
+    bool added = initializeUser(username, password);
+    connectAndRun(host, port, added);
 }
 
 void Main::logout(const vector<string> &arguments) {
@@ -67,39 +59,33 @@ void Main::logout(const vector<string> &arguments) {
     disconnectionCleanup();
 }
 
-bool Main::initializeUser(const string &host, short port, const string &username, const string &password) {
-    bool justAdded;
-    _encdec = new StompMessageEncoderDecoder();
-    _conn = new StompConnectionHandler(host, port, *_encdec);
-    if (_usersMap.count(username)) {
-        _activeUser = _usersMap[username];
-        justAdded = false;
+bool Main::initializeUser(const std::string &username, const std::string &password) {
+    bool added;
+    if (_users.doesUserExists(username)) {
+        _users.setActiveUser(username);
+        added = false;
     }
     else {
-        _activeUser = new BookLibraryUser(username, password, _printer);
-        _usersMap[username] = _activeUser;
-        justAdded = true;
+        _users.addUserAndSetAsActive(username, password, _connection, _printer);
+        added = true;
     }
-    _activeUser->setConnection(_conn);
-    _activeUser->setEncoderDecoder(_encdec);
-    return justAdded;
+    return added;
 }
 
-void Main::connectAndRun(bool justAdded) {
+void Main::connectAndRun(const std::string &host, const short port, const bool added) {
     std::string err;
-    if (_conn->connect() && _activeUser->connect(err)) {
+    _connection.setServer(host, port);
+    if (_connection.connect() && activeUser().connect(err)) {
         _printer.println("Login successful");
-        _userThread = new std::thread(&BookLibraryUser::run, _activeUser);
+        std::thread tmpThread(&BookLibraryUser::run, _users.activeUserPtr());
+        _userThread = std::move(tmpThread);
     }
     else {
         _printer.println(err);
-        _userThread = nullptr;
-        if (justAdded) {
-            std::unique_ptr<BookLibraryUser> userDeleter(_activeUser);
-            _usersMap.erase(_activeUser->username());
-            _activeUser = nullptr;
+        if (added) {
+            _users.removeActiveUser();
         }
-        cleanupConnection();
+        disconnectionCleanup();
     }
 }
 
@@ -107,10 +93,10 @@ void Main::disconnect() {
     DisconnectFame disconnectFame;
     std::string receiptId = nextReceiptId();
     disconnectFame.setReceiptId(receiptId);
-    _activeUser->addReceipt(disconnectFame);
-    if (!_conn->sendFrame(disconnectFame)) {
-        _activeUser->removeReceipt(receiptId);
-        _conn->close();
+    activeUser().addReceipt(disconnectFame);
+    if (!_connection.sendFrame(disconnectFame)) {
+        activeUser().removeReceipt(receiptId);
+        _connection.close();
     }
 }
 
@@ -120,29 +106,21 @@ void Main::disconnectionCleanup() {
 }
 
 void Main::cleanupUser() {
-    std::unique_ptr<std::thread> userThreadDeleter(_userThread);
-    if (_activeUser) {
-        _activeUser->books().clear();
-        _activeUser->clearReceipts();
-        _activeUser->clearSubscriptionMap();
-        _activeUser->setConnection(nullptr);
-        _activeUser->setEncoderDecoder(nullptr);
+    if (_users.isUserActive()) {
+        activeUser().books().clear();
+        activeUser().clearReceipts();
+        activeUser().clearSubscriptionMap();
+        _users.setNoUserActive();
     }
-    if (_userThread) {
-        _userThread->join();
+    if (_userThread.joinable()) {
+        _userThread.join();
+        _userThread = std::thread();
     }
-    _activeUser = nullptr;
-    _userThread = nullptr;
-}
-
-void Main::cleanupConnection() {
-    std::unique_ptr<StompMessageEncoderDecoder> encdecDeleter(_encdec);
-    std::unique_ptr<StompConnectionHandler> connectionDeleter(_conn);
     _nextReceiptId = 1;
     _nextSubscriptionId = 1;
-    _conn = nullptr;
-    _encdec = nullptr;
 }
+
+void Main::cleanupConnection() { }
 
 void Main::joinGenre(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
@@ -214,55 +192,55 @@ void Main::joinGenre(const std::string &genre, const std::string& subscriptionId
     sendFrame.setReceiptId(receiptId);
 
     std::string tmp;
-    if (!_activeUser->getSubscriptionIdFor(genre, tmp)) {
-        _activeUser->setSubscriptionId(genre, subscriptionId);
+    if (!activeUser().getSubscriptionIdFor(genre, tmp)) {
+        activeUser().setSubscriptionId(genre, subscriptionId);
     }
-    _activeUser->addReceipt(sendFrame);
-    if (!_conn->sendFrame(sendFrame)) {
-        _activeUser->removeSubscription(genre);
-        _activeUser->removeReceipt(receiptId);
-        _conn->close();
+    activeUser().addReceipt(sendFrame);
+    if (!_connection.sendFrame(sendFrame)) {
+        activeUser().removeSubscription(genre);
+        activeUser().removeReceipt(receiptId);
+        _connection.close();
     }
 }
 
 void Main::exitGenre(const std::string &genre) {
     std::string subscriptionId;
-    if (_activeUser->getSubscriptionIdFor(genre, subscriptionId)) {
+    if (activeUser().getSubscriptionIdFor(genre, subscriptionId)) {
         UnsubscribeFrame unsubscribeFrame(subscriptionId);
         unsubscribeFrame.setReceiptId(nextReceiptId());
-        if (_conn->sendFrame(unsubscribeFrame)) {
-            _activeUser->removeSubscription(genre);
+        if (_connection.sendFrame(unsubscribeFrame)) {
+            activeUser().removeSubscription(genre);
         } else {
-            _conn->close();
+            _connection.close();
         }
     }
 }
 
 void Main::addBook(const std::string &genre, std::string &bookName) {
-    UserBooks &books = _activeUser->books();
+    UserBooks &books = activeUser().books();
     std::string bookGenre;
     if (books.getBookGenre(bookName, bookGenre) && genre != bookGenre) {
         _printer.println("book is already in the inventory in genre '" + bookGenre + "'");
     }
     else {
-        SendFrame sendFrame(genre, _activeUser->username() + " has added the book " + bookName);
-        if (_conn->sendFrame(sendFrame)) {
+        SendFrame sendFrame(genre, activeUser().username() + " has added the book " + bookName);
+        if (_connection.sendFrame(sendFrame)) {
             books.addBook(genre, bookName);
         } else {
-            _conn->close();
+            _connection.close();
         }
     }
 }
 
 void Main::returnBook(const std::string &genre, const std::string &bookName) {
     std::string borrowedFrom;
-    UserBooks &books = _activeUser->books();
+    UserBooks &books = activeUser().books();
     if (books.getBorrowedFromUsername(genre, bookName, borrowedFrom)) {
         SendFrame sendFrame(genre, "Returning " + bookName + " to " + borrowedFrom);
-        if (_conn->sendFrame(sendFrame)) {
+        if (_connection.sendFrame(sendFrame)) {
             books.removeBorrowedBook(genre, bookName);
         } else {
-            _conn->close();
+            _connection.close();
         }
     }
     else {
@@ -271,18 +249,18 @@ void Main::returnBook(const std::string &genre, const std::string &bookName) {
 }
 
 void Main::borrowBook(const std::string &genre, const std::string &bookName) {
-    SendFrame sendFrame(genre, _activeUser->username() + " wish to borrow " + bookName);
-    if (_conn->sendFrame(sendFrame)) {
-        _activeUser->books().addBookAsWantToBorrow(genre, bookName);
+    SendFrame sendFrame(genre, activeUser().username() + " wish to borrow " + bookName);
+    if (_connection.sendFrame(sendFrame)) {
+        activeUser().books().addBookAsWantToBorrow(genre, bookName);
     } else {
-        _conn->close();
+        _connection.close();
     }
 }
 
 void Main::bookStatus(const std::string &genre) {
     SendFrame sendFrame(genre, "book status");
-    if (!_conn->sendFrame(sendFrame)) {
-        _conn->close();
+    if (!_connection.sendFrame(sendFrame)) {
+        _connection.close();
     }
 }
 
@@ -309,6 +287,10 @@ std::string Main::nextSubscriptionId() {
 
 template <typename T> std::string Main::nextId(T &id) {
     return std::to_string(id++);
+}
+
+BookLibraryUser &Main::activeUser() {
+    return _users.activeUser();
 }
 
 bool Main::readCommand(std::string &cmd) {
@@ -347,7 +329,7 @@ bool Main::handleCommand(const std::vector<std::string> &arguments) {
 }
 
 bool Main::handleLoginCommand(const vector<std::string> &arguments) {
-    if (_activeUser) {
+    if (_users.isUserActive()) {
         // TODO: ???
         _printer.println("cannot login when already logged-in.");
         return false;
@@ -358,11 +340,11 @@ bool Main::handleLoginCommand(const vector<std::string> &arguments) {
 }
 
 bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
-    if (!_activeUser) {
+    if (!_users.isUserActive()) {
         _printer.println("must be logged-in to perform that action.");
         return false;
     }
-    if (_conn && _conn->isClosed()) {
+    if (_connection.isClosed()) {
         _printer.println("cannot perform that action because the connection is closed.");
         disconnectionCleanup();
         return false;
@@ -393,4 +375,79 @@ bool Main::invokeCommand(const std::vector<std::string> &arguments) {
     }
 
     return true;
+}
+
+UserHolder::UserHolder() : _activeUser(nullptr), _usersMap() { }
+UserHolder::UserHolder(const UserHolder &other) : _activeUser(nullptr), _usersMap(other._usersMap) {
+    setActiveUser(other);
+}
+UserHolder::UserHolder(UserHolder &&other) noexcept : _activeUser(nullptr), _usersMap(std::move(other._usersMap)) {
+    setActiveUser(other);
+}
+UserHolder& UserHolder::operator=(const UserHolder &other) {
+    if (&other != this) {
+        clean();
+        _usersMap = other._usersMap;
+        setActiveUser(other);
+    }
+
+    return *this;
+}
+UserHolder& UserHolder::operator=(UserHolder &&other) noexcept {
+    if (&other != this) {
+        clean();
+        _usersMap = std::move(other._usersMap);
+        setActiveUser(other);
+    }
+
+    return *this;
+}
+
+UserHolder::~UserHolder() {
+    clean();
+}
+
+void UserHolder::setActiveUser(const UserHolder &other) {
+    if (other._activeUser) {
+        BookLibraryUser &user = _usersMap.at(other._activeUser->username());
+        _activeUser = &user;
+    }
+}
+
+void UserHolder::clean() {
+    _activeUser = nullptr;
+}
+
+BookLibraryUser& UserHolder::activeUser() {
+    return *_activeUser;
+}
+BookLibraryUser * UserHolder::activeUserPtr() {
+    return _activeUser;
+}
+
+bool UserHolder::doesUserExists(const std::string &username) {
+    return _usersMap.count(username);
+}
+
+void UserHolder::addUserAndSetAsActive(const std::string &username, const std::string &password, StompConnectionHandler &connection, Printer &printer) {
+    BookLibraryUser user(username, password, connection, printer);
+    _usersMap.emplace(username, user);
+    setActiveUser(username);
+}
+
+void UserHolder::setActiveUser(const std::string &username) {
+    _activeUser = &_usersMap.at(username);
+}
+
+void UserHolder::removeActiveUser() {
+    _usersMap.erase(_activeUser->username());
+    _activeUser = nullptr;
+}
+
+void UserHolder::setNoUserActive() {
+    _activeUser = nullptr;
+}
+
+bool UserHolder::isUserActive() {
+    return _activeUser;
 }

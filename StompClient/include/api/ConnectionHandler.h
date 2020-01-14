@@ -17,18 +17,20 @@ private:
         Closed,
     };
 
-	const std::string host_;
-	const short port_;
-	boost::asio::io_service io_service_;   // Provides core I/O functionality
-	tcp::socket socket_;
-	State state_;
+	std::string _host;
+	short _port;
+	boost::asio::io_service _io_service;   // Provides core I/O functionality
+	tcp::socket _socket;
+	State _state;
 
-	std::mutex lock_;
+	std::mutex _lock;
 public:
-    ConnectionHandler(std::string host, short port);
+    ConnectionHandler();
 
     std::string host() const;
- 
+    short port() const;
+
+    bool setServer(const std::string &host, const short port);
     // Connect to the remote machine
     bool connect();
  

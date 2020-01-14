@@ -1,9 +1,7 @@
 
 #include "../../include/bookLibrary/BookCollection.h"
 
-BookCollection::BookCollection(): _books() {
-
-}
+BookCollection::BookCollection(): _books() { }
 
 void BookCollection::addBook(const std::string &bookName) {
     Book book = Book::newBook(bookName);
