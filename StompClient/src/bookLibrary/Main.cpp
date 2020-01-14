@@ -208,9 +208,12 @@ void Main::exitGenre(const std::string &genre) {
     std::string subscriptionId;
     if (activeUser().getSubscriptionIdFor(genre, subscriptionId)) {
         UnsubscribeFrame unsubscribeFrame(subscriptionId);
-        unsubscribeFrame.setReceiptId(nextReceiptId());
+        std::string receiptId = nextReceiptId();
+        unsubscribeFrame.setReceiptId(receiptId);
+        activeUser().addReceipt(unsubscribeFrame);
         if (_connection.sendFrame(unsubscribeFrame)) {
             activeUser().removeSubscription(genre);
+            activeUser().removeReceipt(receiptId);
         } else {
             _connection.close();
         }
