@@ -212,10 +212,9 @@ void Main::exitGenre(const std::string &genre) {
         unsubscribeFrame.setReceiptId(receiptId);
         activeUser().addReceipt(unsubscribeFrame);
         if (_connection.sendFrame(unsubscribeFrame)) {
-            activeUser().removeSubscription(genre);
-            activeUser().removeReceipt(receiptId);
-        } else {
             _connection.close();
+        } else {
+            activeUser().removeSubscription(genre);
         }
     }
 }
@@ -293,7 +292,7 @@ template <typename T> std::string Main::nextId(T &id) {
     return std::to_string(id++);
 }
 
-BookLibraryUser &Main::activeUser() {
+BookLibraryUser& Main::activeUser() {
     return _users.activeUser();
 }
 
