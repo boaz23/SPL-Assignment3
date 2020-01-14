@@ -140,7 +140,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             SubscriptionAttachment attachment = new SubscriptionAttachment(subscriptionId);
-            if (!connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+            if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
                 connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
             }
         }

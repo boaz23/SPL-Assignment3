@@ -15,8 +15,12 @@ public class ConnectionsImpl<T> implements Connections<T> {
     @Override
     public boolean send(int connectionId, T msg) {
         try {
-            clientsMap.get(connectionId).connection().send(msg);
-            return true;
+            Client<T> client = clientsMap.get(connectionId);
+            if (client != null) {
+                client.connection().send(msg);
+                return true;
+            }
+            throw new RuntimeException("how did we get here");
         } catch (IOException e) {
             e.printStackTrace();
         }
