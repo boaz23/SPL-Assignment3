@@ -242,10 +242,14 @@ bool BookLibraryUser::sendBooksStatus(const std::string &dest) {
     std::string bodyMessage = _username + ":";
     if (_books.copyOfBookCollection(dest, bookCollection) && !bookCollection.isEmpty()) {
         auto book = bookCollection.begin();
-        bodyMessage.append(book->name());
-        for (++book; book != bookCollection.end(); ++book) {
-            bodyMessage.append(",");
+        if (book->hasBook()) {
             bodyMessage.append(book->name());
+        }
+        for (++book; book != bookCollection.end(); ++book) {
+            if (book->hasBook()) {
+                bodyMessage.append(",");
+                bodyMessage.append(book->name());
+            }
         }
     }
     return sendSendFrame(dest, bodyMessage);
