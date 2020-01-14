@@ -67,8 +67,11 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 }
 
 bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
-    // TODO: synchronize
-    if (isClosed_doubledChecked()) {
+    if (!isOpen_noLock()) {
+        return false;
+    }
+    mutex_lock lock(lock_);
+    if (!isOpen_noLock()) {
         return false;
     }
 
