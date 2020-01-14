@@ -101,6 +101,7 @@ public class Reactor<T> implements Server<T> {
 
         int nextId = connectionHandlersManager.nextConnectionId();
         final NonBlockingConnectionHandler<T> handler = createConnectionHandler(clientChan, readerFactory.get(), protocolFactory.get(), nextId);
+        handler.init();
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 
