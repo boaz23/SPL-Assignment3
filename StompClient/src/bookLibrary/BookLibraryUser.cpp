@@ -10,12 +10,12 @@ BookLibraryUser::BookLibraryUser(
     StompConnectionHandler &connection, Printer &printer
 ) : _username(std::move(username)), _password(std::move(password)),
     _connection(connection), _printer(printer),
-    _books(), _receiptsLock(), receipts(), genreToSubscriptionIds() {}
+    _books(), _receiptsLock(), receipts(), genreToSubscriptionIds(), subscriptionIdToGenres() {}
 
 BookLibraryUser::BookLibraryUser(const BookLibraryUser &other) :
 _username(other._username), _password(other._password),
 _connection(other._connection), _printer(other._printer),
-_books(other._books), _receiptsLock(), receipts(other.receipts), genreToSubscriptionIds(other.genreToSubscriptionIds) { }
+_books(other._books), _receiptsLock(), receipts(other.receipts), genreToSubscriptionIds(other.genreToSubscriptionIds), subscriptionIdToGenres(other.subscriptionIdToGenres) { }
 
 BookLibraryUser & BookLibraryUser::operator=(const BookLibraryUser other) {
     if (&other != this) {
@@ -24,6 +24,7 @@ BookLibraryUser & BookLibraryUser::operator=(const BookLibraryUser other) {
         _books = other._books;
         receipts = other.receipts;
         genreToSubscriptionIds = other.genreToSubscriptionIds;
+        subscriptionIdToGenres = other.subscriptionIdToGenres;
     }
 
     return *this;
@@ -63,10 +64,13 @@ void BookLibraryUser::clearReceipts() {
 
 void BookLibraryUser::setSubscriptionId(const std::string &genre, const std::string &subscriptionId) {
     genreToSubscriptionIds[genre] = subscriptionId;
+    subscriptionIdToGenres[subscriptionId] = genre;
 }
 
 void BookLibraryUser::removeSubscription(const std::string &genre) {
+    std::string subscriptionId = genreToSubscriptionIds.at(genre);
     genreToSubscriptionIds.erase(genre);
+    subscriptionIdToGenres.erase(subscriptionId);
 }
 
 bool BookLibraryUser::getSubscriptionIdFor(const std::string &genre, std::string &subscriptionId) {
@@ -134,8 +138,8 @@ void BookLibraryUser::run() {
                 if(receiptFrame.messageType() == "SUBSCRIBE") {
                     std::string message = "Joined club " + receiptFrame.headers().at("destination");
                     _printer.println(message);
-                } else if(receiptFrame.messageType() == "UNSUBSCRIBE"){
-                    std::string message = "Exited club " + receiptFrame.headers().at("destination");
+                } else if(receiptFrame.messageType() == "UNSUBSCRIBE") {
+                    std::string message = "Exited club " + subscriptionIdToGenres.at(receiptFrame.getHeader(UnsubscribeFrame::HEADER_ID));
                     _printer.println(message);
                 } else if(receiptFrame.messageType() == "DISCONNECT"){
                     break;

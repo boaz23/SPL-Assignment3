@@ -23,6 +23,7 @@ private:
     std::unordered_map<std::string, Frame> receipts;
 
     std::unordered_map<std::string, std::string> genreToSubscriptionIds;
+    std::unordered_map<std::string, std::string> subscriptionIdToGenres;
 public:
     BookLibraryUser(std::string username, std::string password, StompConnectionHandler &connection, Printer &printer);
     BookLibraryUser(const BookLibraryUser &other);

@@ -211,10 +211,10 @@ void Main::exitGenre(const std::string &genre) {
         std::string receiptId = nextReceiptId();
         unsubscribeFrame.setReceiptId(receiptId);
         activeUser().addReceipt(unsubscribeFrame);
-        if (_connection.sendFrame(unsubscribeFrame)) {
-            _connection.close();
-        } else {
+        if (!_connection.sendFrame(unsubscribeFrame)) {
             activeUser().removeSubscription(genre);
+            activeUser().removeReceipt(receiptId);
+            _connection.close();
         }
     }
 }
