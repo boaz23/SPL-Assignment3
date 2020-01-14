@@ -78,20 +78,19 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             boolean connectSuccessful = false;
-            User user = connections.getUser(userName);
-            if (user == null) {
-                connectSuccessful = true;
-                connections.addUser(connectionId, userName, passcode);
-            }
-            else if (user.isConnected()) {
-                errorMessage(message, "User already logged in", "");
-            }
-            else if (!passcode.equals(user.password())) {
-                errorMessage(message,"Wrong password", "");
-            }
-            else {
-                connectSuccessful = true;
-                connections.connectUser(userName, connectionId);
+            synchronized (connections) {
+                User user = connections.getUser(userName);
+                if (user == null) {
+                    connectSuccessful = true;
+                    connections.addUser(connectionId, userName, passcode);
+                } else if (user.isConnected()) {
+                    errorMessage(message, "User already logged in", "");
+                } else if (!passcode.equals(user.password())) {
+                    errorMessage(message, "Wrong password", "");
+                } else {
+                    connectSuccessful = true;
+                    connections.connectUser(userName, connectionId);
+                }
             }
 
             if (connectSuccessful) {
@@ -118,15 +117,21 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                         "The destination cant be empty");
                 return;
             }
-
-            SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
-            if (attachment == null) {
-                if (connections.isSubscriptionAttachmentUsed(connectionId, new SubscriptionAttachment(subscriptionId))) {
-                    errorMessage(message, "Subscription id already used", "");
+            boolean error = false;
+            synchronized (connections.getClient(connectionId)) {
+                SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
+                if (attachment == null) {
+                    attachment = new SubscriptionAttachment(subscriptionId);
+                    if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+                        errorMessage(message, "Subscription id already used", "");
+                    }
+                    else {
+                        connections.subscribe(dest, connectionId, attachment);
+                    }
                 }
-                else {
-                    connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
-                }
+            }
+            if (error) {
+                errorMessage(message, "Subscription id already used", "");
             }
         }
     }
@@ -142,8 +147,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             SubscriptionAttachment attachment = new SubscriptionAttachment(subscriptionId);
-            if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
-                connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
+            synchronized (connections.getClient(connectionId)) {
+                if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
+                    connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
+                }
             }
         }
     }
@@ -181,7 +188,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
-            connections.disconnect(connectionId);
+            synchronized (connections.getClient(connectionId)) {
+                connections.setUserOffline(connectionId);
+            }
             shouldTerminate = true;
 
             String receiptId  = message.getHeader(Receipt.RECEIPT_ID_HEADER);

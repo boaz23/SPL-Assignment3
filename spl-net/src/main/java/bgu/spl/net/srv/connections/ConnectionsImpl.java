@@ -21,8 +21,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
                 return true;
             }
             throw new RuntimeException("how did we get here");
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
 
         return false;

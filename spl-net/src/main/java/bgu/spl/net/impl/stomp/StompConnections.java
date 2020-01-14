@@ -1,18 +1,21 @@
 package bgu.spl.net.impl.stomp;
 
+import bgu.spl.net.ReadWriteLockedMap;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.*;
 
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReadWriteLock;
 
 // TODO: synchronize access
 public class StompConnections extends ConnectionsImpl<Frame> implements ConnectionHandlersManager<Frame> {
-    private final ConcurrentMap<String, User> usersMap;
     private final ConnectionIdsManager connectionIdsManager;
+
+    private final ConcurrentMap<String, User> usersMap;
     private final ConcurrentMap<Integer, StompClient> clientsMap;
-    private final ConcurrentMap<String, Topic<Frame>> subscriptionsMap;
+    private final ReadWriteLockedMap<String, Topic<Frame>> topicMap;
 
     public StompConnections(ConnectionIdsManager connectionIdsManager) {
         this(connectionIdsManager, new ConcurrentHashMap<>());
@@ -20,8 +23,9 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     private StompConnections(ConnectionIdsManager connectionIdsManager, ConcurrentMap<Integer, StompClient> clientsMap) {
         super(clientsMap);
         this.connectionIdsManager = connectionIdsManager;
+
         this.clientsMap = clientsMap;
-        subscriptionsMap = new ConcurrentHashMap<>();
+        topicMap = new ReadWriteLockedMap<>();
         usersMap = new ConcurrentHashMap<>();
     }
 
@@ -39,6 +43,10 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
 
     public User getUser(String username) {
         return usersMap.get(username);
+    }
+
+    public StompClient getClient(int connectionId) {
+        return clientsMap.get(connectionId);
     }
 
     public User getUser(int connectionId) {
@@ -63,24 +71,28 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         clientsMap.put(connectionId, new StompClient(connectionHandler));
     }
 
-    @Override
-    public void disconnect(int connectionId) {
+    public void setUserOffline(int connectionId) {
         StompClient client = clientsMap.get(connectionId);
         if (client != null) {
-            if (client.user() != null) {
-                client.user().setConnected(false);
+            User user = client.user();
+            if (user != null) {
+                user.setConnected(false);
             }
+        }
+    }
+
+    @Override
+    public void disconnect(int connectionId) {
+        setUserOffline(connectionId);
+        StompClient client = clientsMap.get(connectionId);
+        if (client != null) {
             super.disconnect(connectionId);
             removeClientFromAllTopics(connectionId, client);
         }
     }
 
     public boolean subscribe(String topic, int connectionId, SubscriptionAttachment attachment) {
-        Topic<Frame> t = getTopic(topic);
-        if (t == null) {
-            t = addTopic(topic);
-        }
-
+        Topic<Frame> t = topicMap.computeIfAbsent(topic, x -> new Topic<>());
         clientsMap.get(connectionId).addSubscription(topic, attachment);
         t.addSubscriber(connectionId, attachment);
         return true;
@@ -93,7 +105,7 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
             return false;
         }
 
-        Topic<Frame> t = getTopic(topic);
+        Topic<Frame> t = topicMap.get(topic);
         if (t == null) {
             return false;
         }
@@ -103,32 +115,29 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     }
 
     public Iterable<ConnectionSubscriptionInfo<Frame>> getConnectionsSubscribedTo(String topic) {
-        Topic<Frame> t = getTopic(topic);
+        Topic<Frame> t = topicMap.get(topic);
         if (t == null) {
             return Collections.emptyList();
         }
         return t.subscribers();
     }
 
-    private Topic<Frame> addTopic(String topic) {
-        Topic<Frame> t = new Topic<>();
-        subscriptionsMap.put(topic, t);
-        return t;
-    }
-
-    private Topic<Frame> getTopic(String topic) {
-        return subscriptionsMap.get(topic);
-    }
-
     private void removeClientFromAllTopics(int connectionId, StompClient client) {
-        for (String topic : client.subscriptions()) {
-            removeClientFromTopic(connectionId, topic);
+        ReadWriteLock topicLock = topicMap.internalLock();
+        topicLock.readLock().lock();
+        try {
+            for (String topic : client.subscriptions()) {
+                removeClientFromTopic(connectionId, topic);
+            }
+        }
+        finally {
+            topicLock.readLock().unlock();
         }
         client.clearSubscriptions();
     }
 
     private void removeClientFromTopic(int connectionId, String topic) {
-        Topic<Frame> t = subscriptionsMap.get(topic);
+        Topic<Frame> t = topicMap.getWithoutLock(topic);
         if (t == null) {
             return;
         }
