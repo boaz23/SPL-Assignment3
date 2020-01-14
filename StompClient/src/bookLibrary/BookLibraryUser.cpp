@@ -170,6 +170,10 @@ void BookLibraryUser::run() {
                 if(!sendBooksStatus(dest)){ break; }
             }
         }
+        else if (frame->messageType() == ErrorFrame::MESSAGE_TYPE) {
+            _connection.close();
+            break;
+        }
     }
 }
 
