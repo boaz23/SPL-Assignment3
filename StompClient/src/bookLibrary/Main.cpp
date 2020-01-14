@@ -107,21 +107,23 @@ void Main::disconnectionCleanup() {
 }
 
 void Main::cleanupUser() {
+    if (_userThread.joinable()) {
+        _userThread.join();
+        _userThread = std::thread();
+    }
     if (_users.isUserActive()) {
         activeUser().books().clear();
         activeUser().clearReceipts();
         activeUser().clearSubscriptionMap();
         _users.setNoUserActive();
     }
-    if (_userThread.joinable()) {
-        _userThread.join();
-        _userThread = std::thread();
-    }
     _nextReceiptId = 1;
     _nextSubscriptionId = 1;
 }
 
-void Main::cleanupConnection() { }
+void Main::cleanupConnection() {
+    _connection.close();
+}
 
 void Main::joinGenre(const std::vector<std::string> &arguments) {
     if (arguments.size() != 2) {
