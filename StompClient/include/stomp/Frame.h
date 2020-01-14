@@ -12,7 +12,7 @@ private:
     std::string _body;
 
 public:
-    const static std::string HEADER_RECEIPT_ID;
+    const static std::string HEADER_RECEIPT;
 
     Frame() : _messageType(), _headers(), _body() { }
     Frame(std::string messageType) : _messageType(std::move(messageType)), _headers(), _body() { }
@@ -45,11 +45,11 @@ public:
         return _headers;
     }
 
-    const std::string& receiptId() const {
-        return getHeader(HEADER_RECEIPT_ID);
+    const std::string& receipt() const {
+        return getHeader(HEADER_RECEIPT);
     }
-    Frame& setReceiptId(const std::string &receiptId) {
-        return setHeader(HEADER_RECEIPT_ID, receiptId);
+    Frame& setReceipt(const std::string &receiptId) {
+        return setHeader(HEADER_RECEIPT, receiptId);
     }
 
     virtual ~Frame() = default;
@@ -144,9 +144,11 @@ class ReceiptFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
+    const static std::string HEADER_RECEIPT_ID;
+
     ReceiptFrame() : Frame(MESSAGE_TYPE) { }
     ReceiptFrame(const std::string &receiptId) : Frame(MESSAGE_TYPE) {
-        setReceiptId(receiptId);
+        setHeader(HEADER_RECEIPT_ID, receiptId);
     }
 };
 

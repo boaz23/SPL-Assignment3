@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Frame {
+    public static final String HEADER_RECEIPT = "receipt";
+
     private String messageType;
     private Map<String, String> headers;
     private String body;
@@ -50,6 +52,10 @@ public class Frame {
 
     public Iterable<Map.Entry<String, String>> headers() {
         return headers.entrySet();
+    }
+
+    public String getClientReceiptId() {
+        return getHeader(HEADER_RECEIPT);
     }
 
     public static class Builder {

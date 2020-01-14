@@ -48,10 +48,14 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         process.process(message);
 
         if (!shouldTerminate){
-            String receiptId = message.getHeader(Receipt.RECEIPT_ID_HEADER);
-            if(receiptId != null) {
-                connections.send(connectionId, new Receipt(receiptId));
-            }
+            sendReceipt(message);
+        }
+    }
+
+    private void sendReceipt(Frame message) {
+        String receiptId = message.getHeader(Frame.HEADER_RECEIPT);
+        if (receiptId != null) {
+            connections.send(connectionId, new Receipt(receiptId));
         }
     }
 
@@ -123,7 +127,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 if (attachment == null) {
                     attachment = new SubscriptionAttachment(subscriptionId);
                     if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
-                        errorMessage(message, "Subscription id already used", "");
+                        error = true;
                     }
                     else {
                         connections.subscribe(dest, connectionId, attachment);
@@ -192,11 +196,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 connections.setUserOffline(connectionId);
             }
             shouldTerminate = true;
-
-            String receiptId  = message.getHeader(Receipt.RECEIPT_ID_HEADER);
-            if(receiptId != null) {
-                connections.send(connectionId, new Receipt(receiptId));
-            }
+            sendReceipt(message);
         }
     }
 
@@ -213,7 +213,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 addedBodyMessage;
 
         Frame errorMessage = new ErrorFrame(messageHeader, body);
-        String receiptId = message.getHeader(Receipt.RECEIPT_ID_HEADER);
+        String receiptId = message.getClientReceiptId();
         if(receiptId != null){
             errorMessage.setHeader(Receipt.RECEIPT_ID_HEADER, receiptId);
         }

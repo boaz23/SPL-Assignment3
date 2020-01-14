@@ -40,7 +40,7 @@ UserBooks &BookLibraryUser::books() {
 
 void BookLibraryUser::addReceipt(const Frame &frame) {
     mutex_lock lock(_receiptsLock);
-    receipts[frame.receiptId()] = frame;
+    receipts[frame.receipt()] = frame;
 }
 
 void BookLibraryUser::removeReceipt(const std::string &receiptId) {
@@ -132,7 +132,7 @@ void BookLibraryUser::run() {
 #endif
         // TODO: extract method from this
         if(frame->messageType() == "RECEIPT") {
-            std::string receipt = frame->receiptId();
+            std::string receipt = frame->getHeader(ReceiptFrame::HEADER_RECEIPT_ID);
             if(hasReceipt(receipt)){
                 Frame &receiptFrame = getFrameForReceipt(receipt);
                 if(receiptFrame.messageType() == "SUBSCRIBE") {

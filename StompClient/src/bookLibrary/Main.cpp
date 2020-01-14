@@ -93,7 +93,7 @@ void Main::connectAndRun(const std::string &host, const short port, const bool a
 void Main::disconnect() {
     DisconnectFame disconnectFame;
     std::string receiptId = nextReceiptId();
-    disconnectFame.setReceiptId(receiptId);
+    disconnectFame.setReceipt(receiptId);
     activeUser().addReceipt(disconnectFame);
     if (!_connection.sendFrame(disconnectFame)) {
         activeUser().removeReceipt(receiptId);
@@ -192,7 +192,7 @@ void Main::bookStatus(const std::vector<std::string> &arguments) {
 void Main::joinGenre(const std::string &genre, const std::string& subscriptionId) {
     SubscribeFrame sendFrame(genre, subscriptionId);
     std::string receiptId = nextReceiptId();
-    sendFrame.setReceiptId(receiptId);
+    sendFrame.setReceipt(receiptId);
 
     std::string tmp;
     if (!activeUser().getSubscriptionIdFor(genre, tmp)) {
@@ -211,7 +211,7 @@ void Main::exitGenre(const std::string &genre) {
     if (activeUser().getSubscriptionIdFor(genre, subscriptionId)) {
         UnsubscribeFrame unsubscribeFrame(subscriptionId);
         std::string receiptId = nextReceiptId();
-        unsubscribeFrame.setReceiptId(receiptId);
+        unsubscribeFrame.setReceipt(receiptId);
         activeUser().addReceipt(unsubscribeFrame);
         if (!_connection.sendFrame(unsubscribeFrame)) {
             activeUser().removeSubscription(genre);
