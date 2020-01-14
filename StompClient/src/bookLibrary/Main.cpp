@@ -329,6 +329,7 @@ bool Main::handleCommand(const std::vector<std::string> &arguments) {
         return handleLoginCommand(arguments);
     } else if (action == "quit") {
         _quit = true;
+        return true;
     } else {
         return handleNonLoginCommand(arguments);
     }
