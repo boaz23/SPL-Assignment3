@@ -327,8 +327,9 @@ bool Main::handleCommand(const std::vector<std::string> &arguments) {
     string action = arguments[0];
     if (action == "login") {
         return handleLoginCommand(arguments);
-    }
-    else {
+    } else if (action == "quit") {
+        _quit = true;
+    } else {
         return handleNonLoginCommand(arguments);
     }
 }
@@ -376,8 +377,6 @@ bool Main::invokeCommand(const std::vector<std::string> &arguments) {
         bookStatus(arguments);
     } else if (action == "logout") {
         logout(arguments);
-    } else if (action == "quit") {
-        _quit = true;
     } else {
         _printer.println("Error - unknown action entered");
         return false;
