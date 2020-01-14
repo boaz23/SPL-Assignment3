@@ -332,7 +332,10 @@ bool Main::handleCommand(const std::vector<std::string> &arguments) {
 }
 
 bool Main::handleLoginCommand(const vector<std::string> &arguments) {
-    if (_users.isUserActive()) {
+    if (_connection.isClosed()) {
+        disconnectionCleanup();
+    }
+    else if (_users.isUserActive()) {
         // TODO: ???
         _printer.println("cannot login when already logged-in.");
         return false;
@@ -348,9 +351,8 @@ bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
         return false;
     }
     if (_connection.isClosed()) {
-        _printer.println("cannot perform that action because the connection is closed.");
         disconnectionCleanup();
-        return false;
+        return handleCommand(arguments);
     }
 
     return invokeCommand(arguments);
