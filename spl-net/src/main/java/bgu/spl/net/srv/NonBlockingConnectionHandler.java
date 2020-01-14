@@ -1,5 +1,6 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.Logger;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.srv.connections.ConnectionHandler;
@@ -57,8 +58,15 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
             return () -> {
                 try {
                     while (buf.hasRemaining()) {
-                        T nextMessage = encdec.decodeNextByte(buf.get());
+                        T nextMessage = null;
+                        try {
+                            nextMessage = encdec.decodeNextByte(buf.get());
+                        }
+                        catch (RuntimeException e) {
+                            Logger.incoming.appendLine("invalid frame.\n--------------------");
+                        }
                         if (nextMessage != null) {
+                            Logger.incoming.appendLine("--------------------");
                             protocol.process(nextMessage);
                         }
                     }

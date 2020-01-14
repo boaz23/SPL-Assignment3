@@ -1,6 +1,6 @@
 package bgu.spl.net.impl.stomp;
 
-class User {
+public class User {
     private String username;
     private String password;
     private boolean isConnected;

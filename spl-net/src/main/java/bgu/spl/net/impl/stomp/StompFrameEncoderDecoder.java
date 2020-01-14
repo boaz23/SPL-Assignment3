@@ -2,8 +2,10 @@ package bgu.spl.net.impl.stomp;
 
 import bgu.spl.net.DynamicByteBuffer;
 import bgu.spl.net.DynamicByteBufferReader;
+import bgu.spl.net.Logger;
 import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.frames.Frame;
+import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -37,7 +39,14 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
 
     @Override
     public Frame decodeNextByte(byte nextByte) {
-        return decodeState.decodeNextByte(nextByte);
+        try {
+            return decodeState.decodeNextByte(nextByte);
+        }
+        catch (RuntimeException e) {
+            buffer.clear();
+            reset();
+            throw e;
+        }
     }
 
     @Override
@@ -74,12 +83,20 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         decodeState = new MessageTypeDecodeState();
     }
 
+    private StompConnections connections;
+    private int id;
+    public <T> void setStuff(ConnectionHandlersManager<T> connectionHandlersManager, int nextId) {
+        connections = (StompConnections)connectionHandlersManager;
+        id = nextId;
+    }
+
     private interface DecodeState {
         Frame decodeNextByte(byte nextByte);
     }
 
     private class MessageTypeDecodeState implements DecodeState {
         private boolean carriageReturn;
+        private boolean first = true;
 
         MessageTypeDecodeState() {
             carriageReturn = false;
@@ -87,6 +104,13 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
 
         @Override
         public Frame decodeNextByte(byte nextByte) {
+            if (first) {
+                User user =connections.getUser(id);
+                if (user != null) {
+                    Logger.incoming.appendLine("username: " + user.username());
+                }
+                first = false;
+            }
             if (nextByte == NULL_TERMINATION) {
                 throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
             }
@@ -110,6 +134,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
 
         private void setMessageType() {
             String msgType = bufferReader.popString();
+            Logger.incoming.appendLine(msgType);
             frameBuilder.setMessageType(msgType);
         }
 
@@ -200,6 +225,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         private void decodeEndOfLine() {
             if (newLineFeed) {
                 nextDecodingState();
+                Logger.incoming.appendLine("");
             }
             else {
                 appendHeader();
@@ -220,6 +246,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
                 throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
             }
 
+            Logger.incoming.appendLine(headerName + ":" + value);
             frameBuilder.putHeader(headerName, value);
             reset();
         }
@@ -245,6 +272,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
             frameBuilder.setBody(body);
             Frame frame = frameBuilder.build();
             StompFrameEncoderDecoder.this.reset();
+            Logger.incoming.appendLine(body);
             return frame;
         }
     }

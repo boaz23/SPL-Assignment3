@@ -2,6 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.frames.Frame;
+import bgu.spl.net.impl.stomp.StompFrameEncoderDecoder;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
@@ -100,8 +102,11 @@ public class Reactor<T> implements Server<T> {
         clientChan.configureBlocking(false);
 
         int nextId = connectionHandlersManager.nextConnectionId();
-        final NonBlockingConnectionHandler<T> handler = createConnectionHandler(clientChan, readerFactory.get(), protocolFactory.get(), nextId);
+        MessageEncoderDecoder<T> encdec = readerFactory.get();
+        StompFrameEncoderDecoder tmp = (StompFrameEncoderDecoder) encdec;
+        final NonBlockingConnectionHandler<T> handler = createConnectionHandler(clientChan, encdec, protocolFactory.get(), nextId);
         handler.init();
+        tmp.setStuff(connectionHandlersManager, nextId);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 

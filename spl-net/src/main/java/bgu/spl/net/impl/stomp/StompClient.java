@@ -7,7 +7,7 @@ import bgu.spl.net.srv.connections.ConnectionHandler;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-class StompClient extends Client<Frame> {
+public class StompClient extends Client<Frame> {
     private ConcurrentMap<String, SubscriptionAttachment> subscriptions;
     private ConcurrentMap<SubscriptionAttachment, String> subscritionIdsToTopic;
     private User user;
@@ -41,7 +41,7 @@ class StompClient extends Client<Frame> {
         return subscritionIdsToTopic.get(attachment);
     }
 
-    User user() {
+    public User user() {
         return user;
     }
 
