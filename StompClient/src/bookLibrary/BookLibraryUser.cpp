@@ -9,7 +9,7 @@ BookLibraryUser::BookLibraryUser(
     std::string username, std::string password,
     Printer &printer
 ) : _username(std::move(username)), _password(std::move(password)),
-    _connection(nullptr), _encdec(nullptr), _printer(printer),
+    _connection(nullptr), _printer(printer),
     _books(), _receiptsLock(), receipts(), genreToSubscriptionIds() {}
 
 void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
@@ -80,7 +80,7 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
     }
 
     std::unique_ptr<Frame> frame = nullptr;
-    if (!readFrame(frame)) {
+    if (!_connection->readFrame(frame)) {
         return false;
     }
 
@@ -103,26 +103,12 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
     return true;
 }
 
-bool BookLibraryUser::readFrame(std::unique_ptr<Frame> &frame) {
-    bool ret;
-    byte  b = 0;
-    while ((ret = _connection->getBytes(&b, 1))) {
-        frame = _encdec->decodeNextByte(b);
-        if (frame) {
-            break;
-        }
-    }
-
-    return ret;
-}
-
 void BookLibraryUser::run() {
     std::unique_ptr<Frame> frame = nullptr;
 
     //TODO: refactor
     while(true) {
-        // TODO: move this call to the stomp connection handler
-        if (!readFrame(frame)) {
+        if (!_connection->readFrame(frame)) {
             _connection->close();
             break;
         }
@@ -274,9 +260,10 @@ bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string 
     return true;
 }
 
+#ifdef DEBUG_PRINT_FRAMES
 void BookLibraryUser::debugPrintFrame(const Frame &frame) {
-    std::unique_ptr<std::string> f = _encdec->encode(frame);
-//    f->resize(f->length() + 1);
-//    _printer.println("----------\nreceived frame:\n" + *f);
-        _printer << "----------\nreceived frame:\n" << *f << "\n";
+    std::unique_ptr<std::string> f = _connection->encode(frame);
+    f->resize(f->length() + 1);
+    _printer.println("----------\nreceived frame:\n" + *f);
 }
+#endif

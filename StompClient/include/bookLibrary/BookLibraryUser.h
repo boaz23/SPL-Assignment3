@@ -15,7 +15,6 @@ private:
     std::string _password;
 
     StompConnectionHandler *_connection;
-    StompMessageEncoderDecoder *_encdec;
     Printer &_printer;
 
     UserBooks _books;
@@ -47,8 +46,6 @@ public:
     void setConnection(StompConnectionHandler *connection);
     void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
-    bool readFrame(std::unique_ptr<Frame> &frame);
-
     bool sendHasBookFrame(const std::string &topic, const std::string &bookName);
     bool sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);
     bool sendSendFrame(const std::string &topic, const std::string &bookName);
