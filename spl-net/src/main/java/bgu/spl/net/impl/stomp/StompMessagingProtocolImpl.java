@@ -121,10 +121,12 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
             SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
             if (attachment == null) {
-                connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
-            }
-            else if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
-                errorMessage(message, "Subscription id already used", "");
+                if (connections.isSubscriptionAttachmentUsed(connectionId, new SubscriptionAttachment(subscriptionId))) {
+                    errorMessage(message, "Subscription id already used", "");
+                }
+                else {
+                    connections.subscribe(dest, connectionId, new SubscriptionAttachment(subscriptionId));
+                }
             }
         }
     }
