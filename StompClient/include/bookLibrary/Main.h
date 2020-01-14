@@ -42,6 +42,8 @@ private:
 
 class Main {
 private:
+    bool _quit;
+
     StompMessageEncoderDecoder &_encdec;
     StompConnectionHandler &_connection;
     Printer &_printer;
