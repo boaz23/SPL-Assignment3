@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
-// TODO: synchronize access
+// TODO: check synchronized access
 public class StompConnections extends ConnectionsImpl<Frame> implements ConnectionHandlersManager<Frame> {
     private final ConnectionIdsManager connectionIdsManager;
 

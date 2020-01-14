@@ -15,7 +15,7 @@ const std::string ConnectedFrame::HEADER_VERSION = "version";
 const std::string DisconnectFame::MESSAGE_TYPE = "DISCONNECT";
 
 const std::string ErrorFrame::MESSAGE_TYPE = "ERROR";
-const std::string ErrorFrame::HEADER_lMESSAGE = "message";
+const std::string ErrorFrame::HEADER_MESSAGE = "message";
 
 const std::string ReceiptFrame::MESSAGE_TYPE = "RECEIPT";
 const std::string ReceiptFrame::HEADER_RECEIPT_ID = "receipt-id";
