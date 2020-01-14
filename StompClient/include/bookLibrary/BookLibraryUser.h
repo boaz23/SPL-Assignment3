@@ -44,7 +44,6 @@ public:
     void clearSubscriptionMap();
 
     void setConnection(StompConnectionHandler *connection);
-    void setEncoderDecoder(StompMessageEncoderDecoder *encdec);
 private:
     bool sendHasBookFrame(const std::string &topic, const std::string &bookName);
     bool sendTakingBookFrom(const std::string &topic, const std::string &bookName, const std::string &from);

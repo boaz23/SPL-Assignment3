@@ -81,7 +81,6 @@ bool Main::initializeUser(const string &host, short port, const string &username
         justAdded = true;
     }
     _activeUser->setConnection(_conn);
-    _activeUser->setEncoderDecoder(_encdec);
     return justAdded;
 }
 
@@ -126,7 +125,6 @@ void Main::cleanupUser() {
         _activeUser->clearReceipts();
         _activeUser->clearSubscriptionMap();
         _activeUser->setConnection(nullptr);
-        _activeUser->setEncoderDecoder(nullptr);
     }
     if (_userThread) {
         _userThread->join();

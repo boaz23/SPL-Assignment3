@@ -16,10 +16,6 @@ void BookLibraryUser::setConnection(StompConnectionHandler *connection) {
     _connection = connection;
 }
 
-void BookLibraryUser::setEncoderDecoder(StompMessageEncoderDecoder *encdec) {
-    _encdec = encdec;
-}
-
 std::string BookLibraryUser::username() {
     return _username;
 }
@@ -248,7 +244,7 @@ bool BookLibraryUser::sendTakingBookFrom(const std::string &topic, const std::st
 
 void BookLibraryUser::printMessage(const std::string &topic, const std::string &body) {
     std::string message = topic + ":" + body;
-    _printer << message << "\n";
+    _printer.println(message);
 }
 
 bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string &body) {
