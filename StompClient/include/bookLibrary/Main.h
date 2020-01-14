@@ -15,6 +15,8 @@
 // TODO: think of a way to not hold pointers
 class Main {
 private:
+    bool _quit;
+
     Printer &_printer;
     int _nextReceiptId;
     int _nextSubscriptionId;

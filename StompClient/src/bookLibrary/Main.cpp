@@ -6,7 +6,7 @@
 using std::string;
 using std::vector;
 
-Main::Main(Printer &printer) :
+Main::Main(Printer &printer) : _quit(false),
     _printer(printer), _nextReceiptId(1), _nextSubscriptionId(1),
     _conn(nullptr), _encdec(nullptr), _activeUser(nullptr), _userThread(nullptr),
     _usersMap() { }
@@ -24,7 +24,7 @@ void Main::cleanupUsersMap() {
 }
 
 void Main::start() {
-    while (true) {
+    while (!_quit) {
         string cmd;
         if (!readCommand(cmd)) {
             break;
@@ -385,6 +385,8 @@ bool Main::invokeCommand(const std::vector<std::string> &arguments) {
         bookStatus(arguments);
     } else if (action == "logout") {
         logout(arguments);
+    } else if (action == "quit") {
+        _quit = true;
     } else {
         _printer.println("Error - unknown action entered");
         return false;
