@@ -25,7 +25,20 @@ private:
 
 public:
     StompMessageEncoderDecoder();
+
+    /**
+     * Decode byte byte until a Frame is completed
+     * @param nextByte next byte to decode
+     * @return Frame that was assembled by the previous bytes
+     */
     std::unique_ptr<Frame> decodeNextByte(byte nextByte);
+
+    /**
+     * Encode the @param message To string
+     * Take a Frame object and assemble a string from it.
+     * @param message
+     * @return
+     */
     std::unique_ptr<std::string> encode(const Frame &message);
 };
 
