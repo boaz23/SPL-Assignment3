@@ -67,6 +67,14 @@ public abstract class BaseServer<T> implements Server<T> {
         connectionHandlersManager.disconnect(connectionId);
     }
 
+    /**
+     * A factory method for creating the connection handler
+     * @param clientChan The socket
+     * @param encdec The encoder/decoder
+     * @param protocol The protocol
+     * @param nextId The connetion id
+     * @return A new instance of a connection handler with the specified parameters
+     */
     protected BlockingConnectionHandler<T> createConnectionHandler(
         Socket socket,
         MessageEncoderDecoder<T> encdec,

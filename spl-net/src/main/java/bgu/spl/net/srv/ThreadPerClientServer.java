@@ -6,6 +6,10 @@ import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
 import java.util.function.Supplier;
 
+/**
+ * Represents a server that allocates exactly one thread for each client
+ * @param <T> The type of the message
+ */
 public class ThreadPerClientServer<T> extends BaseServer<T> {
     public ThreadPerClientServer(int port,
                                  Supplier<? extends MessagingProtocol<T>> protocolFactory,

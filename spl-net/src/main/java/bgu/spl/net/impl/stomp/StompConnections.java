@@ -22,14 +22,16 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
      * @param connectionIdsManager
      */
     public StompConnections(ConnectionIdsManager connectionIdsManager) {
-        this(connectionIdsManager, new ConcurrentHashMap<>());
+        this(connectionIdsManager, new ConcurrentHashMap<>(), new ReadWriteLockedMap<>());
     }
-    private StompConnections(ConnectionIdsManager connectionIdsManager, ConcurrentMap<Integer, StompClient> clientsMap) {
-        super(clientsMap);
+    private StompConnections(ConnectionIdsManager connectionIdsManager,
+                             ConcurrentMap<Integer, StompClient> clientsMap,
+                             ReadWriteLockedMap<String, Topic<Frame>> topicMap) {
+        super(clientsMap, topicMap);
         this.connectionIdsManager = connectionIdsManager;
 
         this.clientsMap = clientsMap;
-        topicMap = new ReadWriteLockedMap<>();
+        this.topicMap = topicMap;
         usersMap = new ConcurrentHashMap<>();
     }
 
@@ -158,19 +160,6 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         t.removeSubscriber(connectionId);
         client.removeSubscription(topic);
         return true;
-    }
-
-    /**
-     * Return a Iterable of all the connections info to a topic
-     * @param topic the topic
-     * @return Iterable<ConnectionSubscriptionInfo<Frame>>
-     */
-    public Iterable<ConnectionSubscriptionInfo<Frame>> getConnectionsSubscribedTo(String topic) {
-        Topic<Frame> t = topicMap.get(topic);
-        if (t == null) {
-            return Collections.emptyList();
-        }
-        return t.subscribers();
     }
 
     private void removeClientFromAllTopics(int connectionId, StompClient client) {

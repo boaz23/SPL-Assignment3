@@ -4,7 +4,7 @@ import bgu.spl.net.api.StompMessageProcessor;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.*;
 import bgu.spl.net.srv.IdCount;
-import bgu.spl.net.srv.connections.ConnectionSubscriptionInfo;
+import bgu.spl.net.srv.connections.Subscription;
 import bgu.spl.net.srv.connections.Connections;
 
 import java.util.HashMap;
@@ -201,8 +201,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
-            for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
+            Iterable<Subscription<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
+            for (Subscription<Frame> conn : connectionInfosOfTopic) {
                 int connectionId = conn.getConnectionId();
                 User user = connections.getUser(connectionId);
                 if (user == null || !user.isConnected()) {
