@@ -18,36 +18,79 @@ public:
     Frame(std::string messageType) : _messageType(std::move(messageType)), _headers(), _body() { }
     Frame(std::string messageType, std::string body) : _messageType(std::move(messageType)), _headers(), _body(std::move(body)) { }
 
+    /**
+     * @return The message t of the Frame
+     */
     const std::string& messageType() const {
         return _messageType;
     }
+
+    /**
+     * Set the message t of the frame
+     * @param messageType
+     * @return Reference to the frame
+     */
     Frame& setMessageType(const std::string &messageType) {
         _messageType = messageType;
         return *this;
     }
 
+    /**
+     * @return The body to of the Frame
+     */
     const std::string& body() const {
         return _body;
     }
+
+    /**
+     * Set the body of the Frame
+     * @param body
+     * @return Reference to the frame after edit
+     */
     Frame& setBody(const std::string &body) {
         _body = body;
         return *this;
     }
 
+    /**
+     * @param name
+     * @return Reference to the value of the @param name header
+     */
     const std::string& getHeader(const std::string &name) const {
         return _headers.at(name);
     }
+
+    /**
+     * Set the header @param name to contain the key @param value
+     * Create it if its not exist.
+     * @param name
+     * @param value
+     * @return Reference to the frame after edit
+     */
     Frame& setHeader(const std::string &name, const std::string &value) {
         _headers[name] = value;
         return *this;
     }
+
+    /**
+     * @return Map<key, value> of the the current headers in the frame.
+     */
     const std::unordered_map<std::string, std::string>& headers() const {
         return _headers;
     }
 
+    /**
+     * @return Reference to the receipt id
+     */
     const std::string& receipt() const {
         return getHeader(HEADER_RECEIPT);
     }
+
+    /**
+     * Set the receiptId of the frame
+     * @param receiptId
+     * @return Reference to the frame after edit
+     */
     Frame& setReceipt(const std::string &receiptId) {
         return setHeader(HEADER_RECEIPT, receiptId);
     }

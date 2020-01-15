@@ -55,6 +55,7 @@ private:
 public:
     Main(StompMessageEncoderDecoder &encdec, StompConnectionHandler &connection, Printer &printer);
     ~Main();
+
     void start();
 
 private:
