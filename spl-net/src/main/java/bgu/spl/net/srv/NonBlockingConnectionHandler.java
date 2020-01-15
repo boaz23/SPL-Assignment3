@@ -63,6 +63,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                             nextMessage = encdec.decodeNextByte(buf.get());
                         }
                         catch (RuntimeException e) {
+                            e.printStackTrace();
                             Logger.incoming.appendLine("invalid frame.\n--------------------");
                         }
                         if (nextMessage != null) {

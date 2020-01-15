@@ -33,7 +33,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
                 return true;
             }
             throw new RuntimeException("how did we get here");
-        } catch (IOException ignored) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
         return false;
