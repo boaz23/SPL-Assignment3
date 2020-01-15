@@ -283,15 +283,11 @@ std::string Main::getBookName(const std::vector<std::string>::const_iterator &st
 }
 
 std::string Main::nextReceiptId() {
-    return nextId(_nextReceiptId);
+    return Util::nextId(_nextReceiptId);
 }
 
 std::string Main::nextSubscriptionId() {
-    return nextId(_nextSubscriptionId);
-}
-
-template <typename T> std::string Main::nextId(T &id) {
-    return std::to_string(id++);
+    return Util::nextId(_nextSubscriptionId);
 }
 
 BookLibraryUser& Main::activeUser() {

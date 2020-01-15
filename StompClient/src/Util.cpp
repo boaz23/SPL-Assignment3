@@ -14,3 +14,28 @@ std::vector<std::string> Util::split(const std::string &s, const std::string &de
     res.push_back (s.substr (pos_start));
     return res;
 }
+
+std::string Util::rebuildString(const std::vector<std::string> &strings, int startIndex) {
+    return rebuildString(strings.begin() + startIndex, strings.end());
+}
+
+std::string Util::rebuildString(const std::vector<std::string>::const_iterator &start,
+                                const std::vector<std::string>::const_iterator &end) {
+    std::string s;
+    if (start < end) {
+        auto word = start;
+        s.append(*word);
+        ++word;
+        for (; word != end; ++word) {
+            s.append(" ")
+                .append(*word);
+        }
+    }
+
+    return s;
+}
+
+template<typename T>
+std::string Util::nextId(T &id) {
+    return std::to_string(id++);
+}
