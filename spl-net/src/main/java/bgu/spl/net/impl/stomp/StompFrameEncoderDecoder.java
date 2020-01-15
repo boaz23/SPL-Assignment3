@@ -20,6 +20,10 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
     private Frame.Builder frameBuilder;
     private DecodeState decodeState;
 
+    /**
+     * Constructor
+     * @param encoding
+     */
     public StompFrameEncoderDecoder(Charset encoding) {
         this.encoding = encoding;
         buffer = new DynamicByteBuffer(BUFFER_START_CAPACITY);
@@ -27,6 +31,11 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         reset();
     }
 
+    /**
+     * Create a string reposition of Frame
+     * @param frame the frame
+     * @return string
+     */
     public static String toString(Frame frame) {
         StringBuilder frameSb = new StringBuilder();
         appendMessageType(frame, frameSb);

@@ -12,6 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class StompServer {
+    /**
+     * The entry point of the application
+     * @param args
+     */
     public static void main(String[] args) {
         if (args.length < 2) {
             argumentsError("Not enough arguments.", 1);

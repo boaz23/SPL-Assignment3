@@ -23,6 +23,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private final Map<String, StompMessageProcessor<Frame>> NotConnectedProcessorMap;
     private final Map<String, StompMessageProcessor<Frame>> ConnectedProcessorMap;
 
+    /**
+     * Constructor
+     */
     public StompMessagingProtocolImpl(){
         shouldTerminate = false;
 
@@ -31,6 +34,11 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         comMap = NotConnectedProcessorMap;
     }
 
+    /**
+     * Initialize the connection id and the Connections in instance
+     * @param connectionId connection id
+     * @param connections Connections<Frame> instance
+     */
     @Override
     public void start(int connectionId, Connections<Frame> connections) {
         this.connectionId = connectionId;
@@ -59,11 +67,18 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+    /**
+     * Signal if the run should stop
+     * @return true if the thread should stop
+     */
     @Override
     public boolean shouldTerminate() {
         return shouldTerminate;
     }
 
+    /**
+     * StompMessageProcessor implementation that handles the CONNECT Frame
+     */
     protected class ConnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -104,6 +119,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+    /**
+     * StompMessageProcessor implementation that handles the SUBSCRIBE Frame
+     */
     protected class SubscribeMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -140,6 +158,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the UNSUBSCRIBE Frame
+     */
     protected class UnsubscribeMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -159,6 +181,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the SEND Frame
+     */
     protected class SendMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -189,6 +215,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the DISCONNECT Frame
+     */
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -201,6 +231,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles frame when the user is not connected
+     */
     protected class UserNotConnectedProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {

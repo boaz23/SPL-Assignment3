@@ -12,6 +12,10 @@ class StompClient extends Client<Frame> {
     private ConcurrentMap<SubscriptionAttachment, String> subscritionIdsToTopic;
     private User user;
 
+    /**
+     * Constructor
+     * @param connection ConnectionHandler<Frame> instance
+     */
     StompClient(ConnectionHandler<Frame> connection) {
         super(connection);
         subscriptions = new ConcurrentHashMap<>();
@@ -45,6 +49,10 @@ class StompClient extends Client<Frame> {
         return user;
     }
 
+    /**
+     * Set the user as the client
+     * @param user the user to set
+     */
     public void setUser(User user) {
         this.user = user;
     }
