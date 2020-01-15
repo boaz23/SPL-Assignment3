@@ -71,22 +71,13 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         clientsMap.put(connectionId, new StompClient(connectionHandler));
     }
 
-    public void setUserOffline(int connectionId) {
+    public void logoutUser(int connectionId) {
         StompClient client = clientsMap.get(connectionId);
         if (client != null) {
             User user = client.user();
             if (user != null) {
                 user.setConnected(false);
             }
-        }
-    }
-
-    @Override
-    public void disconnect(int connectionId) {
-        setUserOffline(connectionId);
-        StompClient client = clientsMap.get(connectionId);
-        if (client != null) {
-            super.disconnect(connectionId);
             removeClientFromAllTopics(connectionId, client);
         }
     }
