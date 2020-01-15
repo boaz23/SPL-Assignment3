@@ -82,15 +82,16 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             boolean connectSuccessful = false;
+            String errorMsg = null;
             synchronized (connections) {
                 User user = connections.getUser(userName);
                 if (user == null) {
                     connectSuccessful = true;
                     connections.addUser(connectionId, userName, passcode);
                 } else if (user.isConnected()) {
-                    errorMessage(message, "User already logged in", "");
+                    errorMsg = "User already logged in";
                 } else if (!passcode.equals(user.password())) {
-                    errorMessage(message, "Wrong password", "");
+                    errorMsg = "Wrong password";
                 } else {
                     connectSuccessful = true;
                     connections.connectUser(userName, connectionId);
@@ -100,6 +101,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             if (connectSuccessful) {
                 connections.send(connectionId, new ConnectedFrame(version));
                 switchToConnectedProcessorState();
+            }
+            else {
+                errorMessage(message, errorMsg, "");
             }
         }
     }

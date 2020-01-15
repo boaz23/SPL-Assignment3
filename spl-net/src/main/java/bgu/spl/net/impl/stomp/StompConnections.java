@@ -82,6 +82,12 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         }
     }
 
+    @Override
+    public void disconnect(int connectionId) {
+        logoutUser(connectionId);
+        super.disconnect(connectionId);
+    }
+
     public boolean subscribe(String topic, int connectionId, SubscriptionAttachment attachment) {
         Topic<Frame> t = topicMap.computeIfAbsent(topic, x -> new Topic<>());
         clientsMap.get(connectionId).addSubscription(topic, attachment);
