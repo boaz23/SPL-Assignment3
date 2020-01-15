@@ -193,10 +193,11 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         @Override
         public void process(Frame message) {
             synchronized (connections.getClient(connectionId)) {
-                connections.setUserOffline(connectionId);
+                connections.logoutUser(connectionId);
             }
             shouldTerminate = true;
             sendReceipt(message);
+            connections.disconnect(connectionId);
         }
     }
 

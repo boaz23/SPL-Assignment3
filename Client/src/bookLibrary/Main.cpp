@@ -147,35 +147,35 @@ void Main::exitGenre(const std::vector<std::string> &arguments) {
 }
 
 void Main::addBook(const std::vector<std::string> &arguments) {
-    if (arguments.size() != 3) {
+    if (arguments.size() < 3) {
         _printer.println("invalid usage of the add book command.");
         return;
     }
 
     std::string genre = arguments[1];
-    std::string bookName = arguments[2];
+    std::string bookName = Util::rebuildString(arguments, 2);
     addBook(genre, bookName);
 }
 
 void Main::borrowBook(const std::vector<std::string> &arguments) {
-    if (arguments.size() != 3) {
+    if (arguments.size() < 3) {
         _printer.println("invalid usage of the borrow command.");
         return;
     }
 
     std::string genre = arguments[1];
-    std::string bookName = arguments[2];
+    std::string bookName = Util::rebuildString(arguments, 2);
     borrowBook(genre, bookName);
 }
 
 void Main::returnBook(const std::vector<std::string> &arguments) {
-    if (arguments.size() != 3) {
+    if (arguments.size() < 3) {
         _printer.println("invalid usage of the return command.");
         return;
     }
 
     std::string genre = arguments[1];
-    std::string bookName = arguments[2];
+    std::string bookName = Util::rebuildString(arguments, 2);
     returnBook(genre, bookName);
 }
 
@@ -269,29 +269,12 @@ void Main::bookStatus(const std::string &genre) {
     }
 }
 
-std::string Main::getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end) {
-    std::string bookName;
-    auto word = start;
-    bookName.append(*word);
-    ++word;
-    for (; word != end; ++word) {
-        bookName.append(" ")
-            .append(*word);
-    }
-
-    return bookName;
-}
-
 std::string Main::nextReceiptId() {
-    return nextId(_nextReceiptId);
+    return Util::nextId(_nextReceiptId);
 }
 
 std::string Main::nextSubscriptionId() {
-    return nextId(_nextSubscriptionId);
-}
-
-template <typename T> std::string Main::nextId(T &id) {
-    return std::to_string(id++);
+    return Util::nextId(_nextSubscriptionId);
 }
 
 BookLibraryUser& Main::activeUser() {
@@ -363,6 +346,7 @@ bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
 }
 
 bool Main::invokeCommand(const std::vector<std::string> &arguments) {
+    // TODO: deal with book names with spaces
     string action = arguments[0];
     if (action == "join") {
         joinGenre(arguments);

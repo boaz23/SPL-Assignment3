@@ -55,6 +55,7 @@ private:
 public:
     Main(StompMessageEncoderDecoder &encdec, StompConnectionHandler &connection, Printer &printer);
     ~Main();
+
     void start();
 
 private:
@@ -86,11 +87,8 @@ private:
     void bookStatus(const std::vector<std::string> &arguments);
     void bookStatus(const std::string &genre);
 
-    std::string getBookName(const std::vector<std::string>::const_iterator &start, const std::vector<std::string>::const_iterator &end);
-
     std::string nextReceiptId();
     std::string nextSubscriptionId();
-    template <typename T> std::string nextId(T &id);
     BookLibraryUser& activeUser();
 
     bool readCommand(std::string &cmd);
