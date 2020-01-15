@@ -6,7 +6,7 @@
 #include "../api/ConnectionHandler.h"
 #include "StompMessageEncoderDecoder.h"
 
-#define DEBUG_PRINT_FRAMES
+//#define DEBUG_PRINT_FRAMES
 
 class StompConnectionHandler : public ConnectionHandler {
 private:

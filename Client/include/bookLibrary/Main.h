@@ -12,7 +12,6 @@
 #include "../stomp/StompConnectionHandler.h"
 #include "BookLibraryUser.h"
 
-// TODO: think of a way to not hold pointers
 class UserHolder {
 private:
     BookLibraryUser *_activeUser;

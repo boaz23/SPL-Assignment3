@@ -323,7 +323,6 @@ bool Main::handleLoginCommand(const vector<std::string> &arguments) {
         disconnectionCleanup();
     }
     else if (_users.isUserActive()) {
-        // TODO: ???
         _printer.println("cannot login when already logged-in.");
         return false;
     }
@@ -346,7 +345,6 @@ bool Main::handleNonLoginCommand(const std::vector<std::string> &arguments) {
 }
 
 bool Main::invokeCommand(const std::vector<std::string> &arguments) {
-    // TODO: deal with book names with spaces
     string action = arguments[0];
     if (action == "join") {
         joinGenre(arguments);

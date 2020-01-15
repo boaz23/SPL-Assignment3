@@ -1,3 +1,4 @@
 # Specific files
 */.idea/workspace.xml
 .directory
+*.tar.gz
