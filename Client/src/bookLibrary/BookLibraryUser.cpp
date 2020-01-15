@@ -119,18 +119,15 @@ bool BookLibraryUser::connect(std::string &errorMsg) {
 void BookLibraryUser::run() {
     std::unique_ptr<Frame> frame = nullptr;
 
-    //TODO: refactor
     while(true) {
         if (!_connection.readFrame(frame)) {
             _connection.close();
             break;
         }
 
-        // TODO: remove this call
 #ifdef DEBUG_PRINT_FRAMES
         debugPrintFrame(*frame);
 #endif
-        // TODO: extract method from this
         if(frame->messageType() == "RECEIPT") {
             std::string receipt = frame->getHeader(ReceiptFrame::HEADER_RECEIPT_ID);
             if(hasReceipt(receipt)){
@@ -283,8 +280,10 @@ bool BookLibraryUser::sendSendFrame(const std::string &topic, const std::string 
     return true;
 }
 
+#ifdef DEBUG_PRINT_FRAMES
 void BookLibraryUser::debugPrintFrame(const Frame &frame) {
     std::unique_ptr<std::string> f = _connection.encode(frame);
     f->resize(f->length() + 1);
     _printer.println("----------\nreceived frame:\n" + *f);
 }
+#endif

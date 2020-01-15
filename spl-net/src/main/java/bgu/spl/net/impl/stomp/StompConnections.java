@@ -116,6 +116,13 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         }
     }
 
+
+    @Override
+    public void disconnect(int connectionId) {
+        logoutUser(connectionId);
+        super.disconnect(connectionId);
+    }
+
     /**
      * Add the connection id to the topic, Create one if needed
      * Add the SubscriptionAttachment to the connectionId in the topic
