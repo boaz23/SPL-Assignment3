@@ -1,0 +1,9 @@
+login 132.72.44.37:7777 account a
+join t1
+join t2
+add t1 Book 1
+add t2 Book 3
+add t1 Book 5
+status t1
+logout
+

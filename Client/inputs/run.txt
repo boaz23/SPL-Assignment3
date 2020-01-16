@@ -1,0 +1,1 @@
+( cat input1 | ./StompBookClubClient ) ; ( cat input2 | ./StompBookClubClient )
