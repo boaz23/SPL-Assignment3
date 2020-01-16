@@ -91,7 +91,7 @@ void Main::connectAndRun(const std::string &host, const short port, const bool a
 }
 
 void Main::disconnect() {
-    DisconnectFame disconnectFame;
+    DisconnectFrame disconnectFame;
     std::string receiptId = nextReceiptId();
     disconnectFame.setReceipt(receiptId);
     activeUser().addReceipt(disconnectFame);

@@ -160,11 +160,11 @@ public:
     }
 };
 
-class DisconnectFame : public Frame {
+class DisconnectFrame : public Frame {
 public:
     const static std::string MESSAGE_TYPE;
 
-    DisconnectFame() : Frame(MESSAGE_TYPE) { }
+    DisconnectFrame() : Frame(MESSAGE_TYPE) { }
 };
 
 class ErrorFrame : public Frame {
