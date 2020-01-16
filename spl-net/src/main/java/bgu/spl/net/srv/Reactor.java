@@ -94,13 +94,18 @@ public class Reactor<T> implements Server<T> {
             key.interestOps(ops);
         } else {
             selectorTasks.add(() -> {
+                if (key != null && key.isValid()) {
+                    key.interestOps(ops);
+                }
                 if (!key.isValid() || chan.socket().isClosed() || !chan.isConnected()) {
                     StringBufferLogger.ReactorLogger.appendLine("changing instestOps of stale channel key: " + time);
                 }
                 else {
                     StringBufferLogger.ReactorLogger.appendLine("changing instestOps: " + time);
                 }
-                key.interestOps(ops);
+                if (key != null && key.isValid()) {
+                    key.interestOps(ops);
+                }
                 StringBufferLogger.ReactorLogger.appendLine("changed instestOps: " + time);
             });
             selector.wakeup();
