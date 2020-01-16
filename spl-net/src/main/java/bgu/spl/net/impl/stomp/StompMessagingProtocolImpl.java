@@ -1,5 +1,6 @@
 package bgu.spl.net.impl.stomp;
 
+import bgu.spl.net.StringBufferLogger;
 import bgu.spl.net.api.StompMessageProcessor;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.*;
@@ -190,7 +191,6 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
-
     /**
      * StompMessageProcessor implementation that handles the SEND Frame
      */
@@ -211,7 +211,19 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 int connectionId = conn.getConnectionId();
                 User user = connections.getUser(connectionId);
                 if (user == null || !user.isConnected()) {
+                    if (shouldTerminate()) {
+                        StringBufferLogger.ReactorLogger.appendLine("sending message after termination to offline user" + ((user != null) ? user.username() : ""));
+                    }
+                    else {
+                        StringBufferLogger.ReactorLogger.appendLine("sending message to offline user" + ((user != null) ? user.username() : ""));
+                    }
                     continue;
+                }
+                if (shouldTerminate()) {
+                    StringBufferLogger.ReactorLogger.appendLine("sending message after termination to online user" + user.username());
+                }
+                else {
+                    StringBufferLogger.ReactorLogger.appendLine("sending message to online user" + user.username());
                 }
 
                 SubscriptionAttachment attachment = (SubscriptionAttachment)conn.getAttachment();
@@ -231,10 +243,12 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
+            StringBufferLogger.ReactorLogger.appendLine("processing DISCONNECT...");
             StompClient client = connections.getClient(connectionId);
             if (client != null) {
                 User user = client.user();
                 if (user != null) {
+                    StringBufferLogger.ReactorLogger.appendLine("logging out user");
                     synchronized (user) {
                         connections.logoutUser(connectionId);
                     }
@@ -244,6 +258,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             shouldTerminate = true;
             sendReceipt(message);
             connections.disconnect(connectionId);
+            StringBufferLogger.ReactorLogger.appendLine("DISCONNECT processing finished");
         }
     }
 

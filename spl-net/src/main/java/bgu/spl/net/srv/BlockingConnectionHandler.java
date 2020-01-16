@@ -1,7 +1,9 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.StringBufferLogger;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 
 import java.io.BufferedInputStream;
@@ -58,6 +60,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         }
         finally {
             connections.remove(connectionId);
+            System.out.println(StringBufferLogger.ReactorLogger.toString());
         }
     }
 

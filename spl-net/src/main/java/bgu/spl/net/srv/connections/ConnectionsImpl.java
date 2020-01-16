@@ -1,12 +1,11 @@
 package bgu.spl.net.srv.connections;
 
 import bgu.spl.net.ReadWriteLockedMap;
-import bgu.spl.net.Logger;
+import bgu.spl.net.FileLogger;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.impl.stomp.StompClient;
 import bgu.spl.net.impl.stomp.StompFrameEncoderDecoder;
 import bgu.spl.net.impl.stomp.User;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -39,10 +38,10 @@ public class ConnectionsImpl<T> implements Connections<T> {
             if (client != null) {
                 User user = ((StompClient)client).user();
                 if (user != null) {
-                    Logger.outgoing.appendLine("to user: " + user.username() + "\n" + StompFrameEncoderDecoder.toString((Frame) msg) + "--------------------");
+                    FileLogger.outgoing.appendLine("to user: " + user.username() + "\n" + StompFrameEncoderDecoder.toString((Frame) msg) + "--------------------");
                 }
                 else {
-                    Logger.outgoing.appendLine("to unkown user:\n" + StompFrameEncoderDecoder.toString((Frame) msg) + "--------------------");
+                    FileLogger.outgoing.appendLine("to unkown user:\n" + StompFrameEncoderDecoder.toString((Frame) msg) + "--------------------");
                 }
                 client.connection().send(msg);
                 return true;

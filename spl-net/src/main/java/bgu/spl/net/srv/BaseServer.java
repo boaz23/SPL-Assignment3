@@ -2,6 +2,7 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.impl.stomp.StompFrameEncoderDecoder;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
 
@@ -70,10 +71,10 @@ public abstract class BaseServer<T> implements Server<T> {
 
     /**
      * A factory method for creating the connection handler
-     * @param clientChan The socket
+     * @param socket The socket
      * @param encdec The encoder/decoder
      * @param protocol The protocol
-     * @param nextId The connetion id
+     * @param connectionId The connetion id
      * @return A new instance of a connection handler with the specified parameters
      */
     protected BlockingConnectionHandler<T> createConnectionHandler(
@@ -82,10 +83,11 @@ public abstract class BaseServer<T> implements Server<T> {
         MessagingProtocol<T> protocol,
         int connectionId
     ) {
+        ((StompFrameEncoderDecoder)encdec).setStuff(connectionHandlersManager, connectionId);
         return new BlockingConnectionHandler<>(
             socket,
-            encdecFactory.get(),
-            protocolFactory.get(),
+            encdec,
+            protocol,
             connectionId,
             new ConnectionsHandlerActions()
         );

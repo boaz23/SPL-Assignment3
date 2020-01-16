@@ -2,7 +2,7 @@ package bgu.spl.net.impl.stomp;
 
 import bgu.spl.net.DynamicByteBuffer;
 import bgu.spl.net.DynamicByteBufferReader;
-import bgu.spl.net.Logger;
+import bgu.spl.net.FileLogger;
 import bgu.spl.net.api.StompMessageEncoderDecoder;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.ConnectionHandlersManager;
@@ -114,9 +114,9 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         @Override
         public Frame decodeNextByte(byte nextByte) {
             if (first) {
-                User user =connections.getUser(id);
+                User user = connections.getUser(id);
                 if (user != null) {
-                    Logger.incoming.appendLine("username: " + user.username());
+                    FileLogger.incoming.appendLine("username: " + user.username());
                 }
                 first = false;
             }
@@ -143,7 +143,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
 
         private void setMessageType() {
             String msgType = bufferReader.popString();
-            Logger.incoming.appendLine(msgType);
+            FileLogger.incoming.appendLine(msgType);
             frameBuilder.setMessageType(msgType);
         }
 
@@ -234,7 +234,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
         private void decodeEndOfLine() {
             if (newLineFeed) {
                 nextDecodingState();
-                Logger.incoming.appendLine("");
+                FileLogger.incoming.appendLine("");
             }
             else {
                 appendHeader();
@@ -255,7 +255,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
                 throw new RuntimeException("invalid input. should not get here because we assume input is valid.");
             }
 
-            Logger.incoming.appendLine(headerName + ":" + value);
+            FileLogger.incoming.appendLine(headerName + ":" + value);
             frameBuilder.putHeader(headerName, value);
             reset();
         }
@@ -281,7 +281,7 @@ public class StompFrameEncoderDecoder implements StompMessageEncoderDecoder {
             frameBuilder.setBody(body);
             Frame frame = frameBuilder.build();
             StompFrameEncoderDecoder.this.reset();
-            Logger.incoming.appendLine(body);
+            FileLogger.incoming.appendLine(body);
             return frame;
         }
     }

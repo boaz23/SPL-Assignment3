@@ -1,8 +1,10 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.Logger;
+import bgu.spl.net.FileLogger;
+import bgu.spl.net.StringBufferLogger;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.ConnectionHandler;
 
 import java.io.IOException;
@@ -64,10 +66,11 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                         }
                         catch (RuntimeException e) {
                             e.printStackTrace();
-                            Logger.incoming.appendLine("invalid frame.\n--------------------");
+                            FileLogger.incoming.appendLine("invalid frame.\n--------------------");
                         }
                         if (nextMessage != null) {
-                            Logger.incoming.appendLine("--------------------");
+                            StringBufferLogger.ReactorLogger.appendLine("handling frame: " + ((Frame)nextMessage).getMessageType());
+                            FileLogger.incoming.appendLine("--------------------");
                             protocol.process(nextMessage);
                         }
                     }
@@ -87,7 +90,10 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         connections.add(connectionId, this);
     }
 
+    boolean closed = false;
     public void close() {
+        closed = true;
+        StringBufferLogger.ReactorLogger.appendLine("closing...");
         try {
             chan.close();
         } catch (IOException ex) {
@@ -95,6 +101,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         }
 
         connections.remove(connectionId);
+        StringBufferLogger.ReactorLogger.appendLine("closed");
     }
 
     public boolean isClosed() {
@@ -119,7 +126,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
 
         if (writeQueue.isEmpty()) {
             if (protocol.shouldTerminate()) close();
-            else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
+            else reactor.updateInterestedOps(chan, SelectionKey.OP_READ, 0);
         }
     }
 
@@ -137,11 +144,18 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         BUFFER_POOL.add(buff);
     }
 
+    int time = 0;
     @Override
     public void send(T msg) {
         if (msg != null) {
-            writeQueue.add(ByteBuffer.wrap(encdec.encode(msg)));
-            reactor.updateInterestedOps(chan, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+            if (!closed && !isClosed()) {
+                StringBufferLogger.ReactorLogger.appendLine("sending frame: " + ((Frame)msg).getMessageType());
+                writeQueue.add(ByteBuffer.wrap(encdec.encode(msg)));
+                reactor.updateInterestedOps(chan, SelectionKey.OP_READ | SelectionKey.OP_WRITE, time++);
+            }
+            else {
+                StringBufferLogger.ReactorLogger.appendLine("sending frame: " + ((Frame)msg).getMessageType() + " | but the channel is closed.");
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.StringBufferLogger;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.api.frames.Frame;
@@ -56,6 +57,9 @@ public class Reactor<T> implements Server<T> {
             while (!Thread.currentThread().isInterrupted()) {
 
                 selector.select();
+                if (!StringBufferLogger.ReactorLogger.isEmpty()) {
+                    System.out.println(StringBufferLogger.ReactorLogger.toString());
+                }
                 runSelectionThreadTasks();
 
                 for (SelectionKey key : selector.selectedKeys()) {
@@ -84,13 +88,20 @@ public class Reactor<T> implements Server<T> {
         pool.shutdown();
     }
 
-    /*package*/ void updateInterestedOps(SocketChannel chan, int ops) {
+    /*package*/ void updateInterestedOps(SocketChannel chan, int ops, int time) {
         final SelectionKey key = chan.keyFor(selector);
         if (Thread.currentThread() == selectorThread) {
             key.interestOps(ops);
         } else {
             selectorTasks.add(() -> {
+                if (!key.isValid() || chan.socket().isClosed() || !chan.isConnected()) {
+                    StringBufferLogger.ReactorLogger.appendLine("changing instestOps of stale channel key: " + time);
+                }
+                else {
+                    StringBufferLogger.ReactorLogger.appendLine("changing instestOps: " + time);
+                }
                 key.interestOps(ops);
+                StringBufferLogger.ReactorLogger.appendLine("changed instestOps: " + time);
             });
             selector.wakeup();
         }
