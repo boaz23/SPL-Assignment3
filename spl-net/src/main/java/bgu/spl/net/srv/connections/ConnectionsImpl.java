@@ -34,8 +34,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
                 client.connection().send(msg);
                 return true;
             }
-            throw new RuntimeException("how did we get here");
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return false;
