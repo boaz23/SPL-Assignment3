@@ -4,7 +4,7 @@ import bgu.spl.net.api.StompMessageProcessor;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.api.frames.*;
 import bgu.spl.net.srv.IdCount;
-import bgu.spl.net.srv.connections.ConnectionSubscriptionInfo;
+import bgu.spl.net.srv.connections.Subscription;
 import bgu.spl.net.srv.connections.Connections;
 
 import java.util.HashMap;
@@ -23,6 +23,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     private final Map<String, StompMessageProcessor<Frame>> NotConnectedProcessorMap;
     private final Map<String, StompMessageProcessor<Frame>> ConnectedProcessorMap;
 
+    /**
+     * Constructor
+     */
     public StompMessagingProtocolImpl(){
         shouldTerminate = false;
 
@@ -31,6 +34,11 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         comMap = NotConnectedProcessorMap;
     }
 
+    /**
+     * Initialize the connection id and the Connections in instance
+     * @param connectionId connection id
+     * @param connections Connections<Frame> instance
+     */
     @Override
     public void start(int connectionId, Connections<Frame> connections) {
         this.connectionId = connectionId;
@@ -59,11 +67,18 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+    /**
+     * Signal if the run should stop
+     * @return true if the thread should stop
+     */
     @Override
     public boolean shouldTerminate() {
         return shouldTerminate;
     }
 
+    /**
+     * StompMessageProcessor implementation that handles the CONNECT Frame
+     */
     protected class ConnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -82,18 +97,22 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             boolean connectSuccessful = false;
-            synchronized (connections) {
-                User user = connections.getUser(userName);
-                if (user == null) {
-                    connectSuccessful = true;
-                    connections.addUser(connectionId, userName, passcode);
-                } else if (user.isConnected()) {
-                    errorMessage(message, "User already logged in", "");
-                } else if (!passcode.equals(user.password())) {
-                    errorMessage(message, "Wrong password", "");
-                } else {
-                    connectSuccessful = true;
-                    connections.connectUser(userName, connectionId);
+            String errorMsg = null;
+            User user = connections.getUser(userName);
+            if (user == null) {
+                connectSuccessful = true;
+                connections.addUser(connectionId, userName, passcode);
+            }
+            else {
+                synchronized (user) {
+                    if (user.isConnected()) {
+                        errorMsg = "User already logged in";
+                    } else if (!passcode.equals(user.password())) {
+                        errorMsg = "Wrong password";
+                    } else {
+                        connectSuccessful = true;
+                        connections.connectUser(userName, connectionId);
+                    }
                 }
             }
 
@@ -101,9 +120,15 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 connections.send(connectionId, new ConnectedFrame(version));
                 switchToConnectedProcessorState();
             }
+            else {
+                errorMessage(message, errorMsg, "");
+            }
         }
     }
 
+    /**
+     * StompMessageProcessor implementation that handles the SUBSCRIBE Frame
+     */
     protected class SubscribeMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -122,7 +147,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
             boolean error = false;
-            synchronized (connections.getClient(connectionId)) {
+            User user = connections.getClient(connectionId).user();
+            synchronized (user) {
                 SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
                 if (attachment == null) {
                     attachment = new SubscriptionAttachment(subscriptionId);
@@ -140,6 +166,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the UNSUBSCRIBE Frame
+     */
     protected class UnsubscribeMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -151,7 +181,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             SubscriptionAttachment attachment = new SubscriptionAttachment(subscriptionId);
-            synchronized (connections.getClient(connectionId)) {
+            User user = connections.getClient(connectionId).user();
+            synchronized (user) {
                 if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
                     connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
                 }
@@ -159,6 +190,10 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the SEND Frame
+     */
     protected class SendMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
@@ -171,8 +206,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
 
-            Iterable<ConnectionSubscriptionInfo<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
-            for (ConnectionSubscriptionInfo<Frame> conn : connectionInfosOfTopic) {
+            Iterable<Subscription<Frame>> connectionInfosOfTopic = connections.getConnectionsSubscribedTo(topic);
+            for (Subscription<Frame> conn : connectionInfosOfTopic) {
                 int connectionId = conn.getConnectionId();
                 User user = connections.getUser(connectionId);
                 if (user == null || !user.isConnected()) {
@@ -189,23 +224,48 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles the DISCONNECT Frame
+     */
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
-            synchronized (connections.getClient(connectionId)) {
-                connections.logoutUser(connectionId);
+            StompClient client = connections.getClient(connectionId);
+            if (client != null) {
+                User user = client.user();
+                if (user != null) {
+                    synchronized (user) {
+                        connections.logoutUser(connectionId);
+                    }
+                }
             }
+
             shouldTerminate = true;
             sendReceipt(message);
             connections.disconnect(connectionId);
         }
     }
 
+
+    /**
+     * StompMessageProcessor implementation that handles frame when the user is not connected
+     */
     protected class UserNotConnectedProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
             errorMessage(message, "Not valid request, user not connected",
                     "User is not connected");
+        }
+    }
+
+    /**
+     * When the connection already sent a login that was successful
+     */
+    protected class AlreadyConnetedOnConnectionProcessor implements StompMessageProcessor<Frame> {
+        @Override
+        public void process(Frame message) {
+            errorMessage(message, "Already connected with this connection", "");
         }
     }
 
@@ -239,7 +299,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
     private Map<String, StompMessageProcessor<Frame>> InitMapConnected() {
         Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
-        comMap.put("CONNECT", new ConnectMessageProcessor());
+        comMap.put("CONNECT", new AlreadyConnetedOnConnectionProcessor());
         comMap.put("STOMP", comMap.get("CONNECT"));
         comMap.put("SUBSCRIBE", new SubscribeMessageProcessor());
         comMap.put("UNSUBSCRIBE", new UnsubscribeMessageProcessor());

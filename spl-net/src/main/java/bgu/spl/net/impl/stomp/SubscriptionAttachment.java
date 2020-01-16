@@ -5,10 +5,17 @@ import java.util.Objects;
 public class SubscriptionAttachment {
     private String subscriptionId;
 
+    /**
+     * Constructor of the class
+     * @param subscriptionId the subscription id
+     */
     public SubscriptionAttachment(String subscriptionId) {
         this.subscriptionId = subscriptionId;
     }
 
+    /**
+     * @return the subscription id
+     */
     public String getSubscriptionId() {
         return subscriptionId;
     }

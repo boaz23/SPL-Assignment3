@@ -9,7 +9,6 @@ void BookCollection::addBook(const std::string &bookName) {
 }
 
 void BookCollection::addBook(const Book& book) {
-    //TODO check if the vector copy the Book or just holding the reference
     _books.push_back(book);
 }
 

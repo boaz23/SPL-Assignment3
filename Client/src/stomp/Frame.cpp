@@ -12,7 +12,7 @@ const std::string ConnectFrame::HEADER_PASSCODE = "passcode";
 const std::string ConnectedFrame::MESSAGE_TYPE = "CONNECTED";
 const std::string ConnectedFrame::HEADER_VERSION = "version";
 
-const std::string DisconnectFame::MESSAGE_TYPE = "DISCONNECT";
+const std::string DisconnectFrame::MESSAGE_TYPE = "DISCONNECT";
 
 const std::string ErrorFrame::MESSAGE_TYPE = "ERROR";
 const std::string ErrorFrame::HEADER_MESSAGE = "message";

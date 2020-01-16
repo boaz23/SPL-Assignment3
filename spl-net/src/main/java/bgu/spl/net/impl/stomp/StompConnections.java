@@ -4,51 +4,97 @@ import bgu.spl.net.ReadWriteLockedMap;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.*;
 
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
-// TODO: check synchronized access
 public class StompConnections extends ConnectionsImpl<Frame> implements ConnectionHandlersManager<Frame> {
     private final ConnectionIdsManager connectionIdsManager;
 
     private final ConcurrentMap<String, User> usersMap;
+    private final Object loginLock = new Object();
+
     private final ConcurrentMap<Integer, StompClient> clientsMap;
     private final ReadWriteLockedMap<String, Topic<Frame>> topicMap;
 
+    /**
+     * Constructor
+     * @param connectionIdsManager
+     */
     public StompConnections(ConnectionIdsManager connectionIdsManager) {
-        this(connectionIdsManager, new ConcurrentHashMap<>());
+        this(connectionIdsManager, new ConcurrentHashMap<>(), new ReadWriteLockedMap<>());
     }
-    private StompConnections(ConnectionIdsManager connectionIdsManager, ConcurrentMap<Integer, StompClient> clientsMap) {
-        super(clientsMap);
+    private StompConnections(ConnectionIdsManager connectionIdsManager,
+                             ConcurrentMap<Integer, StompClient> clientsMap,
+                             ReadWriteLockedMap<String, Topic<Frame>> topicMap) {
+        super(clientsMap, topicMap);
         this.connectionIdsManager = connectionIdsManager;
 
         this.clientsMap = clientsMap;
-        topicMap = new ReadWriteLockedMap<>();
+        this.topicMap = topicMap;
         usersMap = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Adding a user to the class data
+     * @param connectionId connection id
+     * @param username username identifier
+     * @param password password of the user
+     */
     public void addUser(int connectionId, String username, String password) {
-        User user = new User(username, password);
-        clientsMap.get(connectionId).setUser(user);
-        usersMap.put(username, user);
+        User user = clientsMap.get(connectionId).user();
+        if (user == null) {
+            synchronized (loginLock) {
+                if (user == null) {
+                    user = new User(username, password);
+                    clientsMap.get(connectionId).setUser(user);
+                    usersMap.put(username, user);
+                }
+            }
+        }
     }
 
+    /**
+     * Set a user With the username to be connected
+     * @param username username identifier
+     * @param connectionId id associated with the username
+     */
     public void connectUser(String username, int connectionId) {
-        User user = usersMap.get(username);
-        clientsMap.get(connectionId).setUser(user);
-        user.setConnected(true);
+        User user = clientsMap.get(connectionId).user();
+        if (user == null) {
+            synchronized (loginLock) {
+                if (user == null) {
+                    user = usersMap.get(username);
+                    clientsMap.get(connectionId).setUser(user);
+                    user.setConnected(true);
+                }
+            }
+        }
     }
 
+    /**
+     * Return the User instance class of the user with username
+     * @param username username identifier
+     * @return User instance class of the user with username
+     */
     public User getUser(String username) {
         return usersMap.get(username);
     }
 
+    /**
+     *
+     * @param connectionId connection id
+     * @return
+     */
     public StompClient getClient(int connectionId) {
         return clientsMap.get(connectionId);
     }
 
+    /**
+     * Return the User instance class of the user identified by connectionId
+     * @param connectionId connection id
+     * @return User instance class of the user identified by connectionId
+     */
     public User getUser(int connectionId) {
         return clientsMap.get(connectionId).user();
     }
@@ -71,6 +117,10 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         clientsMap.put(connectionId, new StompClient(connectionHandler));
     }
 
+    /**
+     * Handle the logout of the user
+     * @param connectionId connection id
+     */
     public void logoutUser(int connectionId) {
         StompClient client = clientsMap.get(connectionId);
         if (client != null) {
@@ -82,6 +132,21 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         }
     }
 
+
+    @Override
+    public void disconnect(int connectionId) {
+        logoutUser(connectionId);
+        super.disconnect(connectionId);
+    }
+
+    /**
+     * Add the connection id to the topic, Create one if needed
+     * Add the SubscriptionAttachment to the connectionId in the topic
+     * @param topic the topic
+     * @param connectionId connection id
+     * @param attachment SubscriptionAttachment <connectionId, topic>
+     * @return true if the connection id was added to the topic, false otherwise
+     */
     public boolean subscribe(String topic, int connectionId, SubscriptionAttachment attachment) {
         Topic<Frame> t = topicMap.computeIfAbsent(topic, x -> new Topic<>());
         clientsMap.get(connectionId).addSubscription(topic, attachment);
@@ -89,6 +154,12 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         return true;
     }
 
+    /**
+     * Remove a connection id from a topic, using attachment to identify the topic
+     * @param connectionId connection id
+     * @param attachment attachment
+     * @return true if the user was unsubscribe, false otherwise
+     */
     public boolean unsubscribe(int connectionId, SubscriptionAttachment attachment) {
         StompClient client = clientsMap.get(connectionId);
         String topic = client.getTopicOfSubscriptionAttachment(attachment);
@@ -103,14 +174,6 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
         t.removeSubscriber(connectionId);
         client.removeSubscription(topic);
         return true;
-    }
-
-    public Iterable<ConnectionSubscriptionInfo<Frame>> getConnectionsSubscribedTo(String topic) {
-        Topic<Frame> t = topicMap.get(topic);
-        if (t == null) {
-            return Collections.emptyList();
-        }
-        return t.subscribers();
     }
 
     private void removeClientFromAllTopics(int connectionId, StompClient client) {
