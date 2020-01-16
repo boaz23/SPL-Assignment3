@@ -139,6 +139,7 @@ void BookLibraryUser::run() {
                     std::string message = "Exited club " + subscriptionIdToGenres.at(receiptFrame.getHeader(UnsubscribeFrame::HEADER_ID));
                     _printer.println(message);
                 } else if(receiptFrame.messageType() == "DISCONNECT"){
+                    _connection.close();
                     break;
                 }
                 removeReceipt(receipt);

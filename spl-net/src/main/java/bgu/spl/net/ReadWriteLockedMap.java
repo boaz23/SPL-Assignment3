@@ -1,6 +1,7 @@
 package bgu.spl.net;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -16,11 +17,21 @@ public class ReadWriteLockedMap<K, V> {
     private ReadWriteLock lock;
 
     /**
-     * Initializes a new instance with a {@link HashMap} as the internal map and a {@link ReentrantReadWriteLock} as the internal lock
+     * Initializes a new instance with a {@link HashMap} as the internal map and
+     * a non-fair {@link ReentrantReadWriteLock} as the internal lock
      */
     public ReadWriteLockedMap() {
+        this(false);
+    }
+
+    /**
+     * Initializes a new instance with a {@link HashMap} as the internal map and
+     * a {@link ReentrantReadWriteLock} as the internal lock with a boolean value
+     * specifying whether the lock is fair
+     */
+    public ReadWriteLockedMap(boolean fair) {
         map = new HashMap<>();
-        lock = new ReentrantReadWriteLock();
+        lock = new ReentrantReadWriteLock(fair);
     }
 
     /**
@@ -46,6 +57,33 @@ public class ReadWriteLockedMap<K, V> {
         lock.readLock().lock();
         try {
             return map.get(key);
+        }
+        finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Removes the value associated with this key
+     * @param key The key to remove the value of
+     */
+    public void remove(K key) {
+        lock.writeLock().lock();
+        try {
+            map.remove(key);
+        }
+        finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * @return An iterable of all the values the map stores
+     */
+    public Iterable<V> values() {
+        lock.readLock().lock();
+        try {
+            return new LinkedList<>(map.values());
         }
         finally {
             lock.readLock().unlock();
