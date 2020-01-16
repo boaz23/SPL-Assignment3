@@ -4,7 +4,6 @@ import bgu.spl.net.ReadWriteLockedMap;
 import bgu.spl.net.api.frames.Frame;
 import bgu.spl.net.srv.connections.*;
 
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -13,6 +12,8 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
     private final ConnectionIdsManager connectionIdsManager;
 
     private final ConcurrentMap<String, User> usersMap;
+    private final Object loginLock = new Object();
+
     private final ConcurrentMap<Integer, StompClient> clientsMap;
     private final ReadWriteLockedMap<String, Topic<Frame>> topicMap;
 
@@ -41,9 +42,16 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
      * @param password password of the user
      */
     public void addUser(int connectionId, String username, String password) {
-        User user = new User(username, password);
-        clientsMap.get(connectionId).setUser(user);
-        usersMap.put(username, user);
+        User user = clientsMap.get(connectionId).user();
+        if (user == null) {
+            synchronized (loginLock) {
+                if (user == null) {
+                    user = new User(username, password);
+                    clientsMap.get(connectionId).setUser(user);
+                    usersMap.put(username, user);
+                }
+            }
+        }
     }
 
     /**
@@ -52,9 +60,16 @@ public class StompConnections extends ConnectionsImpl<Frame> implements Connecti
      * @param connectionId id associated with the username
      */
     public void connectUser(String username, int connectionId) {
-        User user = usersMap.get(username);
-        clientsMap.get(connectionId).setUser(user);
-        user.setConnected(true);
+        User user = clientsMap.get(connectionId).user();
+        if (user == null) {
+            synchronized (loginLock) {
+                if (user == null) {
+                    user = usersMap.get(username);
+                    clientsMap.get(connectionId).setUser(user);
+                    user.setConnected(true);
+                }
+            }
+        }
     }
 
     /**

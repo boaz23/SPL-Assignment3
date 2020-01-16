@@ -98,18 +98,21 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
             boolean connectSuccessful = false;
             String errorMsg = null;
-            synchronized (connections) {
-                User user = connections.getUser(userName);
-                if (user == null) {
-                    connectSuccessful = true;
-                    connections.addUser(connectionId, userName, passcode);
-                } else if (user.isConnected()) {
-                    errorMsg = "User already logged in";
-                } else if (!passcode.equals(user.password())) {
-                    errorMsg = "Wrong password";
-                } else {
-                    connectSuccessful = true;
-                    connections.connectUser(userName, connectionId);
+            User user = connections.getUser(userName);
+            if (user == null) {
+                connectSuccessful = true;
+                connections.addUser(connectionId, userName, passcode);
+            }
+            else {
+                synchronized (user) {
+                    if (user.isConnected()) {
+                        errorMsg = "User already logged in";
+                    } else if (!passcode.equals(user.password())) {
+                        errorMsg = "Wrong password";
+                    } else {
+                        connectSuccessful = true;
+                        connections.connectUser(userName, connectionId);
+                    }
                 }
             }
 
@@ -144,7 +147,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
                 return;
             }
             boolean error = false;
-            synchronized (connections.getClient(connectionId)) {
+            User user = connections.getClient(connectionId).user();
+            synchronized (user) {
                 SubscriptionAttachment attachment = connections.getSubscriptionAttachment(connectionId, dest);
                 if (attachment == null) {
                     attachment = new SubscriptionAttachment(subscriptionId);
@@ -177,7 +181,8 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
             }
 
             SubscriptionAttachment attachment = new SubscriptionAttachment(subscriptionId);
-            synchronized (connections.getClient(connectionId)) {
+            User user = connections.getClient(connectionId).user();
+            synchronized (user) {
                 if (connections.isSubscriptionAttachmentUsed(connectionId, attachment)) {
                     connections.unsubscribe(connectionId, new SubscriptionAttachment(subscriptionId));
                 }
@@ -226,9 +231,16 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
     protected class DisconnectMessageProcessor implements StompMessageProcessor<Frame>{
         @Override
         public void process(Frame message) {
-            synchronized (connections.getClient(connectionId)) {
-                connections.logoutUser(connectionId);
+            StompClient client = connections.getClient(connectionId);
+            if (client != null) {
+                User user = client.user();
+                if (user != null) {
+                    synchronized (user) {
+                        connections.logoutUser(connectionId);
+                    }
+                }
             }
+
             shouldTerminate = true;
             sendReceipt(message);
             connections.disconnect(connectionId);
@@ -244,6 +256,16 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
         public void process(Frame message) {
             errorMessage(message, "Not valid request, user not connected",
                     "User is not connected");
+        }
+    }
+
+    /**
+     * When the connection already sent a login that was successful
+     */
+    protected class AlreadyConnetedOnConnectionProcessor implements StompMessageProcessor<Frame> {
+        @Override
+        public void process(Frame message) {
+            errorMessage(message, "Already connected with this connection", "");
         }
     }
 
@@ -277,7 +299,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol {
 
     private Map<String, StompMessageProcessor<Frame>> InitMapConnected() {
         Map<String, StompMessageProcessor<Frame>> comMap = new HashMap<>();
-        comMap.put("CONNECT", new ConnectMessageProcessor());
+        comMap.put("CONNECT", new AlreadyConnetedOnConnectionProcessor());
         comMap.put("STOMP", comMap.get("CONNECT"));
         comMap.put("SUBSCRIBE", new SubscribeMessageProcessor());
         comMap.put("UNSUBSCRIBE", new UnsubscribeMessageProcessor());
