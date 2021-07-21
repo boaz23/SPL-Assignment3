@@ -17,4 +17,4 @@ It used a fixed amount of threads, so each thread served multiple clients.
 This architecture was already implemented for us by the staff, but we had to change it a bit.
 We also had to be cautious when dealing with the above data structures (because of the multi-threading).
 
-For the assignment's description, refer to [this page](https://www.cs.bgu.ac.il/~spl201/index.php?page=Assignments.Assignment_3).
+[Full assignment description](https://www.cs.bgu.ac.il/~spl201/index.php?page=Assignments.Assignment_3)
