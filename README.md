@@ -8,7 +8,8 @@ Each client was written in C++ had 2 threads: one for user input and another for
 
 The server was just acting as a relay, it did not perform any domain logic besides that,
 but it had to keep data structures for the rooms and the clients which were connected to them.
-Naturally, the server was responsible for decoding, encoding and parsing messages.
+Naturally, the server was responsible for decoding, encoding and parsing messages.  
+The server was written in Java.
 
 Another challenge of the server was multithreading
 The server used an architecture which the course staff called _Reactor_.
